@@ -12,15 +12,17 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
 // ============ MONGODB CONNECTION ============
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/portfolio_db';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://aditidhumal704_db_user:kaqJeBFcCKabk2k6@cluster0.1iqtkir.mongodb.net/aditi_portfolio?retryWrites=true&w=majority&appName=Cluster0';
 
-console.log('📡 Connecting to MongoDB...');
+console.log('📡 Connecting to MongoDB Atlas...');
+console.log('📍 Cluster: cluster0.1iqtkir.mongodb.net');
+console.log('💾 Database: aditi_portfolio');
 
 mongoose.connect(MONGODB_URI)
-  .then(() => console.log('✅ Connected to MongoDB - Data will persist!'))
+  .then(() => console.log('✅ Connected to MongoDB - Data will persist forever!'))
   .catch(err => {
     console.error('❌ MongoDB connection error:', err.message);
-    console.log('⚠️ Make sure MongoDB Atlas is whitelisted or local MongoDB is running');
+    console.log('⚠️ Make sure your IP is whitelisted in MongoDB Atlas');
   });
 
 // ============ SCHEMAS ============
@@ -482,7 +484,7 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-    mongodb_state: mongoose.connection.readyState
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -491,8 +493,8 @@ app.listen(PORT, async () => {
   console.log(`\n🚀 ========================================`);
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📊 API available at http://localhost:${PORT}/api`);
-  console.log(`💾 Using MongoDB - Data will persist forever!`);
-  console.log(`✅ Portfolio ready!`);
+  console.log(`💾 Using MongoDB Atlas - Data will persist forever!`);
+  console.log(`✅ Portfolio ready for MSIM applications!`);
   console.log(`🚀 ========================================\n`);
   
   await seedInitialData();
