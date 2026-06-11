@@ -2,6 +2,11 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -18,7 +23,10 @@ console.log('📡 Connecting to MongoDB Atlas...');
 console.log('📍 Cluster: cluster0.1iqtkir.mongodb.net');
 console.log('💾 Database: aditi_portfolio');
 
-mongoose.connect(MONGODB_URI)
+mongoose.connect(MONGODB_URI, {
+  serverSelectionTimeoutMS: 10000,
+  socketTimeoutMS: 45000,
+})
   .then(() => console.log('✅ Connected to MongoDB - Data will persist forever!'))
   .catch(err => {
     console.error('❌ MongoDB connection error:', err.message);
@@ -178,6 +186,11 @@ async function seedInitialData() {
     console.error('Error seeding data:', error);
   }
 }
+
+// ============ TEST ENDPOINT ============
+app.get('/test', (req, res) => {
+  res.json({ message: 'Server is working!', timestamp: new Date().toISOString() });
+});
 
 // ============ PROFILE ROUTES ============
 app.get('/api/profile', async (req, res) => {
@@ -487,6 +500,14 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// ============ SERVE STATIC FILES (Production) ============
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'dist')));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  });
+}
 
 // ============ START SERVER ============
 app.listen(PORT, async () => {
