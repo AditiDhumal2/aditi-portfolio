@@ -504,7 +504,8 @@ app.get('/api/health', (req, res) => {
 // ============ SERVE STATIC FILES (Production) ============
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'dist')));
-  app.get('*', (req, res) => {
+  // FIXED: Changed from '*' to '/*' - this resolves the path-to-regexp error
+  app.get('/*', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
   });
 }
