@@ -1,0 +1,407 @@
+{
+  "profile": {
+    "name": "Aditi",
+    "photo": "https://res.cloudinary.com/drmv85wsw/image/upload/v1777539974/aditi_profile_photo_d5mif7.jpg",
+    "graduation": "Graduated in 2025",
+    "title": "Information Technology Student specializing in Data Analytics & Intelligent Systems",
+    "subtitle": "Building data-driven solutions and research-backed systems for real-world impact",
+    "education": "BE in Information Technology",
+    "interests": "Data Analytics + AI Systems",
+    "description": "I'm a passionate IT student with a strong research mindset, aiming to solve real-world problems through data. My goal is to pursue MSIM and contribute to intelligent systems that make a difference.",
+    "stats": {
+      "achievements": 6,
+      "projects": 3,
+      "certifications": 6,
+      "researchPapers": 2
+    },
+    "journey": [
+      "Passionate about turning data into actionable insights",
+      "Experienced in Python, SQL, and Machine Learning",
+      "Research-oriented with 2 published papers",
+      "Aiming for MSIM to create intelligent systems"
+    ]
+  },
+  "projects": [
+    {
+      "id": 1,
+      "title": "AI-Powered Academic Chatbot",
+      "problem": "Students struggle to get instant answers to course-related questions, leading to delayed learning",
+      "dataset": "University course data, FAQs (2000+ entries)",
+      "methodology": "Fine-tuned BERT model + RAG architecture for contextual understanding",
+      "tools": "Python, Hugging Face, FAISS, Streamlit",
+      "results": "87% accuracy, 300+ student users in pilot test",
+      "impact": "Reduced faculty query response time by 75%, improved student satisfaction by 40%",
+      "image": "",
+      "githubLink": "",
+      "deployedLink": "",
+      "paperLink": "",
+      "codeLink": "",
+      "screenshots": [],
+      "challenges": "Handling context length limitations and optimizing response time",
+      "futureWork": "Multi-language support and integration with university LMS",
+      "featured": true
+    },
+    {
+      "id": 2,
+      "title": "Food Waste Analytics Dashboard",
+      "problem": "Restaurants waste 30% of food due to poor demand prediction and inventory management",
+      "dataset": "2 years of restaurant sales data from 50 locations (50k+ orders)",
+      "methodology": "Time series forecasting using ARIMA + XGBoost, customer clustering analysis",
+      "tools": "Python, Pandas, Tableau, SQL, Scikit-learn",
+      "results": "Reduced waste by 23%, saved $45k annually per location",
+      "impact": "Successfully implemented in 5 local restaurants, reducing carbon footprint by 15 tons CO2",
+      "image": "",
+      "githubLink": "",
+      "deployedLink": "",
+      "paperLink": "",
+      "codeLink": "",
+      "screenshots": [],
+      "challenges": "Data sparsity and seasonality in food demand patterns",
+      "futureWork": "Real-time IoT integration for inventory tracking",
+      "featured": true
+    },
+    {
+      "id": 3,
+      "title": "Real-time Sales Analytics Dashboard",
+      "problem": "Businesses lack real-time visibility into sales performance across multiple locations",
+      "dataset": "Live sales data from 10 stores (100k+ transactions, real-time streaming)",
+      "methodology": "ETL pipeline with Apache Kafka, interactive visualization with drill-down capabilities",
+      "tools": "Python, Power BI, SQL, Apache Airflow, PostgreSQL",
+      "results": "15% increase in operational efficiency, 20% faster decision making",
+      "impact": "Adopted by 3 retail chains, processing 1M+ transactions monthly",
+      "image": "",
+      "githubLink": "",
+      "deployedLink": "",
+      "paperLink": "",
+      "codeLink": "",
+      "screenshots": [],
+      "challenges": "Handling high-velocity data streams and ensuring data consistency",
+      "futureWork": "Predictive analytics for sales forecasting",
+      "featured": true
+    }
+  ],
+  "experience": [
+    {
+      "id": 1,
+      "title": "Data Analyst Intern",
+      "company": "Tech Solutions Inc.",
+      "location": "Mumbai, India",
+      "period": " a- August 2024",
+      "type": "Internship",
+      "achievements": [
+        "Analyzed customer behavior patterns from 50,000+ transaction records using Python and SQL, identifying key trends that increased retention by 15%",
+        "Built interactive dashboards in Tableau and Power BI, reducing reporting time by 40% and enabling real-time KPI tracking",
+        "Improved data quality by implementing automated ETL pipelines, reducing manual data cleaning effort by 60%",
+        "Collaborated with cross-functional teams to deliver actionable insights for marketing campaigns"
+      ],
+      "technologies": [
+        "Python",
+        "SQL",
+        "Tableau",
+        "Power BI",
+        "Excel"
+      ],
+      "link": ""
+    },
+    {
+      "id": 2,
+      "title": "MERN Stack Developer Intern",
+      "company": "WebCraft Innovations",
+      "location": "Remote",
+      "period": "January 2024 - April 2024",
+      "type": "Internship",
+      "achievements": [
+        "Built full-stack web applications using MongoDB, Express.js, React, and Node.js, serving 1,000+ monthly active users",
+        "Developed RESTful APIs and optimized database queries, improving response time by 35%",
+        "Implemented responsive UI components and state management using React Hooks and Redux",
+        "Collaborated in an Agile environment using Git/GitHub for version control and code reviews"
+      ],
+      "technologies": [
+        "MongoDB",
+        "Express.js",
+        "React",
+        "Node.js",
+        "Git"
+      ],
+      "link": ""
+    },
+    {
+      "id": 3,
+      "title": "Event Coordinator & Technical Lead",
+      "company": "College TechFest 2024",
+      "location": "Pune, India",
+      "period": "September 2023 - March 2024",
+      "type": "Leadership",
+      "achievements": [
+        "Coordinated a 500+ participant hackathon, managing logistics, sponsors, and 20+ volunteers",
+        "Organized 5 technical workshops on Data Science and Web Development with 300+ attendees",
+        "Led a team of 8 to design event schedule, manage registrations, and ensure smooth execution",
+        "Increased participant satisfaction by 30% through effective communication and problem-solving"
+      ],
+      "technologies": [
+        "Project Management",
+        "Leadership",
+        "Event Planning"
+      ],
+      "link": ""
+    }
+  ],
+  "currentProjects": [
+    {
+      "id": 1,
+      "title": "Career Intelligence Platform",
+      "description": "Building an AI-powered platform that analyzes job market trends, skill demands, and career trajectories to help students make data-informed career decisions.",
+      "progress": "70%",
+      "features": [
+        "Real-time job scraping from LinkedIn and Indeed",
+        "Skill gap analysis using NLP",
+        "Personalized course recommendations",
+        "Salary prediction based on location and experience"
+      ],
+      "technologies": [
+        "Python",
+        "Flask",
+        "React",
+        "MongoDB",
+        "Scikit-learn",
+        "BeautifulSoup"
+      ],
+      "timeline": "Launching August 2025",
+      "githubLink": "",
+      "demoLink": ""
+    },
+    {
+      "id": 2,
+      "title": "Future Analytics Dashboard",
+      "description": "Developing an advanced analytics dashboard for predictive insights using machine learning models to forecast trends in sales, customer behavior, and operational efficiency.",
+      "progress": "45%",
+      "features": [
+        "Time series forecasting with Prophet and ARIMA",
+        "Interactive visualizations with Plotly and D3.js",
+        "Real-time data streaming with WebSocket",
+        "Customizable widgets and drill-down capabilities"
+      ],
+      "technologies": [
+        "Python",
+        "Pandas",
+        "Plotly",
+        "Streamlit",
+        "Scikit-learn",
+        "FastAPI"
+      ],
+      "timeline": "Beta release September 2025",
+      "githubLink": "",
+      "demoLink": ""
+    }
+  ],
+  "research": [
+    {
+      "id": 1,
+      "title": "Optimizing Food Supply Chains Using Predictive Analytics",
+      "type": "Conference Paper",
+      "status": "Under Review at IEEE ICRAI 2024",
+      "description": "Proposed a hybrid LSTM-XGBoost model that reduces prediction error by 32% compared to traditional methods.",
+      "abstract": "This paper presents a novel approach to food supply chain optimization using machine learning...",
+      "link": "#",
+      "paperLink": "",
+      "pdfLink": "",
+      "arxivLink": "",
+      "doi": "",
+      "authors": "Aditi, Dr. Professor Name",
+      "venue": "IEEE International Conference on Robotics and Artificial Intelligence",
+      "year": "2024",
+      "citations": "",
+      "impact": ""
+    },
+    {
+      "id": 2,
+      "title": "Ethical Considerations in AI-driven Decision Making",
+      "type": "Literature Review",
+      "status": "Published in University Research Journal",
+      "description": "Analyzed 45+ papers on AI bias, fairness metrics, and mitigation strategies.",
+      "abstract": "A comprehensive review of ethical challenges in AI systems and proposed frameworks...",
+      "link": "#",
+      "paperLink": "",
+      "pdfLink": "",
+      "arxivLink": "",
+      "doi": "",
+      "authors": "Aditi",
+      "venue": "University Journal of Technology & Ethics",
+      "year": "2024",
+      "citations": "",
+      "impact": ""
+    }
+  ],
+  "certifications": [
+    {
+      "id": 1,
+      "name": "Google Data Analytics Professional",
+      "issuer": "Google",
+      "link": "#",
+      "date": "2024",
+      "image": "",
+      "description": "Completed 8 courses covering data cleaning, analysis, visualization, and tools including spreadsheets, SQL, and R.",
+      "skills": [
+        "Data Cleaning",
+        "Data Analysis",
+        "SQL",
+        "Tableau",
+        "R Programming"
+      ],
+      "credentialId": "",
+      "validity": "No Expiry",
+      "grade": ""
+    },
+    {
+      "id": 2,
+      "name": "Python for Data Science",
+      "issuer": "IBM",
+      "link": "#",
+      "date": "2024",
+      "image": "",
+      "description": "Learned Python programming for data analysis, including libraries like Pandas, NumPy, and Matplotlib.",
+      "skills": [
+        "Python",
+        "Pandas",
+        "NumPy",
+        "Data Visualization",
+        "Data Wrangling"
+      ],
+      "credentialId": "",
+      "validity": "No Expiry",
+      "grade": ""
+    },
+    {
+      "id": 3,
+      "name": "SQL for Data Analysis",
+      "issuer": "UC Davis",
+      "link": "#",
+      "date": "2023",
+      "image": "",
+      "description": "Mastered SQL queries for data extraction, aggregation, and analysis from relational databases.",
+      "skills": [
+        "SQL",
+        "Joins",
+        "Subqueries",
+        "Window Functions",
+        "Database Design"
+      ],
+      "credentialId": "",
+      "validity": "No Expiry",
+      "grade": ""
+    },
+    {
+      "id": 4,
+      "name": "Machine Learning Specialization",
+      "issuer": "Stanford Online",
+      "link": "#",
+      "date": "2024",
+      "image": "",
+      "description": "Comprehensive machine learning course covering supervised learning, unsupervised learning, and best practices.",
+      "skills": [
+        "Regression",
+        "Classification",
+        "Clustering",
+        "Neural Networks",
+        "Decision Trees"
+      ],
+      "credentialId": "",
+      "validity": "No Expiry",
+      "grade": ""
+    }
+  ],
+  "achievements": [
+    {
+      "id": 1,
+      "title": "CGPA: 8.02/10",
+      "description": "Top 5% of class, Dean's List for 3 consecutive semesters",
+      "category": "Academic",
+      "date": "2025",
+      "link": ""
+    },
+    {
+      "id": 2,
+      "title": "Data Hackathon Winner",
+      "description": "National level competition - 500+ participants, secured 1st place",
+      "category": "Competition",
+      "date": "2024",
+      "link": ""
+    },
+    {
+      "id": 3,
+      "title": "Research Intern",
+      "description": "AI Research Lab, Summer 2024 - Worked on predictive analytics projects",
+      "category": "Professional",
+      "date": "2024",
+      "link": ""
+    },
+    {
+      "id": 4,
+      "title": "Published Author",
+      "description": "2 papers in peer-reviewed journals with 50+ citations",
+      "category": "Research",
+      "date": "2024",
+      "link": ""
+    },
+    {
+      "id": 5,
+      "title": "Teaching Assistant",
+      "description": "Data Structures & Algorithms course - mentored 100+ students",
+      "category": "Leadership",
+      "date": "2023",
+      "link": ""
+    },
+    {
+      "id": 6,
+      "title": "Scholarship Recipient",
+      "description": "Merit-based scholarship for academic excellence",
+      "category": "Academic",
+      "date": "2023",
+      "link": ""
+    }
+  ],
+  "skills": {
+    "programming": [
+      "Python",
+      "SQL",
+      "JavaScript",
+      "R",
+      "Java"
+    ],
+    "dataTools": [
+      "Pandas",
+      "NumPy",
+      "Tableau",
+      "Power BI",
+      "Excel",
+      "Matplotlib",
+      "Seaborn"
+    ],
+    "mlTools": [
+      "Scikit-learn",
+      "TensorFlow",
+      "PyTorch",
+      "Hugging Face",
+      "XGBoost"
+    ],
+    "databases": [
+      "PostgreSQL",
+      "MySQL",
+      "MongoDB",
+      "BigQuery"
+    ],
+    "web": [
+      "React",
+      "Flask",
+      "Streamlit",
+      "HTML/CSS"
+    ]
+  },
+  "contact": {
+    "linkedin": "https://www.linkedin.com/in/aditi-dhumal-1917b92a6?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
+    "github": "https://github.com/yourusername",
+    "instagram": "https://instagram.com/aditi_d_02",
+    "email": "your.email@university.edu",
+    "resume": ""
+  }
+}

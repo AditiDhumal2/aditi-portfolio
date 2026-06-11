@@ -1,0 +1,121 @@
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import axios from 'axios';
+
+const Contact = () => {
+  const [contact, setContact] = useState(null);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    loadContact();
+  }, []);
+  
+  const loadContact = async () => {
+    try {
+      const response = await axios.get('/api/contact');
+      setContact(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error loading contact:', error);
+      setLoading(false);
+    }
+  };
+  
+  if (loading) return null;
+  
+  const socialLinks = [
+    { 
+      name: 'LinkedIn', 
+      icon: (
+        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451c.979 0 1.771-.773 1.771-1.729V1.729C24 .774 23.204 0 22.225 0z"/>
+        </svg>
+      ), 
+      url: contact?.linkedin, 
+      bgHover: "hover:bg-[#0077B5]" 
+    },
+    { 
+      name: 'GitHub', 
+      icon: (
+        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.387.6.113.82-.26.82-.58 0-.287-.01-1.05-.015-2.06-3.338.726-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.082-.73.082-.73 1.205.085 1.838 1.237 1.838 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.775.418-1.305.762-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.4 3-.405 1.02.005 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/>
+        </svg>
+      ), 
+      url: contact?.github, 
+      bgHover: "hover:bg-gray-600" 
+    },
+    { 
+      name: 'Instagram', 
+      icon: (
+        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM12 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+        </svg>
+      ), 
+      url: contact?.instagram, 
+      bgHover: "hover:bg-gradient-to-br hover:from-[#E4405F] hover:to-[#F77737]" 
+    },
+    { 
+      name: 'Email', 
+      icon: (
+        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+        </svg>
+      ), 
+      url: contact?.email ? `mailto:${contact.email}` : null, 
+      bgHover: "hover:bg-red-600" 
+    }
+  ];
+  
+  const activeLinks = socialLinks.filter(link => link.url && link.url !== '#');
+  
+  return (
+    <section id="contact" className="py-20 bg-gradient-to-b from-gray-900 to-dark">
+      <div className="container mx-auto px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center"
+        >
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            Get In <span className="text-accent">Touch</span>
+          </h2>
+          <div className="w-20 h-1 bg-accent mx-auto rounded-full mb-6"></div>
+          <p className="text-gray-400 mb-12 max-w-2xl mx-auto">
+            Let's connect! I'm always open to discussing research opportunities, collaborations, or data analytics projects
+          </p>
+          
+          <div className="flex flex-wrap justify-center gap-6 mb-12">
+            {activeLinks.map((link, idx) => (
+              <motion.a
+                key={link.name}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                initial={{ opacity: 0, scale: 0 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ delay: idx * 0.1 }}
+                whileHover={{ y: -5, scale: 1.05 }}
+                className={`bg-gray-800 ${link.bgHover} transition-all p-6 rounded-2xl inline-flex flex-col items-center gap-3 group w-32 hover:shadow-xl`}
+              >
+                <div className="text-4xl group-hover:scale-110 transition-transform text-white">
+                  {link.icon}
+                </div>
+                <span className="font-semibold text-gray-300 group-hover:text-white transition">
+                  {link.name}
+                </span>
+              </motion.a>
+            ))}
+          </div>
+          
+          <div className="text-gray-500 text-sm">
+            <p>📍 Based in India | Open to global opportunities</p>
+            <p className="mt-2">📅 Available for Summer 2025 Research Internships</p>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+
+export default Contact;
