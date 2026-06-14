@@ -95,18 +95,22 @@ const researchSchema = new mongoose.Schema({
   authors: { type: String, default: '' },
   venue: { type: String, default: '' },
   year: { type: String, default: '' },
-  paperLink: { type: String, default: '' }
+  paperLink: { type: String, default: '' },
+  doi: { type: String, default: '' },
+  citations: { type: String, default: '' }
 }, { timestamps: true });
 
 const certificationSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  issuer: { type: String, required: true },
+  name: { type: String, default: 'New Certification' },
+  issuer: { type: String, default: 'Unknown Issuer' },
   date: { type: String, default: '' },
   image: { type: String, default: '' },
   description: { type: String, default: '' },
   skills: [{ type: String }],
   link: { type: String, default: '' },
-  credentialId: { type: String, default: '' }
+  credentialId: { type: String, default: '' },
+  validity: { type: String, default: '' },
+  grade: { type: String, default: '' }
 }, { timestamps: true });
 
 const achievementSchema = new mongoose.Schema({
@@ -370,35 +374,83 @@ app.delete('/api/research/:id', async (req, res) => {
 app.get('/api/certifications', async (req, res) => {
   try {
     const certs = await Certification.find().sort({ date: -1 });
+    console.log(`📜 Found ${certs.length} certifications`);
     res.json(certs);
   } catch (error) {
+    console.error('GET certifications error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
 app.post('/api/certifications', async (req, res) => {
   try {
-    const cert = await Certification.create(req.body);
+    console.log('📝 Creating certification with data:', req.body);
+    
+    // Ensure all required fields have values
+    const certData = {
+      name: req.body.name || 'New Certification',
+      issuer: req.body.issuer || 'Unknown Issuer',
+      date: req.body.date || new Date().getFullYear().toString(),
+      image: req.body.image || '',
+      description: req.body.description || '',
+      skills: req.body.skills || [],
+      link: req.body.link || '',
+      credentialId: req.body.credentialId || '',
+      validity: req.body.validity || '',
+      grade: req.body.grade || ''
+    };
+    
+    const cert = await Certification.create(certData);
+    console.log('✅ Certification created:', cert._id);
     res.json(cert);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('❌ POST certification error:', error);
+    res.status(500).json({ error: error.message, stack: error.stack });
   }
 });
 
 app.put('/api/certifications/:id', async (req, res) => {
   try {
-    const cert = await Certification.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const cert = await Certification.findByIdAndUpdate(
+      req.params.id, 
+      req.body, 
+      { new: true, runValidators: false }
+    );
+    if (!cert) {
+      return res.status(404).json({ error: 'Certification not found' });
+    }
     res.json(cert);
   } catch (error) {
+    console.error('PUT certification error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
 app.delete('/api/certifications/:id', async (req, res) => {
   try {
-    await Certification.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Deleted' });
+    const cert = await Certification.findByIdAndDelete(req.params.id);
+    if (!cert) {
+      return res.status(404).json({ error: 'Certification not found' });
+    }
+    res.json({ message: 'Certification deleted successfully' });
   } catch (error) {
+    console.error('DELETE certification error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Test endpoint for certifications
+app.post('/api/certifications-test', async (req, res) => {
+  try {
+    const cert = await Certification.create({
+      name: "Test Certification",
+      issuer: "Test Issuer",
+      date: "2024",
+      skills: ["Test Skill"]
+    });
+    res.json({ success: true, cert });
+  } catch (error) {
+    console.error('Test endpoint error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -503,11 +555,8 @@ app.get('/api/health', (req, res) => {
 
 // ============ SERVE STATIC FILES (Production) ============
 if (process.env.NODE_ENV === 'production') {
-  // Serve static files from the dist folder
   app.use(express.static(path.join(__dirname, 'dist')));
   
-  // For all non-API routes, serve index.html
-  // This regex matches any route that doesn't start with /api
   app.get(/^\/(?!api).*/, (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
   });
