@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { uploadToCloudinary } from '../../utils/cloudinary';
 
-const ProjectsTab = ({ projects, showMessage, setUploading, uploading, fetchAllData }) => {
+const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploading, fetchAllData }) => {
   const [editingProject, setEditingProject] = useState(null);
-  const [editForm, setEditForm] = useState({});
+  const [uploadingImages, setUploadingImages] = useState({});
 
   const addProject = async () => {
     const newProject = {
@@ -15,13 +15,27 @@ const ProjectsTab = ({ projects, showMessage, setUploading, uploading, fetchAllD
       tools: "",
       results: "",
       impact: "",
-      image: "",
+      images: [],
       githubLink: "",
       deployedLink: "",
-      featured: true
+      preprint: {
+        title: "",
+        doi: "",
+        link: ""
+      },
+      publication: {
+        title: "",
+        doi: "",
+        link: "",
+        conference: ""
+      },
+      challenges: "",
+      futureWork: "",
+      featured: true,
+      order: projects.length
     };
     try {
-      await axios.post('/api/projects', newProject);
+      const response = await axios.post('/api/projects', newProject);
       await fetchAllData();
       showMessage('Project added!');
     } catch (error) {
@@ -29,24 +43,15 @@ const ProjectsTab = ({ projects, showMessage, setUploading, uploading, fetchAllD
     }
   };
 
-  const startEdit = (project) => {
-    setEditingProject(project._id);
-    setEditForm({ ...project });
-  };
-
-  const saveEdit = async (id) => {
+  const updateProject = async (id, updatedProject) => {
     try {
-      await axios.put(`/api/projects/${id}`, editForm);
+      const response = await axios.put(`/api/projects/${id}`, updatedProject);
       await fetchAllData();
       showMessage('Project updated!');
       setEditingProject(null);
     } catch (error) {
       showMessage('Error updating project', true);
     }
-  };
-
-  const cancelEdit = () => {
-    setEditingProject(null);
   };
 
   const deleteProject = async (id) => {
@@ -63,17 +68,27 @@ const ProjectsTab = ({ projects, showMessage, setUploading, uploading, fetchAllD
 
   const uploadProjectImage = async (file, projectId) => {
     setUploading(true);
+    setUploadingImages(prev => ({ ...prev, [projectId]: true }));
+    showMessage('Uploading image...');
     try {
       const imageUrl = await uploadToCloudinary(file);
-      setEditForm({ ...editForm, image: imageUrl });
-      await axios.put(`/api/projects/${projectId}`, { ...editForm, image: imageUrl });
-      await fetchAllData();
+      const project = projects.find(p => p._id === projectId);
+      const updatedImages = [...(project.images || []), imageUrl];
+      await updateProject(projectId, { ...project, images: updatedImages });
       showMessage('✅ Image uploaded!');
     } catch (error) {
       showMessage('❌ Upload failed', true);
     } finally {
       setUploading(false);
+      setUploadingImages(prev => ({ ...prev, [projectId]: false }));
     }
+  };
+
+  const removeProjectImage = async (projectId, imageIndex) => {
+    const project = projects.find(p => p._id === projectId);
+    const updatedImages = project.images.filter((_, idx) => idx !== imageIndex);
+    await updateProject(projectId, { ...project, images: updatedImages });
+    showMessage('Image removed');
   };
 
   return (
@@ -86,69 +101,263 @@ const ProjectsTab = ({ projects, showMessage, setUploading, uploading, fetchAllD
         {projects.map(project => (
           <div key={project._id} className="bg-gray-800 rounded-xl p-4 border border-gray-700">
             <div className="flex justify-between items-start mb-4">
-              <h3 className="text-lg font-bold text-accent">📊 {project.title}</h3>
+              <h3 className="text-lg font-bold text-accent">
+                {editingProject === project._id ? 'Editing:' : '📊'} {project.title || 'Untitled Project'}
+              </h3>
               <div className="flex gap-2">
-                {editingProject === project._id ? (
-                  <>
-                    <button onClick={() => saveEdit(project._id)} className="bg-green-500 px-3 py-1 rounded text-sm">Save</button>
-                    <button onClick={cancelEdit} className="bg-gray-500 px-3 py-1 rounded text-sm">Cancel</button>
-                  </>
-                ) : (
-                  <>
-                    <button onClick={() => startEdit(project)} className="bg-blue-500 px-3 py-1 rounded text-sm">Edit</button>
-                    <button onClick={() => deleteProject(project._id)} className="bg-red-500 px-3 py-1 rounded text-sm">Delete</button>
-                  </>
-                )}
+                <button
+                  onClick={() => setEditingProject(editingProject === project._id ? null : project._id)}
+                  className="bg-blue-500 px-3 py-1 rounded text-sm"
+                >
+                  {editingProject === project._id ? 'Cancel' : 'Edit'}
+                </button>
+                <button onClick={() => deleteProject(project._id)} className="bg-red-500 px-3 py-1 rounded text-sm">
+                  Delete
+                </button>
               </div>
             </div>
             
             {editingProject === project._id ? (
-              <div className="grid grid-cols-1 gap-3">
+              <div className="grid grid-cols-1 gap-4">
+                {/* Basic Info */}
                 <div className="grid md:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-semibold mb-1">Title</label>
-                    <input value={editForm.title || ''} onChange={(e) => setEditForm({...editForm, title: e.target.value})} className="w-full bg-gray-700 p-2 rounded" />
+                    <label className="block text-sm font-semibold mb-1 text-blue-400">Project Title *</label>
+                    <input
+                      value={project.title || ''}
+                      onChange={(e) => updateProject(project._id, {...project, title: e.target.value})}
+                      className="w-full bg-gray-700 p-2 rounded"
+                      placeholder="Project Title"
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1">Tech Stack</label>
-                    <input value={editForm.tools || ''} onChange={(e) => setEditForm({...editForm, tools: e.target.value})} className="w-full bg-gray-700 p-2 rounded" />
+                    <label className="block text-sm font-semibold mb-1 text-purple-400">Tech Stack</label>
+                    <input
+                      value={project.tools || ''}
+                      onChange={(e) => updateProject(project._id, {...project, tools: e.target.value})}
+                      className="w-full bg-gray-700 p-2 rounded"
+                      placeholder="Python, Pandas, Scikit-learn, Tableau"
+                    />
                   </div>
                 </div>
+                
+                {/* Problem Statement */}
                 <div>
-                  <label className="block text-sm font-semibold mb-1 text-red-400">Problem Statement</label>
-                  <textarea value={editForm.problem || ''} onChange={(e) => setEditForm({...editForm, problem: e.target.value})} className="w-full bg-gray-700 p-2 rounded" rows="3" />
+                  <label className="block text-sm font-semibold mb-1 text-red-400">🎯 Problem Statement</label>
+                  <textarea
+                    value={project.problem || ''}
+                    onChange={(e) => updateProject(project._id, {...project, problem: e.target.value})}
+                    className="w-full bg-gray-700 p-2 rounded"
+                    placeholder="What problem does this solve?"
+                    rows="3"
+                  />
                 </div>
+                
+                {/* Dataset */}
                 <div>
-                  <label className="block text-sm font-semibold mb-1">Dataset Used</label>
-                  <input value={editForm.dataset || ''} onChange={(e) => setEditForm({...editForm, dataset: e.target.value})} className="w-full bg-gray-700 p-2 rounded" />
+                  <label className="block text-sm font-semibold mb-1 text-blue-400">📊 Dataset Used</label>
+                  <input
+                    value={project.dataset || ''}
+                    onChange={(e) => updateProject(project._id, {...project, dataset: e.target.value})}
+                    className="w-full bg-gray-700 p-2 rounded"
+                    placeholder="Describe dataset: size, source, features"
+                  />
                 </div>
+                
+                {/* Methodology */}
                 <div>
-                  <label className="block text-sm font-semibold mb-1 text-green-400">Methodology</label>
-                  <textarea value={editForm.methodology || ''} onChange={(e) => setEditForm({...editForm, methodology: e.target.value})} className="w-full bg-gray-700 p-2 rounded" rows="3" />
+                  <label className="block text-sm font-semibold mb-1 text-green-400">⚙️ Methodology & Approach</label>
+                  <textarea
+                    value={project.methodology || ''}
+                    onChange={(e) => updateProject(project._id, {...project, methodology: e.target.value})}
+                    className="w-full bg-gray-700 p-2 rounded"
+                    placeholder="Explain your approach, algorithms used, data processing steps"
+                    rows="3"
+                  />
                 </div>
+                
+                {/* Results */}
                 <div>
-                  <label className="block text-sm font-semibold mb-1 text-yellow-400">Results</label>
-                  <textarea value={editForm.results || ''} onChange={(e) => setEditForm({...editForm, results: e.target.value})} className="w-full bg-gray-700 p-2 rounded" rows="2" />
+                  <label className="block text-sm font-semibold mb-1 text-yellow-400">📈 Results & Insights</label>
+                  <textarea
+                    value={project.results || ''}
+                    onChange={(e) => updateProject(project._id, {...project, results: e.target.value})}
+                    className="w-full bg-gray-700 p-2 rounded"
+                    placeholder="Include specific metrics: accuracy, precision, recall, business impact"
+                    rows="3"
+                  />
                 </div>
+                
+                {/* Impact */}
                 <div>
-                  <label className="block text-sm font-semibold mb-1 text-orange-400">Impact</label>
-                  <textarea value={editForm.impact || ''} onChange={(e) => setEditForm({...editForm, impact: e.target.value})} className="w-full bg-gray-700 p-2 rounded" rows="2" />
+                  <label className="block text-sm font-semibold mb-1 text-orange-400">🚀 Real-World Impact</label>
+                  <textarea
+                    value={project.impact || ''}
+                    onChange={(e) => updateProject(project._id, {...project, impact: e.target.value})}
+                    className="w-full bg-gray-700 p-2 rounded"
+                    placeholder="Quantify the impact (e.g., reduced waste by 23%, saved $45k annually)"
+                    rows="2"
+                  />
                 </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-1">GitHub Link</label>
-                  <input value={editForm.githubLink || ''} onChange={(e) => setEditForm({...editForm, githubLink: e.target.value})} className="w-full bg-gray-700 p-2 rounded" />
+                
+                {/* Links */}
+                <div className="grid md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">🐙 GitHub Repository</label>
+                    <input
+                      value={project.githubLink || ''}
+                      onChange={(e) => updateProject(project._id, {...project, githubLink: e.target.value})}
+                      className="w-full bg-gray-700 p-2 rounded"
+                      placeholder="https://github.com/username/repo"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">🌐 Deployed / Live Demo Link</label>
+                    <input
+                      value={project.deployedLink || ''}
+                      onChange={(e) => updateProject(project._id, {...project, deployedLink: e.target.value})}
+                      className="w-full bg-gray-700 p-2 rounded"
+                      placeholder="https://project-demo.vercel.app"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-1">Project Image</label>
-                  {editForm.image && <img src={editForm.image} alt="Project" className="w-48 h-32 object-cover rounded mb-2" />}
-                  <input type="file" accept="image/*" onChange={(e) => e.target.files[0] && uploadProjectImage(e.target.files[0], project._id)} className="block w-full text-sm text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded file:bg-accent file:text-white file:cursor-pointer" />
+                
+                {/* Publication Details */}
+                <div className="border-t border-gray-700 pt-4 mt-2">
+                  <h4 className="text-md font-bold text-accent mb-3">📄 Publication & Preprint Details</h4>
+                  
+                  {/* Preprint */}
+                  <div className="bg-gray-700/30 p-3 rounded-lg mb-3">
+                    <label className="block text-sm font-semibold mb-2 text-blue-400">📑 Preprint</label>
+                    <div className="grid md:grid-cols-3 gap-2">
+                      <input
+                        value={project.preprint?.title || ''}
+                        onChange={(e) => updateProject(project._id, {...project, preprint: { ...project.preprint, title: e.target.value }})}
+                        className="w-full bg-gray-700 p-2 rounded"
+                        placeholder="Preprint Title"
+                      />
+                      <input
+                        value={project.preprint?.doi || ''}
+                        onChange={(e) => updateProject(project._id, {...project, preprint: { ...project.preprint, doi: e.target.value }})}
+                        className="w-full bg-gray-700 p-2 rounded"
+                        placeholder="DOI (e.g., 10.xxxx/xxxxx)"
+                      />
+                      <input
+                        value={project.preprint?.link || ''}
+                        onChange={(e) => updateProject(project._id, {...project, preprint: { ...project.preprint, link: e.target.value }})}
+                        className="w-full bg-gray-700 p-2 rounded"
+                        placeholder="Link to preprint"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Publication */}
+                  <div className="bg-gray-700/30 p-3 rounded-lg">
+                    <label className="block text-sm font-semibold mb-2 text-green-400">📖 Published Paper</label>
+                    <div className="grid md:grid-cols-4 gap-2">
+                      <input
+                        value={project.publication?.title || ''}
+                        onChange={(e) => updateProject(project._id, {...project, publication: { ...project.publication, title: e.target.value }})}
+                        className="w-full bg-gray-700 p-2 rounded"
+                        placeholder="Paper Title"
+                      />
+                      <input
+                        value={project.publication?.conference || ''}
+                        onChange={(e) => updateProject(project._id, {...project, publication: { ...project.publication, conference: e.target.value }})}
+                        className="w-full bg-gray-700 p-2 rounded"
+                        placeholder="Conference/Journal"
+                      />
+                      <input
+                        value={project.publication?.doi || ''}
+                        onChange={(e) => updateProject(project._id, {...project, publication: { ...project.publication, doi: e.target.value }})}
+                        className="w-full bg-gray-700 p-2 rounded"
+                        placeholder="DOI"
+                      />
+                      <input
+                        value={project.publication?.link || ''}
+                        onChange={(e) => updateProject(project._id, {...project, publication: { ...project.publication, link: e.target.value }})}
+                        className="w-full bg-gray-700 p-2 rounded"
+                        placeholder="Link to paper"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Multiple Images Upload */}
+                <div className="border-t border-gray-700 pt-4 mt-2">
+                  <label className="block text-sm font-semibold mb-2">🖼️ Project Images / Screenshots</label>
+                  
+                  {/* Display existing images */}
+                  {project.images && project.images.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {project.images.map((img, idx) => (
+                        <div key={idx} className="relative">
+                          <img src={img} alt={`Project ${idx + 1}`} className="w-24 h-24 object-cover rounded" />
+                          <button
+                            onClick={() => removeProjectImage(project._id, idx)}
+                            className="absolute -top-2 -right-2 bg-red-500 rounded-full w-5 h-5 text-xs"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* Upload new image */}
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files[0]) {
+                          uploadProjectImage(e.target.files[0], project._id);
+                        }
+                      }}
+                      className="block w-full text-sm text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded file:bg-accent file:text-white file:cursor-pointer"
+                    />
+                    {uploadingImages[project._id] && (
+                      <span className="text-accent text-sm">Uploading...</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Upload multiple screenshots, graphs, or visualizations from your project</p>
+                </div>
+                
+                {/* Challenges & Future Work */}
+                <div className="grid md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">⚠️ Challenges Faced</label>
+                    <textarea
+                      value={project.challenges || ''}
+                      onChange={(e) => updateProject(project._id, {...project, challenges: e.target.value})}
+                      className="w-full bg-gray-700 p-2 rounded"
+                      placeholder="What challenges did you encounter and how did you overcome them?"
+                      rows="2"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">🔮 Future Work</label>
+                    <textarea
+                      value={project.futureWork || ''}
+                      onChange={(e) => updateProject(project._id, {...project, futureWork: e.target.value})}
+                      className="w-full bg-gray-700 p-2 rounded"
+                      placeholder="What improvements or extensions could be made?"
+                      rows="2"
+                    />
+                  </div>
                 </div>
               </div>
             ) : (
               <div className="text-sm text-gray-300">
-                <p><strong>Problem:</strong> {project.problem?.substring(0, 100)}...</p>
-                <p><strong>Tech:</strong> {project.tools}</p>
-                <p><strong>Results:</strong> {project.results?.substring(0, 80)}...</p>
+                <p><strong className="text-red-400">Problem:</strong> {project.problem?.substring(0, 100)}...</p>
+                <p><strong className="text-green-400">Methodology:</strong> {project.methodology?.substring(0, 100)}...</p>
+                <p><strong className="text-purple-400">Tech Stack:</strong> {project.tools}</p>
+                <p><strong className="text-yellow-400">Results:</strong> {project.results?.substring(0, 100)}...</p>
+                {project.images && project.images.length > 0 && (
+                  <p><strong>Images:</strong> {project.images.length} uploaded</p>
+                )}
+                {project.githubLink && <p><strong>GitHub:</strong> <a href={project.githubLink} target="_blank" className="text-accent">Repository</a></p>}
+                {project.deployedLink && <p><strong>Live Demo:</strong> <a href={project.deployedLink} target="_blank" className="text-accent">View Project</a></p>}
               </div>
             )}
           </div>
