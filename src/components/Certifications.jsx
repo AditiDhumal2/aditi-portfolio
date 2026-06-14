@@ -17,91 +17,65 @@ const CertificateModal = ({ cert, onClose }) => {
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-gradient-to-br from-gray-900 to-dark border border-gray-700 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
-        {/* Certificate Image - Clear and prominent */}
-        {cert.image && cert.image !== "" ? (
-          <div className="relative">
+        {/* Certificate Image - Clean and prominent */}
+        <div className="relative">
+          {cert.image && cert.image !== "" ? (
             <img 
               src={cert.image} 
               alt={cert.name}
-              className="w-full max-h-80 object-contain bg-gray-800 p-4 rounded-t-2xl"
+              className="w-full rounded-t-2xl"
             />
-            <button 
-              onClick={onClose}
-              className="absolute top-4 right-4 bg-black/60 hover:bg-black/80 rounded-full p-2 text-white transition z-10"
-            >
-              ✕
-            </button>
-          </div>
-        ) : (
-          <div className="relative h-48 bg-gradient-to-r from-accent/20 to-purple-500/20 rounded-t-2xl flex items-center justify-center">
-            <div className="text-8xl">📜</div>
-            <button 
-              onClick={onClose}
-              className="absolute top-4 right-4 bg-black/60 hover:bg-black/80 rounded-full p-2 text-white transition"
-            >
-              ✕
-            </button>
-          </div>
-        )}
+          ) : (
+            <div className="h-64 bg-gradient-to-r from-blue-500 to-purple-600 rounded-t-2xl flex items-center justify-center">
+              <div className="text-8xl">📜</div>
+            </div>
+          )}
+          <button 
+            onClick={onClose}
+            className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 rounded-full w-8 h-8 flex items-center justify-center text-white text-xl transition z-10"
+          >
+            ✕
+          </button>
+        </div>
         
         {/* Content */}
         <div className="p-6">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-bold text-accent">{cert.name}</h2>
-              <p className="text-gray-400 mt-1">
-                {cert.issuer} • {cert.date}
-              </p>
-            </div>
-            {cert.link && cert.link !== "#" && (
-              <a 
-                href={cert.link} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="bg-accent hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition flex items-center gap-2"
-              >
-                <span>🔗</span> View Course
-              </a>
-            )}
-          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">{cert.name}</h2>
+          <p className="text-gray-600 mb-4">{cert.issuer} • {cert.date}</p>
           
-          <div className="space-y-6">
-            {cert.description && (
-              <div>
-                <h3 className="text-lg font-semibold text-accent mb-2 flex items-center gap-2">
-                  <span>📝</span> About this Certification
-                </h3>
-                <p className="text-gray-300 leading-relaxed">{cert.description}</p>
+          {cert.description && (
+            <div className="mb-4">
+              <h3 className="font-semibold text-gray-700 mb-2">About this Certification</h3>
+              <p className="text-gray-600">{cert.description}</p>
+            </div>
+          )}
+          
+          {cert.skills && cert.skills.length > 0 && (
+            <div className="mb-4">
+              <h3 className="font-semibold text-gray-700 mb-2">Skills Gained</h3>
+              <div className="flex flex-wrap gap-2">
+                {cert.skills.map((skill, idx) => (
+                  <span key={idx} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+                    {skill}
+                  </span>
+                ))}
               </div>
-            )}
-            
-            {cert.skills && cert.skills.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-accent mb-3 flex items-center gap-2">
-                  <span>🛠️</span> Skills Gained
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {cert.skills.map((skill, idx) => (
-                    <span key={idx} className="bg-accent/20 text-accent px-3 py-1.5 rounded-full text-sm font-medium">
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {cert.credentialId && (
-              <div>
-                <h3 className="text-lg font-semibold text-accent mb-2 flex items-center gap-2">
-                  <span>🔑</span> Credential ID
-                </h3>
-                <code className="bg-gray-800 px-3 py-2 rounded text-sm text-gray-300">{cert.credentialId}</code>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
+          
+          {cert.link && cert.link !== "#" && (
+            <a 
+              href={cert.link} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+            >
+              View Certificate →
+            </a>
+          )}
         </div>
       </motion.div>
     </motion.div>
@@ -133,7 +107,7 @@ const Certifications = () => {
   
   return (
     <>
-      <section id="certifications" className="py-20 bg-gradient-to-b from-dark to-gray-900">
+      <section id="certifications" className="py-20 bg-gray-50">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -141,11 +115,11 @@ const Certifications = () => {
             transition={{ duration: 0.5 }}
             className="text-center mb-12"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              📜 <span className="text-accent">Certifications</span>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-800">
+              📜 Certifications
             </h2>
-            <div className="w-20 h-1 bg-accent mx-auto rounded-full mb-4"></div>
-            <p className="text-gray-400 max-w-2xl mx-auto">
+            <div className="w-20 h-1 bg-blue-600 mx-auto rounded-full mb-4"></div>
+            <p className="text-gray-600 max-w-2xl mx-auto">
               Professional certifications that validate my skills and expertise
             </p>
           </motion.div>
@@ -157,37 +131,35 @@ const Certifications = () => {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
-                whileHover={{ y: -8 }}
+                whileHover={{ y: -5 }}
                 onClick={() => setSelectedCert(cert)}
-                className="group cursor-pointer"
+                className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer border border-gray-200"
               >
-                <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl overflow-hidden border border-gray-700 hover:border-accent transition-all duration-300 h-full">
-                  {/* Card Image - Clear and visible */}
-                  <div className="h-48 overflow-hidden bg-gray-700">
-                    {cert.image && cert.image !== "" ? (
-                      <img 
-                        src={cert.image} 
-                        alt={cert.name}
-                        className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="text-6xl group-hover:scale-110 transition-transform">📜</div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="p-5">
-                    <h3 className="font-bold text-lg text-accent group-hover:text-blue-400 transition line-clamp-1">
-                      {cert.name}
-                    </h3>
-                    <p className="text-gray-400 text-sm mb-2">{cert.issuer}</p>
-                    <div className="flex items-center justify-between mt-3">
-                      <span className="text-xs text-gray-500">{cert.date}</span>
-                      <span className="text-accent text-sm group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
-                        Explore <span>→</span>
-                      </span>
+                {/* Certificate Image */}
+                <div className="h-48 overflow-hidden bg-gray-100">
+                  {cert.image && cert.image !== "" ? (
+                    <img 
+                      src={cert.image} 
+                      alt={cert.name}
+                      className="w-full h-full object-contain p-4"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-6xl">📜</div>
                     </div>
+                  )}
+                </div>
+                
+                <div className="p-5">
+                  <h3 className="font-bold text-lg text-gray-800 mb-1 line-clamp-1">
+                    {cert.name}
+                  </h3>
+                  <p className="text-gray-500 text-sm mb-2">{cert.issuer}</p>
+                  <p className="text-gray-400 text-xs">{cert.date}</p>
+                  <div className="mt-3">
+                    <span className="text-blue-600 text-sm hover:underline inline-flex items-center gap-1">
+                      View Details →
+                    </span>
                   </div>
                 </div>
               </motion.div>
