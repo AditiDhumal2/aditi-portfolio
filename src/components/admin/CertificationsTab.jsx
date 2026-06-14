@@ -96,10 +96,7 @@ const CertificationsTab = ({ certifications, setCertifications, showMessage, set
       const imageUrl = await uploadToCloudinary(file);
       console.log('Upload successful! URL:', imageUrl);
       
-      // Update the edit form with the new image URL
       setEditForm({...editForm, image: imageUrl});
-      
-      // Save to database immediately
       await axios.put(`/api/certifications/${certId}`, { ...editForm, image: imageUrl });
       await fetchAllData();
       
@@ -120,11 +117,11 @@ const CertificationsTab = ({ certifications, setCertifications, showMessage, set
       </button>
       
       <div className="space-y-6">
-        {certifications.map((cert) => (
+        {certifications.map(cert => (
           <div key={cert._id} className="bg-gray-800 rounded-xl p-4 border border-gray-700">
             <div className="flex justify-between items-start mb-4">
               <h3 className="text-lg font-bold text-accent">
-                📜 {cert.name || 'Untitled Certification'}
+                {editingCert === cert._id ? 'Editing:' : '📜'} {cert.name || 'Untitled Certification'}
               </h3>
               <div className="flex gap-2">
                 {editingCert === cert._id ? (
@@ -310,6 +307,7 @@ const CertificationsTab = ({ certifications, setCertifications, showMessage, set
                 <p><strong className="text-blue-400">Issuer:</strong> {cert.issuer || 'Not specified'}</p>
                 <p><strong className="text-blue-400">Date:</strong> {cert.date || 'Not specified'}</p>
                 {cert.grade && <p><strong className="text-blue-400">Grade:</strong> {cert.grade}</p>}
+                {cert.credentialId && <p><strong className="text-blue-400">Credential ID:</strong> {cert.credentialId}</p>}
                 <p><strong className="text-blue-400">Skills:</strong> {cert.skills?.join(', ') || 'Not specified'}</p>
                 {cert.link && cert.link !== "#" && (
                   <p className="mt-2">
