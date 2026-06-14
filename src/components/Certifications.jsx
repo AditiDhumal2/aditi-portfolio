@@ -1,207 +1,201 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from 'react';
 import axios from 'axios';
+import { uploadToCloudinary } from '../../utils/cloudinary';
 
-const CertificateModal = ({ cert, onClose }) => {
-  if (!cert) return null;
-  
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 overflow-y-auto"
-      onClick={onClose}
-    >
-      <motion.div 
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-gradient-to-br from-gray-900 to-dark border border-gray-700 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="relative">
-          {/* Hero Image Section */}
-          <div className="relative h-64 bg-gradient-to-r from-accent/20 to-purple-500/20 rounded-t-2xl overflow-hidden">
-            {cert.image && cert.image !== "" ? (
-              <img 
-                src={cert.image} 
-                alt={cert.name}
-                className="w-full h-full object-cover opacity-60"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="text-8xl">📜</div>
-              </div>
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div>
-            <button 
-              onClick={onClose}
-              className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 rounded-full p-2 text-white transition"
-            >
-              ✕
-            </button>
-          </div>
-          
-          {/* Content */}
-          <div className="p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-accent">{cert.name}</h2>
-                <p className="text-gray-400 mt-1">
-                  {cert.issuer} • {cert.date}
-                </p>
-              </div>
-              {cert.link && cert.link !== "#" && (
-                <a 
-                  href={cert.link} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="bg-accent hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition flex items-center gap-2"
-                >
-                  <span>🔗</span> View Course
-                </a>
-              )}
-            </div>
-            
-            <div className="space-y-6">
-              {cert.description && (
-                <div>
-                  <h3 className="text-lg font-semibold text-accent mb-2 flex items-center gap-2">
-                    <span>📝</span> About this Certification
-                  </h3>
-                  <p className="text-gray-300 leading-relaxed">{cert.description}</p>
-                </div>
-              )}
-              
-              {cert.skills && cert.skills.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold text-accent mb-3 flex items-center gap-2">
-                    <span>🛠️</span> Skills Gained
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {cert.skills.map((skill, idx) => (
-                      <span key={idx} className="bg-accent/20 text-accent px-3 py-1.5 rounded-full text-sm font-medium">
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {cert.credentialId && (
-                <div>
-                  <h3 className="text-lg font-semibold text-accent mb-2 flex items-center gap-2">
-                    <span>🔑</span> Credential ID
-                  </h3>
-                  <code className="bg-gray-800 px-3 py-2 rounded text-sm text-gray-300">{cert.credentialId}</code>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-};
+const CertificationsTab = ({ certifications, setCertifications, showMessage, setUploading, uploading, fetchAllData }) => {
+  const [editingCert, setEditingCert] = useState(null);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    issuer: '',
+    link: '',
+    date: '',
+    image: '',
+    description: '',
+    skills: [],
+    credentialId: '',
+    validity: '',
+    grade: ''
+  });
 
-const Certifications = () => {
-  const [certifications, setCertifications] = useState([]);
-  const [selectedCert, setSelectedCert] = useState(null);
-  const [loading, setLoading] = useState(true);
-  
-  useEffect(() => {
-    loadCertifications();
-  }, []);
-  
-  const loadCertifications = async () => {
+  const addCertification = async () => {
+    const newCert = {
+      name: "New Certification",
+      issuer: "Issuer Name",
+      link: "",
+      date: new Date().getFullYear().toString(),
+      image: "",
+      description: "",
+      skills: [],
+      credentialId: "",
+      validity: "",
+      grade: ""
+    };
     try {
-      const response = await axios.get('/api/certifications');
-      setCertifications(response.data);
-      setLoading(false);
+      const response = await axios.post('/api/certifications', newCert);
+      console.log('Add response:', response.data);
+      await fetchAllData();
+      showMessage('Certification added!');
     } catch (error) {
-      console.error('Error loading certifications:', error);
-      setLoading(false);
+      console.error('Add error:', error.response?.data || error.message);
+      showMessage('Error adding certification: ' + (error.response?.data?.error || error.message), true);
     }
   };
-  
-  if (loading) return null;
-  if (certifications.length === 0) return null;
-  
+
+  const startEdit = (cert) => {
+    setEditingCert(cert._id);
+    setEditForm({
+      name: cert.name || '',
+      issuer: cert.issuer || '',
+      link: cert.link || '',
+      date: cert.date || '',
+      image: cert.image || '',
+      description: cert.description || '',
+      skills: cert.skills || [],
+      credentialId: cert.credentialId || '',
+      validity: cert.validity || '',
+      grade: cert.grade || ''
+    });
+  };
+
+  const saveEdit = async (id) => {
+    try {
+      const response = await axios.put(`/api/certifications/${id}`, editForm);
+      console.log('Save response:', response.data);
+      await fetchAllData();
+      showMessage('Certification updated!');
+      setEditingCert(null);
+    } catch (error) {
+      console.error('Save error:', error.response?.data || error.message);
+      showMessage('Error updating certification', true);
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingCert(null);
+  };
+
+  const deleteCertification = async (id) => {
+    if (window.confirm('Delete this certification?')) {
+      try {
+        await axios.delete(`/api/certifications/${id}`);
+        await fetchAllData();
+        showMessage('Certification deleted!');
+      } catch (error) {
+        console.error('Delete error:', error);
+        showMessage('Error deleting certification', true);
+      }
+    }
+  };
+
+  const uploadCertImage = async (file, certId) => {
+    if (!file) return;
+    
+    setUploading(true);
+    showMessage('📤 Uploading certificate image to Cloudinary...');
+    
+    try {
+      const imageUrl = await uploadToCloudinary(file);
+      console.log('Upload successful! URL:', imageUrl);
+      
+      const updatedForm = { ...editForm, image: imageUrl };
+      setEditForm(updatedForm);
+      
+      await axios.put(`/api/certifications/${certId}`, updatedForm);
+      await fetchAllData();
+      
+      showMessage('✅ Certificate image uploaded successfully!');
+    } catch (error) {
+      console.error('Upload error:', error);
+      showMessage('❌ Failed to upload image', true);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
-    <>
-      <section id="certifications" className="py-20 bg-gradient-to-b from-dark to-gray-900">
-        <div className="container mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              📜 <span className="text-accent">Certifications</span>
-            </h2>
-            <div className="w-20 h-1 bg-accent mx-auto rounded-full mb-4"></div>
-            <p className="text-gray-400 max-w-2xl mx-auto">
-              Professional certifications that validate my skills and expertise
-            </p>
-          </motion.div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {certifications.map((cert, idx) => (
-              <motion.div
-                key={cert._id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                whileHover={{ y: -8 }}
-                onClick={() => setSelectedCert(cert)}
-                className="group cursor-pointer"
-              >
-                <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl overflow-hidden border border-gray-700 hover:border-accent transition-all duration-300 h-full">
-                  <div className="h-40 bg-gradient-to-r from-accent/10 to-purple-500/10 relative overflow-hidden">
-                    {cert.image && cert.image !== "" ? (
-                      <img 
-                        src={cert.image} 
-                        alt={cert.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="text-6xl group-hover:scale-110 transition-transform">📜</div>
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent"></div>
+    <div>
+      <button onClick={addCertification} className="bg-green-500 px-4 py-2 rounded-lg mb-4 hover:bg-green-600 transition">
+        + Add Certification
+      </button>
+      
+      <div className="space-y-6">
+        {certifications && certifications.length > 0 ? (
+          certifications.map(cert => (
+            <div key={cert._id} className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-lg font-bold text-accent">
+                  {editingCert === cert._id ? 'Editing:' : '📜'} {cert.name || 'Untitled Certification'}
+                </h3>
+                <div className="flex gap-2">
+                  {editingCert === cert._id ? (
+                    <>
+                      <button onClick={() => saveEdit(cert._id)} className="bg-green-500 px-3 py-1 rounded text-sm">Save</button>
+                      <button onClick={cancelEdit} className="bg-gray-500 px-3 py-1 rounded text-sm">Cancel</button>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={() => startEdit(cert)} className="bg-blue-500 px-3 py-1 rounded text-sm">Edit</button>
+                      <button onClick={() => deleteCertification(cert._id)} className="bg-red-500 px-3 py-1 rounded text-sm">Delete</button>
+                    </>
+                  )}
+                </div>
+              </div>
+              
+              {cert.image && editingCert !== cert._id && (
+                <div className="mb-4">
+                  <img src={cert.image} alt={cert.name} className="w-32 h-32 object-cover rounded-lg border border-gray-600" />
+                </div>
+              )}
+              
+              {editingCert === cert._id ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Name</label>
+                    <input value={editForm.name} onChange={(e) => setEditForm({...editForm, name: e.target.value})} className="w-full bg-gray-700 p-2 rounded" />
                   </div>
-                  
-                  <div className="p-5">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-bold text-lg text-accent group-hover:text-blue-400 transition line-clamp-1">
-                        {cert.name}
-                      </h3>
-                    </div>
-                    <p className="text-gray-400 text-sm mb-2">{cert.issuer}</p>
-                    <div className="flex items-center justify-between mt-3">
-                      <span className="text-xs text-gray-500">{cert.date}</span>
-                      <span className="text-accent text-sm group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
-                        Explore <span>→</span>
-                      </span>
-                    </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Issuer</label>
+                    <input value={editForm.issuer} onChange={(e) => setEditForm({...editForm, issuer: e.target.value})} className="w-full bg-gray-700 p-2 rounded" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Date</label>
+                    <input value={editForm.date} onChange={(e) => setEditForm({...editForm, date: e.target.value})} className="w-full bg-gray-700 p-2 rounded" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Link</label>
+                    <input value={editForm.link} onChange={(e) => setEditForm({...editForm, link: e.target.value})} className="w-full bg-gray-700 p-2 rounded" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-semibold mb-1">Description</label>
+                    <textarea value={editForm.description} onChange={(e) => setEditForm({...editForm, description: e.target.value})} className="w-full bg-gray-700 p-2 rounded" rows="3" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-semibold mb-1">Skills (comma-separated)</label>
+                    <input value={editForm.skills.join(', ')} onChange={(e) => setEditForm({...editForm, skills: e.target.value.split(',').map(s => s.trim())})} className="w-full bg-gray-700 p-2 rounded" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-semibold mb-1">Certificate Image</label>
+                    {editForm.image && <img src={editForm.image} alt="Preview" className="w-32 h-32 object-cover rounded mb-2" />}
+                    <input type="file" accept="image/*" onChange={(e) => e.target.files[0] && uploadCertImage(e.target.files[0], cert._id)} className="block w-full text-sm text-gray-400" />
                   </div>
                 </div>
-              </motion.div>
-            ))}
+              ) : (
+                <div className="text-sm text-gray-300">
+                  <p><strong>Issuer:</strong> {cert.issuer || 'Not specified'}</p>
+                  <p><strong>Date:</strong> {cert.date || 'Not specified'}</p>
+                  <p><strong>Skills:</strong> {cert.skills?.join(', ') || 'Not specified'}</p>
+                </div>
+              )}
+            </div>
+          ))
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            No certifications yet. Click "+ Add Certification" to create one.
           </div>
-        </div>
-      </section>
-      
-      <AnimatePresence>
-        {selectedCert && (
-          <CertificateModal cert={selectedCert} onClose={() => setSelectedCert(null)} />
         )}
-      </AnimatePresence>
-    </>
+      </div>
+    </div>
   );
 };
 
-export default Certifications;
+export default CertificationsTab;
