@@ -107,7 +107,8 @@ const certificationSchema = new mongoose.Schema({
   image: { type: String, default: '' },
   description: { type: String, default: '' },
   skills: [{ type: String }],
-  link: { type: String, default: '' },
+  link: { type: String, default: '' },              // Course link
+  certificateLink: { type: String, default: '' },   // Certificate verification link
   credentialId: { type: String, default: '' },
   validity: { type: String, default: '' },
   grade: { type: String, default: '' }
@@ -386,7 +387,6 @@ app.post('/api/certifications', async (req, res) => {
   try {
     console.log('📝 Creating certification with data:', req.body);
     
-    // Ensure all required fields have values
     const certData = {
       name: req.body.name || 'New Certification',
       issuer: req.body.issuer || 'Unknown Issuer',
@@ -395,6 +395,7 @@ app.post('/api/certifications', async (req, res) => {
       description: req.body.description || '',
       skills: req.body.skills || [],
       link: req.body.link || '',
+      certificateLink: req.body.certificateLink || '',
       credentialId: req.body.credentialId || '',
       validity: req.body.validity || '',
       grade: req.body.grade || ''
