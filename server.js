@@ -60,9 +60,27 @@ const projectSchema = new mongoose.Schema({
   tools: { type: String, default: '' },
   results: { type: String, default: '' },
   impact: { type: String, default: '' },
-  image: { type: String, default: '' },
+  images: [{ type: String }],
   githubLink: { type: String, default: '' },
   deployedLink: { type: String, default: '' },
+  documentation: {
+    title: { type: String, default: '' },
+    link: { type: String, default: '' },
+    description: { type: String, default: '' }
+  },
+  preprint: {
+    title: { type: String, default: '' },
+    doi: { type: String, default: '' },
+    link: { type: String, default: '' }
+  },
+  publication: {
+    title: { type: String, default: '' },
+    doi: { type: String, default: '' },
+    link: { type: String, default: '' },
+    conference: { type: String, default: '' }
+  },
+  challenges: { type: String, default: '' },
+  futureWork: { type: String, default: '' },
   featured: { type: Boolean, default: true }
 }, { timestamps: true });
 

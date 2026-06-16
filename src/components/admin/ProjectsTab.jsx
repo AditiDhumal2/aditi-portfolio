@@ -18,6 +18,11 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
       images: [],
       githubLink: "",
       deployedLink: "",
+      documentation: {
+        title: "",
+        link: "",
+        description: ""
+      },
       preprint: {
         title: "",
         doi: "",
@@ -219,6 +224,34 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                       className="w-full bg-gray-700 p-2 rounded"
                       placeholder="https://project-demo.vercel.app"
                     />
+                  </div>
+                </div>
+                
+                {/* Documentation Section */}
+                <div className="border-t border-gray-700 pt-4 mt-2">
+                  <h4 className="text-md font-bold text-blue-400 mb-3">📄 Documentation</h4>
+                  <div className="bg-gray-700/30 p-3 rounded-lg">
+                    <div className="grid md:grid-cols-3 gap-2">
+                      <input
+                        value={project.documentation?.title || ''}
+                        onChange={(e) => updateProject(project._id, {...project, documentation: { ...project.documentation, title: e.target.value }})}
+                        className="w-full bg-gray-700 p-2 rounded"
+                        placeholder="Documentation Title"
+                      />
+                      <input
+                        value={project.documentation?.link || ''}
+                        onChange={(e) => updateProject(project._id, {...project, documentation: { ...project.documentation, link: e.target.value }})}
+                        className="w-full bg-gray-700 p-2 rounded"
+                        placeholder="Link to documentation"
+                      />
+                      <input
+                        value={project.documentation?.description || ''}
+                        onChange={(e) => updateProject(project._id, {...project, documentation: { ...project.documentation, description: e.target.value }})}
+                        className="w-full bg-gray-700 p-2 rounded"
+                        placeholder="Short description"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Add project documentation, report, or detailed write-up</p>
                   </div>
                 </div>
                 

@@ -7,12 +7,28 @@ const ProjectModal = ({ project, onClose }) => {
   
   if (!project) return null;
   
+  // Dynamically determine which tabs to show
+  const hasGallery = project.images && project.images.length > 0;
+  const hasDocumentation = project.documentation?.title || project.documentation?.link;
+  const hasPreprint = project.preprint?.title || project.preprint?.doi || project.preprint?.link;
+  const hasPublication = project.publication?.title || project.publication?.doi || project.publication?.link;
+  const hasTechnical = project.methodology || project.tools || project.challenges || project.futureWork;
+  
   const tabs = [
-    { id: 'overview', name: '📋 Overview', icon: '📋' },
-    { id: 'technical', name: '⚙️ Technical', icon: '⚙️' },
-    { id: 'publications', name: '📄 Publications', icon: '📄' },
-    { id: 'gallery', name: '🖼️ Gallery', icon: '🖼️' },
-  ];
+    { id: 'overview', name: '📋 Overview', show: true },
+    { id: 'technical', name: '⚙️ Technical', show: hasTechnical },
+    { id: 'gallery', name: '🖼️ Gallery', show: hasGallery },
+    { id: 'documentation', name: '📄 Documentation', show: hasDocumentation },
+    { id: 'preprint', name: '📑 Preprint', show: hasPreprint },
+    { id: 'publication', name: '📖 Publication', show: hasPublication },
+  ].filter(tab => tab.show);
+  
+  // Set default active tab to first available
+  React.useEffect(() => {
+    if (tabs.length > 0 && !tabs.find(t => t.id === activeTab)) {
+      setActiveTab(tabs[0].id);
+    }
+  }, [project]);
   
   return (
     <motion.div 
@@ -51,7 +67,7 @@ const ProjectModal = ({ project, onClose }) => {
         </div>
         
         {/* Action Buttons */}
-        <div className="flex gap-3 p-4 border-b border-gray-700">
+        <div className="flex flex-wrap gap-3 p-4 border-b border-gray-700">
           {project.githubLink && (
             <a href={project.githubLink} target="_blank" rel="noopener noreferrer" className="bg-gray-800 hover:bg-accent text-white px-4 py-2 rounded-lg transition flex items-center gap-2">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -67,20 +83,22 @@ const ProjectModal = ({ project, onClose }) => {
           )}
         </div>
         
-        {/* Tabs */}
-        <div className="flex border-b border-gray-700 px-4">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 text-sm font-medium transition ${
-                activeTab === tab.id ? 'text-accent border-b-2 border-accent' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              {tab.name}
-            </button>
-          ))}
-        </div>
+        {/* Tabs - Only show tabs with data */}
+        {tabs.length > 1 && (
+          <div className="flex flex-wrap border-b border-gray-700 px-4 overflow-x-auto">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-2 text-sm font-medium transition whitespace-nowrap ${
+                  activeTab === tab.id ? 'text-accent border-b-2 border-accent' : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                {tab.name}
+              </button>
+            ))}
+          </div>
+        )}
         
         {/* Tab Content */}
         <div className="p-6">
@@ -109,18 +127,22 @@ const ProjectModal = ({ project, onClose }) => {
           
           {activeTab === 'technical' && (
             <div className="space-y-5">
-              <div className="border-l-4 border-green-500 pl-4">
-                <h3 className="text-lg font-bold text-green-400 mb-2">⚙️ Methodology</h3>
-                <p className="text-gray-300">{project.methodology}</p>
-              </div>
-              <div className="border-l-4 border-purple-500 pl-4">
-                <h3 className="text-lg font-bold text-purple-400 mb-2">🛠️ Tech Stack</h3>
-                <div className="flex flex-wrap gap-2">
-                  {project.tools?.split(',').map((tool, idx) => (
-                    <span key={idx} className="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-sm">{tool.trim()}</span>
-                  ))}
+              {project.methodology && (
+                <div className="border-l-4 border-green-500 pl-4">
+                  <h3 className="text-lg font-bold text-green-400 mb-2">⚙️ Methodology</h3>
+                  <p className="text-gray-300">{project.methodology}</p>
                 </div>
-              </div>
+              )}
+              {project.tools && (
+                <div className="border-l-4 border-purple-500 pl-4">
+                  <h3 className="text-lg font-bold text-purple-400 mb-2">🛠️ Tech Stack</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {project.tools.split(',').map((tool, idx) => (
+                      <span key={idx} className="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-sm">{tool.trim()}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
               {project.challenges && (
                 <div className="border-l-4 border-orange-500 pl-4">
                   <h3 className="text-lg font-bold text-orange-400 mb-2">⚠️ Challenges</h3>
@@ -136,44 +158,58 @@ const ProjectModal = ({ project, onClose }) => {
             </div>
           )}
           
-          {activeTab === 'publications' && (
-            <div className="space-y-5">
-              {project.preprint?.title && (
-                <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-                  <h3 className="text-lg font-bold text-blue-400 mb-2">📑 Preprint</h3>
-                  <p className="text-gray-300 font-medium mb-1">{project.preprint.title}</p>
-                  {project.preprint.doi && <p className="text-sm text-gray-400">DOI: {project.preprint.doi}</p>}
-                  {project.preprint.link && (
-                    <a href={project.preprint.link} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline text-sm mt-2 inline-block">
-                      Read Preprint →
-                    </a>
-                  )}
-                </div>
-              )}
-              {project.publication?.title && (
-                <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-                  <h3 className="text-lg font-bold text-green-400 mb-2">📖 Published Paper</h3>
-                  <p className="text-gray-300 font-medium mb-1">{project.publication.title}</p>
-                  {project.publication.conference && <p className="text-sm text-gray-400">{project.publication.conference}</p>}
-                  {project.publication.doi && <p className="text-sm text-gray-400">DOI: {project.publication.doi}</p>}
-                  {project.publication.link && (
-                    <a href={project.publication.link} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline text-sm mt-2 inline-block">
-                      View Publication →
-                    </a>
-                  )}
-                </div>
-              )}
-              {!project.preprint?.title && !project.publication?.title && (
-                <p className="text-gray-400 text-center">No publications associated with this project.</p>
-              )}
-            </div>
-          )}
-          
           {activeTab === 'gallery' && project.images && project.images.length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {project.images.map((img, idx) => (
                 <img key={idx} src={img} alt={`Screenshot ${idx + 1}`} className="rounded-lg border border-gray-700 hover:scale-105 transition cursor-pointer" onClick={() => window.open(img, '_blank')} />
               ))}
+            </div>
+          )}
+          
+          {activeTab === 'documentation' && (
+            <div className="space-y-4">
+              {project.documentation?.title && (
+                <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+                  <h3 className="text-lg font-bold text-blue-400 mb-2">📄 {project.documentation.title}</h3>
+                  {project.documentation.description && <p className="text-gray-300 mb-3">{project.documentation.description}</p>}
+                  {project.documentation.link && (
+                    <a href={project.documentation.link} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline inline-block">
+                      📄 View Documentation →
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+          
+          {activeTab === 'preprint' && (
+            <div className="space-y-4">
+              <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+                <h3 className="text-lg font-bold text-blue-400 mb-2">📑 Preprint</h3>
+                {project.preprint?.title && <p className="text-gray-300 font-medium mb-1">{project.preprint.title}</p>}
+                {project.preprint?.doi && <p className="text-sm text-gray-400">DOI: {project.preprint.doi}</p>}
+                {project.preprint?.link && (
+                  <a href={project.preprint.link} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline text-sm mt-2 inline-block">
+                    Read Preprint →
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {activeTab === 'publication' && (
+            <div className="space-y-4">
+              <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+                <h3 className="text-lg font-bold text-green-400 mb-2">📖 Published Paper</h3>
+                {project.publication?.title && <p className="text-gray-300 font-medium mb-1">{project.publication.title}</p>}
+                {project.publication?.conference && <p className="text-sm text-gray-400">{project.publication.conference}</p>}
+                {project.publication?.doi && <p className="text-sm text-gray-400">DOI: {project.publication.doi}</p>}
+                {project.publication?.link && (
+                  <a href={project.publication.link} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline text-sm mt-2 inline-block">
+                    View Publication →
+                  </a>
+                )}
+              </div>
             </div>
           )}
         </div>
