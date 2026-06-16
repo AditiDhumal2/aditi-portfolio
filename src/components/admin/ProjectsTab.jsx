@@ -4,6 +4,7 @@ import { uploadToCloudinary } from '../../utils/cloudinary';
 
 const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploading, fetchAllData }) => {
   const [editingProject, setEditingProject] = useState(null);
+  const [editForm, setEditForm] = useState({});
   const [uploadingImages, setUploadingImages] = useState({});
 
   const addProject = async () => {
@@ -48,15 +49,26 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
     }
   };
 
-  const updateProject = async (id, updatedProject) => {
+  const startEdit = (project) => {
+    setEditingProject(project._id);
+    setEditForm(JSON.parse(JSON.stringify(project))); // Deep copy
+  };
+
+  const saveEdit = async (id) => {
     try {
-      const response = await axios.put(`/api/projects/${id}`, updatedProject);
+      const response = await axios.put(`/api/projects/${id}`, editForm);
       await fetchAllData();
       showMessage('Project updated!');
       setEditingProject(null);
+      setEditForm({});
     } catch (error) {
       showMessage('Error updating project', true);
     }
+  };
+
+  const cancelEdit = () => {
+    setEditingProject(null);
+    setEditForm({});
   };
 
   const deleteProject = async (id) => {
@@ -77,9 +89,8 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
     showMessage('Uploading image...');
     try {
       const imageUrl = await uploadToCloudinary(file);
-      const project = projects.find(p => p._id === projectId);
-      const updatedImages = [...(project.images || []), imageUrl];
-      await updateProject(projectId, { ...project, images: updatedImages });
+      const updatedImages = [...(editForm.images || []), imageUrl];
+      setEditForm({ ...editForm, images: updatedImages });
       showMessage('✅ Image uploaded!');
     } catch (error) {
       showMessage('❌ Upload failed', true);
@@ -89,11 +100,21 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
     }
   };
 
-  const removeProjectImage = async (projectId, imageIndex) => {
-    const project = projects.find(p => p._id === projectId);
-    const updatedImages = project.images.filter((_, idx) => idx !== imageIndex);
-    await updateProject(projectId, { ...project, images: updatedImages });
+  const removeProjectImage = (imageIndex) => {
+    const updatedImages = editForm.images.filter((_, idx) => idx !== imageIndex);
+    setEditForm({ ...editForm, images: updatedImages });
     showMessage('Image removed');
+  };
+
+  const updateField = (field, value) => {
+    setEditForm({ ...editForm, [field]: value });
+  };
+
+  const updateNestedField = (parent, field, value) => {
+    setEditForm({
+      ...editForm,
+      [parent]: { ...editForm[parent], [field]: value }
+    });
   };
 
   return (
@@ -107,18 +128,28 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
           <div key={project._id} className="bg-gray-800 rounded-xl p-4 border border-gray-700">
             <div className="flex justify-between items-start mb-4">
               <h3 className="text-lg font-bold text-accent">
-                {editingProject === project._id ? 'Editing:' : '📊'} {project.title || 'Untitled Project'}
+                {editingProject === project._id ? '✏️ Editing:' : '📊'} {project.title || 'Untitled Project'}
               </h3>
               <div className="flex gap-2">
-                <button
-                  onClick={() => setEditingProject(editingProject === project._id ? null : project._id)}
-                  className="bg-blue-500 px-3 py-1 rounded text-sm"
-                >
-                  {editingProject === project._id ? 'Cancel' : 'Edit'}
-                </button>
-                <button onClick={() => deleteProject(project._id)} className="bg-red-500 px-3 py-1 rounded text-sm">
-                  Delete
-                </button>
+                {editingProject === project._id ? (
+                  <>
+                    <button onClick={() => saveEdit(project._id)} className="bg-green-500 px-3 py-1 rounded text-sm">
+                      💾 Save
+                    </button>
+                    <button onClick={cancelEdit} className="bg-gray-500 px-3 py-1 rounded text-sm">
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={() => startEdit(project)} className="bg-blue-500 px-3 py-1 rounded text-sm">
+                      Edit
+                    </button>
+                    <button onClick={() => deleteProject(project._id)} className="bg-red-500 px-3 py-1 rounded text-sm">
+                      Delete
+                    </button>
+                  </>
+                )}
               </div>
             </div>
             
@@ -129,8 +160,8 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                   <div>
                     <label className="block text-sm font-semibold mb-1 text-blue-400">Project Title *</label>
                     <input
-                      value={project.title || ''}
-                      onChange={(e) => updateProject(project._id, {...project, title: e.target.value})}
+                      value={editForm.title || ''}
+                      onChange={(e) => updateField('title', e.target.value)}
                       className="w-full bg-gray-700 p-2 rounded"
                       placeholder="Project Title"
                     />
@@ -138,8 +169,8 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                   <div>
                     <label className="block text-sm font-semibold mb-1 text-purple-400">Tech Stack</label>
                     <input
-                      value={project.tools || ''}
-                      onChange={(e) => updateProject(project._id, {...project, tools: e.target.value})}
+                      value={editForm.tools || ''}
+                      onChange={(e) => updateField('tools', e.target.value)}
                       className="w-full bg-gray-700 p-2 rounded"
                       placeholder="Python, Pandas, Scikit-learn, Tableau"
                     />
@@ -150,8 +181,8 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                 <div>
                   <label className="block text-sm font-semibold mb-1 text-red-400">🎯 Problem Statement</label>
                   <textarea
-                    value={project.problem || ''}
-                    onChange={(e) => updateProject(project._id, {...project, problem: e.target.value})}
+                    value={editForm.problem || ''}
+                    onChange={(e) => updateField('problem', e.target.value)}
                     className="w-full bg-gray-700 p-2 rounded"
                     placeholder="What problem does this solve?"
                     rows="3"
@@ -162,8 +193,8 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                 <div>
                   <label className="block text-sm font-semibold mb-1 text-blue-400">📊 Dataset Used</label>
                   <input
-                    value={project.dataset || ''}
-                    onChange={(e) => updateProject(project._id, {...project, dataset: e.target.value})}
+                    value={editForm.dataset || ''}
+                    onChange={(e) => updateField('dataset', e.target.value)}
                     className="w-full bg-gray-700 p-2 rounded"
                     placeholder="Describe dataset: size, source, features"
                   />
@@ -173,8 +204,8 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                 <div>
                   <label className="block text-sm font-semibold mb-1 text-green-400">⚙️ Methodology & Approach</label>
                   <textarea
-                    value={project.methodology || ''}
-                    onChange={(e) => updateProject(project._id, {...project, methodology: e.target.value})}
+                    value={editForm.methodology || ''}
+                    onChange={(e) => updateField('methodology', e.target.value)}
                     className="w-full bg-gray-700 p-2 rounded"
                     placeholder="Explain your approach, algorithms used, data processing steps"
                     rows="3"
@@ -185,8 +216,8 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                 <div>
                   <label className="block text-sm font-semibold mb-1 text-yellow-400">📈 Results & Insights</label>
                   <textarea
-                    value={project.results || ''}
-                    onChange={(e) => updateProject(project._id, {...project, results: e.target.value})}
+                    value={editForm.results || ''}
+                    onChange={(e) => updateField('results', e.target.value)}
                     className="w-full bg-gray-700 p-2 rounded"
                     placeholder="Include specific metrics: accuracy, precision, recall, business impact"
                     rows="3"
@@ -197,8 +228,8 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                 <div>
                   <label className="block text-sm font-semibold mb-1 text-orange-400">🚀 Real-World Impact</label>
                   <textarea
-                    value={project.impact || ''}
-                    onChange={(e) => updateProject(project._id, {...project, impact: e.target.value})}
+                    value={editForm.impact || ''}
+                    onChange={(e) => updateField('impact', e.target.value)}
                     className="w-full bg-gray-700 p-2 rounded"
                     placeholder="Quantify the impact (e.g., reduced waste by 23%, saved $45k annually)"
                     rows="2"
@@ -210,8 +241,8 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                   <div>
                     <label className="block text-sm font-semibold mb-1">🐙 GitHub Repository</label>
                     <input
-                      value={project.githubLink || ''}
-                      onChange={(e) => updateProject(project._id, {...project, githubLink: e.target.value})}
+                      value={editForm.githubLink || ''}
+                      onChange={(e) => updateField('githubLink', e.target.value)}
                       className="w-full bg-gray-700 p-2 rounded"
                       placeholder="https://github.com/username/repo"
                     />
@@ -219,8 +250,8 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                   <div>
                     <label className="block text-sm font-semibold mb-1">🌐 Deployed / Live Demo Link</label>
                     <input
-                      value={project.deployedLink || ''}
-                      onChange={(e) => updateProject(project._id, {...project, deployedLink: e.target.value})}
+                      value={editForm.deployedLink || ''}
+                      onChange={(e) => updateField('deployedLink', e.target.value)}
                       className="w-full bg-gray-700 p-2 rounded"
                       placeholder="https://project-demo.vercel.app"
                     />
@@ -233,20 +264,20 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                   <div className="bg-gray-700/30 p-3 rounded-lg">
                     <div className="grid md:grid-cols-3 gap-2">
                       <input
-                        value={project.documentation?.title || ''}
-                        onChange={(e) => updateProject(project._id, {...project, documentation: { ...project.documentation, title: e.target.value }})}
+                        value={editForm.documentation?.title || ''}
+                        onChange={(e) => updateNestedField('documentation', 'title', e.target.value)}
                         className="w-full bg-gray-700 p-2 rounded"
                         placeholder="Documentation Title"
                       />
                       <input
-                        value={project.documentation?.link || ''}
-                        onChange={(e) => updateProject(project._id, {...project, documentation: { ...project.documentation, link: e.target.value }})}
+                        value={editForm.documentation?.link || ''}
+                        onChange={(e) => updateNestedField('documentation', 'link', e.target.value)}
                         className="w-full bg-gray-700 p-2 rounded"
                         placeholder="Link to documentation"
                       />
                       <input
-                        value={project.documentation?.description || ''}
-                        onChange={(e) => updateProject(project._id, {...project, documentation: { ...project.documentation, description: e.target.value }})}
+                        value={editForm.documentation?.description || ''}
+                        onChange={(e) => updateNestedField('documentation', 'description', e.target.value)}
                         className="w-full bg-gray-700 p-2 rounded"
                         placeholder="Short description"
                       />
@@ -264,20 +295,20 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                     <label className="block text-sm font-semibold mb-2 text-blue-400">📑 Preprint</label>
                     <div className="grid md:grid-cols-3 gap-2">
                       <input
-                        value={project.preprint?.title || ''}
-                        onChange={(e) => updateProject(project._id, {...project, preprint: { ...project.preprint, title: e.target.value }})}
+                        value={editForm.preprint?.title || ''}
+                        onChange={(e) => updateNestedField('preprint', 'title', e.target.value)}
                         className="w-full bg-gray-700 p-2 rounded"
                         placeholder="Preprint Title"
                       />
                       <input
-                        value={project.preprint?.doi || ''}
-                        onChange={(e) => updateProject(project._id, {...project, preprint: { ...project.preprint, doi: e.target.value }})}
+                        value={editForm.preprint?.doi || ''}
+                        onChange={(e) => updateNestedField('preprint', 'doi', e.target.value)}
                         className="w-full bg-gray-700 p-2 rounded"
                         placeholder="DOI (e.g., 10.xxxx/xxxxx)"
                       />
                       <input
-                        value={project.preprint?.link || ''}
-                        onChange={(e) => updateProject(project._id, {...project, preprint: { ...project.preprint, link: e.target.value }})}
+                        value={editForm.preprint?.link || ''}
+                        onChange={(e) => updateNestedField('preprint', 'link', e.target.value)}
                         className="w-full bg-gray-700 p-2 rounded"
                         placeholder="Link to preprint"
                       />
@@ -289,26 +320,26 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                     <label className="block text-sm font-semibold mb-2 text-green-400">📖 Published Paper</label>
                     <div className="grid md:grid-cols-4 gap-2">
                       <input
-                        value={project.publication?.title || ''}
-                        onChange={(e) => updateProject(project._id, {...project, publication: { ...project.publication, title: e.target.value }})}
+                        value={editForm.publication?.title || ''}
+                        onChange={(e) => updateNestedField('publication', 'title', e.target.value)}
                         className="w-full bg-gray-700 p-2 rounded"
                         placeholder="Paper Title"
                       />
                       <input
-                        value={project.publication?.conference || ''}
-                        onChange={(e) => updateProject(project._id, {...project, publication: { ...project.publication, conference: e.target.value }})}
+                        value={editForm.publication?.conference || ''}
+                        onChange={(e) => updateNestedField('publication', 'conference', e.target.value)}
                         className="w-full bg-gray-700 p-2 rounded"
                         placeholder="Conference/Journal"
                       />
                       <input
-                        value={project.publication?.doi || ''}
-                        onChange={(e) => updateProject(project._id, {...project, publication: { ...project.publication, doi: e.target.value }})}
+                        value={editForm.publication?.doi || ''}
+                        onChange={(e) => updateNestedField('publication', 'doi', e.target.value)}
                         className="w-full bg-gray-700 p-2 rounded"
                         placeholder="DOI"
                       />
                       <input
-                        value={project.publication?.link || ''}
-                        onChange={(e) => updateProject(project._id, {...project, publication: { ...project.publication, link: e.target.value }})}
+                        value={editForm.publication?.link || ''}
+                        onChange={(e) => updateNestedField('publication', 'link', e.target.value)}
                         className="w-full bg-gray-700 p-2 rounded"
                         placeholder="Link to paper"
                       />
@@ -320,14 +351,13 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                 <div className="border-t border-gray-700 pt-4 mt-2">
                   <label className="block text-sm font-semibold mb-2">🖼️ Project Images / Screenshots</label>
                   
-                  {/* Display existing images */}
-                  {project.images && project.images.length > 0 && (
+                  {editForm.images && editForm.images.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-3">
-                      {project.images.map((img, idx) => (
+                      {editForm.images.map((img, idx) => (
                         <div key={idx} className="relative">
                           <img src={img} alt={`Project ${idx + 1}`} className="w-24 h-24 object-cover rounded" />
                           <button
-                            onClick={() => removeProjectImage(project._id, idx)}
+                            onClick={() => removeProjectImage(idx)}
                             className="absolute -top-2 -right-2 bg-red-500 rounded-full w-5 h-5 text-xs"
                           >
                             ✕
@@ -337,7 +367,6 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                     </div>
                   )}
                   
-                  {/* Upload new image */}
                   <div className="flex items-center gap-3">
                     <input
                       type="file"
@@ -353,7 +382,7 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                       <span className="text-accent text-sm">Uploading...</span>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">Upload multiple screenshots, graphs, or visualizations from your project</p>
+                  <p className="text-xs text-gray-500 mt-1">Upload multiple screenshots, graphs, or visualizations</p>
                 </div>
                 
                 {/* Challenges & Future Work */}
@@ -361,26 +390,27 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                   <div>
                     <label className="block text-sm font-semibold mb-1">⚠️ Challenges Faced</label>
                     <textarea
-                      value={project.challenges || ''}
-                      onChange={(e) => updateProject(project._id, {...project, challenges: e.target.value})}
+                      value={editForm.challenges || ''}
+                      onChange={(e) => updateField('challenges', e.target.value)}
                       className="w-full bg-gray-700 p-2 rounded"
-                      placeholder="What challenges did you encounter and how did you overcome them?"
+                      placeholder="What challenges did you encounter?"
                       rows="2"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold mb-1">🔮 Future Work</label>
                     <textarea
-                      value={project.futureWork || ''}
-                      onChange={(e) => updateProject(project._id, {...project, futureWork: e.target.value})}
+                      value={editForm.futureWork || ''}
+                      onChange={(e) => updateField('futureWork', e.target.value)}
                       className="w-full bg-gray-700 p-2 rounded"
-                      placeholder="What improvements or extensions could be made?"
+                      placeholder="What improvements could be made?"
                       rows="2"
                     />
                   </div>
                 </div>
               </div>
             ) : (
+              // View Mode
               <div className="text-sm text-gray-300">
                 <p><strong className="text-red-400">Problem:</strong> {project.problem?.substring(0, 100)}...</p>
                 <p><strong className="text-green-400">Methodology:</strong> {project.methodology?.substring(0, 100)}...</p>
@@ -391,6 +421,7 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                 )}
                 {project.githubLink && <p><strong>GitHub:</strong> <a href={project.githubLink} target="_blank" className="text-accent">Repository</a></p>}
                 {project.deployedLink && <p><strong>Live Demo:</strong> <a href={project.deployedLink} target="_blank" className="text-accent">View Project</a></p>}
+                {project.documentation?.title && <p><strong>Documentation:</strong> {project.documentation.title}</p>}
               </div>
             )}
           </div>
