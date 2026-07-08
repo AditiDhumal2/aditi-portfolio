@@ -215,61 +215,58 @@ const Projects = () => {
   
   return (
     <>
-      <section id="projects" className="py-12 bg-gradient-to-b from-dark to-gray-900">
+      <section id="projects" className="py-16 bg-gradient-to-b from-dark to-gray-900">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="text-center mb-8"
+            className="text-center mb-10"
           >
-            <h2 className="text-3xl md:text-4xl font-bold">Featured <span className="text-accent">Projects</span></h2>
+            <h2 className="text-4xl font-bold">My <span className="text-accent">Projects</span></h2>
             <div className="w-16 h-0.5 bg-accent mx-auto rounded-full mt-2"></div>
           </motion.div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredProjects.map((project, idx) => (
               <motion.div
                 key={project._id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
-                className="group relative"
+                className="group cursor-pointer"
+                onClick={() => setSelectedProject(project)}
               >
-                <div 
-                  className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl overflow-hidden border border-gray-700 hover:border-accent transition-all cursor-pointer h-full"
-                  onClick={() => setSelectedProject(project)}
-                >
-                  {/* Image Section */}
-                  <div className="h-48 overflow-hidden relative">
+                <div className="relative rounded-xl overflow-hidden bg-gray-800 border border-gray-700 hover:border-accent transition-all h-[280px]">
+                  {/* Project Image */}
+                  <div className="w-full h-full">
                     {project.images && project.images[0] ? (
                       <img 
                         src={project.images[0]} 
-                        alt={project.title} 
+                        alt={project.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-accent/20 to-purple-500/20 flex items-center justify-center">
-                        <div className="text-5xl">📊</div>
+                        <div className="text-6xl">📊</div>
                       </div>
                     )}
-                    {/* Gradient overlay for text readability */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent"></div>
                   </div>
                   
-                  {/* Title - Always visible */}
-                  <div className="p-4">
-                    <h3 className="text-base font-bold text-white group-hover:text-accent transition line-clamp-2">
+                  {/* Dark overlay - visible by default, darkens on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent transition-opacity group-hover:opacity-100"></div>
+                  
+                  {/* Content overlay - bottom aligned */}
+                  <div className="absolute bottom-0 left-0 right-0 p-5">
+                    <h3 className="text-xl font-bold text-white group-hover:text-accent transition line-clamp-2">
                       {project.title}
                     </h3>
-                    
-                    {/* Arrow - Only visible on hover */}
-                    <div className="flex items-center justify-end mt-2">
-                      <div className="transform transition-all duration-300 group-hover:translate-x-2 group-hover:opacity-100 opacity-0">
-                        <span className="text-accent text-sm font-semibold flex items-center gap-1">
-                          View More <span className="text-lg">→</span>
-                        </span>
-                      </div>
+                  </div>
+                  
+                  {/* Learn More - appears on hover */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="bg-accent/90 hover:bg-accent text-white px-6 py-3 rounded-lg font-semibold transform transition-transform group-hover:scale-105 shadow-lg">
+                      Learn More →
                     </div>
                   </div>
                 </div>

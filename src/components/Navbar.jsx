@@ -31,10 +31,15 @@ const Navbar = () => {
       scrolled ? 'bg-dark/95 backdrop-blur-md py-3 shadow-lg' : 'bg-transparent py-5'
     }`}>
       <div className="container mx-auto px-6 flex justify-between items-center">
-        {/* No logo/text - just empty space for balance */}
-        <div className="w-10"></div>
+        {/* Name/Logo - Left Side */}
+        <a 
+          href="#home" 
+          className="text-xl md:text-2xl font-bold text-accent hover:text-blue-400 transition"
+        >
+          Aditi Dhumal
+        </a>
         
-        {/* Desktop Menu */}
+        {/* Desktop Menu - Center */}
         <div className="hidden md:flex gap-4 lg:gap-6">
           {navItems.map((item) => (
             <a 
@@ -46,6 +51,9 @@ const Navbar = () => {
             </a>
           ))}
         </div>
+        
+        {/* Right side spacer for balance */}
+        <div className="w-20 md:w-0"></div>
         
         {/* Mobile Menu Button */}
         <button 
