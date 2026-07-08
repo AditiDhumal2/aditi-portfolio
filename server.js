@@ -84,14 +84,19 @@ const projectSchema = new mongoose.Schema({
   featured: { type: Boolean, default: true }
 }, { timestamps: true });
 
+// ============ UPDATED EXPERIENCE SCHEMA ============
 const experienceSchema = new mongoose.Schema({
   title: { type: String, required: true },
   company: { type: String, required: true },
   location: { type: String, default: '' },
   period: { type: String, default: '' },
   type: { type: String, default: 'Internship' },
+  roleDescription: { type: String, default: '' },
   achievements: [{ type: String }],
-  technologies: [{ type: String }]
+  technologies: [{ type: String }],
+  image: { type: String, default: '' },
+  certificateLink: { type: String, default: '' },
+  order: { type: Number, default: 0 }
 }, { timestamps: true });
 
 const currentProjectSchema = new mongoose.Schema({
@@ -115,7 +120,10 @@ const researchSchema = new mongoose.Schema({
   year: { type: String, default: '' },
   paperLink: { type: String, default: '' },
   doi: { type: String, default: '' },
-  citations: { type: String, default: '' }
+  citations: { type: String, default: '' },
+  theme: { type: String, default: 'Decision Support Systems' },
+  featured: { type: Boolean, default: false },
+  impact: { type: String, default: '' }
 }, { timestamps: true });
 
 const certificationSchema = new mongoose.Schema({
@@ -125,8 +133,8 @@ const certificationSchema = new mongoose.Schema({
   image: { type: String, default: '' },
   description: { type: String, default: '' },
   skills: [{ type: String }],
-  link: { type: String, default: '' },              // Course link
-  certificateLink: { type: String, default: '' },   // Certificate verification link
+  link: { type: String, default: '' },
+  certificateLink: { type: String, default: '' },
   credentialId: { type: String, default: '' },
   validity: { type: String, default: '' },
   grade: { type: String, default: '' }

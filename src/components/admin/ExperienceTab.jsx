@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { uploadToCloudinary } from '../../utils/cloudinary';
 
-const ExperienceTab = ({ experience, setExperience, showMessage, fetchAllData }) => {
+const ExperienceTab = ({ experience, setExperience, showMessage, setUploading, uploading, fetchAllData }) => {
   const [editingExp, setEditingExp] = useState(null);
   const [editForm, setEditForm] = useState({
     title: '',
@@ -9,8 +10,11 @@ const ExperienceTab = ({ experience, setExperience, showMessage, fetchAllData })
     location: '',
     period: '',
     type: 'Internship',
+    roleDescription: '',
     achievements: [],
-    technologies: []
+    technologies: [],
+    image: '',
+    certificateLink: ''
   });
 
   const addExperience = async () => {
@@ -20,8 +24,11 @@ const ExperienceTab = ({ experience, setExperience, showMessage, fetchAllData })
       location: "Location",
       period: "Month Year - Month Year",
       type: "Internship",
+      roleDescription: "",
       achievements: ["Achievement 1", "Achievement 2"],
       technologies: ["Tech 1", "Tech 2"],
+      image: "",
+      certificateLink: "",
       order: experience.length
     };
     try {
@@ -41,8 +48,11 @@ const ExperienceTab = ({ experience, setExperience, showMessage, fetchAllData })
       location: exp.location || '',
       period: exp.period || '',
       type: exp.type || 'Internship',
+      roleDescription: exp.roleDescription || '',
       achievements: exp.achievements || [],
-      technologies: exp.technologies || []
+      technologies: exp.technologies || [],
+      image: exp.image || '',
+      certificateLink: exp.certificateLink || ''
     });
   };
 
@@ -73,6 +83,20 @@ const ExperienceTab = ({ experience, setExperience, showMessage, fetchAllData })
     }
   };
 
+  const uploadExperienceImage = async (file, expId) => {
+    setUploading(true);
+    showMessage('📤 Uploading image...');
+    try {
+      const imageUrl = await uploadToCloudinary(file);
+      setEditForm({...editForm, image: imageUrl});
+      showMessage('✅ Image uploaded!');
+    } catch (error) {
+      showMessage('❌ Upload failed', true);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div>
       <button onClick={addExperience} className="bg-green-500 px-4 py-2 rounded-lg mb-4 hover:bg-green-600 transition">
@@ -83,7 +107,9 @@ const ExperienceTab = ({ experience, setExperience, showMessage, fetchAllData })
         {experience.map(exp => (
           <div key={exp._id} className="bg-gray-800 rounded-xl p-4 border border-gray-700">
             <div className="flex justify-between items-start mb-4">
-              <h3 className="text-lg font-bold text-accent">💼 {exp.title}</h3>
+              <h3 className="text-lg font-bold text-accent">
+                {editingExp === exp._id ? 'Editing:' : '💼'} {exp.title}
+              </h3>
               <div className="flex gap-2">
                 {editingExp === exp._id ? (
                   <>
@@ -127,22 +153,65 @@ const ExperienceTab = ({ experience, setExperience, showMessage, fetchAllData })
                       <option value="Volunteer">Volunteer</option>
                     </select>
                   </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Experience Image</label>
+                    {editForm.image && <img src={editForm.image} alt="Experience" className="w-24 h-24 object-cover rounded mb-2" />}
+                    <input type="file" accept="image/*" onChange={(e) => e.target.files[0] && uploadExperienceImage(e.target.files[0], exp._id)} className="block w-full text-sm text-gray-400" />
+                  </div>
                 </div>
+                
                 <div>
-                  <label className="block text-sm font-semibold mb-1">Achievements (one per line)</label>
-                  <textarea value={editForm.achievements.join('\n')} onChange={(e) => setEditForm({...editForm, achievements: e.target.value.split('\n').filter(a => a.trim())})} className="w-full bg-gray-700 p-2 rounded" rows="4" />
+                  <label className="block text-sm font-semibold mb-1 text-blue-400">📋 Role Description</label>
+                  <textarea
+                    value={editForm.roleDescription}
+                    onChange={(e) => setEditForm({...editForm, roleDescription: e.target.value})}
+                    className="w-full bg-gray-700 p-2 rounded"
+                    placeholder="Brief description of your role and responsibilities..."
+                    rows="3"
+                  />
                 </div>
+                
                 <div>
-                  <label className="block text-sm font-semibold mb-1">Technologies (comma-separated)</label>
-                  <input value={editForm.technologies.join(', ')} onChange={(e) => setEditForm({...editForm, technologies: e.target.value.split(',').map(t => t.trim())})} className="w-full bg-gray-700 p-2 rounded" />
+                  <label className="block text-sm font-semibold mb-1">🏆 Achievements (one per line)</label>
+                  <textarea
+                    value={editForm.achievements.join('\n')}
+                    onChange={(e) => setEditForm({...editForm, achievements: e.target.value.split('\n').filter(a => a.trim())})}
+                    className="w-full bg-gray-700 p-2 rounded"
+                    rows="4"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-semibold mb-1">🛠️ Technologies (comma-separated)</label>
+                  <input
+                    value={editForm.technologies.join(', ')}
+                    onChange={(e) => setEditForm({...editForm, technologies: e.target.value.split(',').map(t => t.trim())})}
+                    className="w-full bg-gray-700 p-2 rounded"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-semibold mb-1 text-green-400">📄 Certificate / Offer Letter Link</label>
+                  <input
+                    value={editForm.certificateLink}
+                    onChange={(e) => setEditForm({...editForm, certificateLink: e.target.value})}
+                    className="w-full bg-gray-700 p-2 rounded"
+                    placeholder="https://drive.google.com/your-certificate.pdf"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Upload PDF to Google Drive or Cloudinary and paste link here</p>
                 </div>
               </div>
             ) : (
               <div className="text-sm text-gray-300">
-                <p><strong>Company:</strong> {exp.company}</p>
-                <p><strong>Period:</strong> {exp.period}</p>
-                <p><strong>Achievements:</strong> {exp.achievements?.length} items</p>
-                <p><strong>Tech Stack:</strong> {exp.technologies?.join(', ')}</p>
+                {exp.image && <img src={exp.image} alt={exp.company} className="w-24 h-24 object-cover rounded mb-2" />}
+                <p><strong className="text-blue-400">Company:</strong> {exp.company}</p>
+                <p><strong className="text-blue-400">Period:</strong> {exp.period}</p>
+                <p><strong className="text-blue-400">Type:</strong> {exp.type}</p>
+                {exp.roleDescription && (
+                  <p><strong className="text-blue-400">Role:</strong> {exp.roleDescription.substring(0, 100)}...</p>
+                )}
+                <p><strong className="text-blue-400">Achievements:</strong> {exp.achievements?.length} items</p>
+                {exp.certificateLink && <p><strong>Certificate:</strong> <a href={exp.certificateLink} target="_blank" className="text-accent">View →</a></p>}
               </div>
             )}
           </div>

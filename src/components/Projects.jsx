@@ -253,7 +253,7 @@ const Projects = () => {
                     )}
                   </div>
                   
-                  {/* Dark overlay - visible by default, darkens on hover */}
+                  {/* Dark overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent transition-opacity group-hover:opacity-100"></div>
                   
                   {/* Content overlay - bottom aligned */}
@@ -273,6 +273,24 @@ const Projects = () => {
               </motion.div>
             ))}
           </div>
+          
+          {/* Quote Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mt-16 text-center"
+          >
+            <div className="relative inline-block">
+              <div className="absolute -top-6 -left-6 text-6xl text-accent/20">"</div>
+              <div className="absolute -bottom-6 -right-6 text-6xl text-accent/20">"</div>
+              <p className="text-2xl md:text-3xl font-light text-gray-200 px-8 py-4 max-w-3xl mx-auto">
+                <span className="text-accent font-medium">From Ideas</span> to{' '}
+                <span className="text-accent font-medium">Impactful Solutions</span>
+              </p>
+              <div className="w-24 h-0.5 bg-accent/50 mx-auto rounded-full mt-3"></div>
+            </div>
+          </motion.div>
         </div>
       </section>
       
