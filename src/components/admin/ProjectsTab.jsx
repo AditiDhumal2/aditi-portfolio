@@ -51,7 +51,7 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
 
   const startEdit = (project) => {
     setEditingProject(project._id);
-    setEditForm(JSON.parse(JSON.stringify(project))); // Deep copy
+    setEditForm(JSON.parse(JSON.stringify(project)));
   };
 
   const saveEdit = async (id) => {
