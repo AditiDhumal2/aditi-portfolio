@@ -13,23 +13,70 @@ const Achievements = () => {
   const loadAchievements = async () => {
     try {
       const response = await axios.get('/api/achievements');
+      console.log('✅ Achievements loaded:', response.data);
       setAchievements(response.data);
       setLoading(false);
     } catch (error) {
-      console.error('Error loading achievements:', error);
+      console.error('❌ Error loading achievements:', error);
       setLoading(false);
     }
   };
   
-  if (loading) return null;
-  if (achievements.length === 0) return null;
+  if (loading) return (
+    <section id="achievements" className="py-16 bg-gradient-to-b from-gray-900 to-dark">
+      <div className="container mx-auto px-6 text-center">
+        <div className="animate-pulse text-gray-400">Loading achievements...</div>
+      </div>
+    </section>
+  );
   
-  // Group achievements by category
-  const categories = {
-    '🏆 Achievements': achievements.filter(a => a.category === '🏆 Achievements'),
-    '💼 Leadership & Community': achievements.filter(a => a.category === '💼 Leadership & Community'),
-    '🏅 Awards': achievements.filter(a => a.category === '🏅 Awards')
+  if (achievements.length === 0) {
+    return (
+      <section id="achievements" className="py-16 bg-gradient-to-b from-gray-900 to-dark">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="text-4xl font-bold">🏆 <span className="text-accent">Achievements</span></h2>
+          <div className="w-16 h-0.5 bg-accent mx-auto rounded-full mt-2"></div>
+          <p className="text-gray-400 mt-8">No achievements added yet. Add them in the admin dashboard.</p>
+        </div>
+      </section>
+    );
+  }
+  
+  // ============ FIXED: Group achievements by category with fallback ============
+  const getCategory = (ach) => {
+    // Map old categories to new ones
+    const categoryMap = {
+      'Academic': '🏆 Achievements',
+      'Competition': '🏆 Achievements',
+      'Professional': '🏆 Achievements',
+      'Leadership': '💼 Leadership & Community',
+      'Research': '📚 Research & Publications',
+      'Award': '🏅 Awards',
+      'Recognition': '🏅 Awards'
+    };
+    
+    // If category already has emoji, use it as-is
+    if (ach.category && (ach.category.includes('🏆') || ach.category.includes('💼') || ach.category.includes('🏅') || ach.category.includes('📚'))) {
+      return ach.category;
+    }
+    
+    // Map old category to new one
+    return categoryMap[ach.category] || '🏆 Achievements';
   };
+  
+  // Group achievements by mapped category
+  const groupedAchievements = {};
+  achievements.forEach(ach => {
+    const category = getCategory(ach);
+    if (!groupedAchievements[category]) {
+      groupedAchievements[category] = [];
+    }
+    groupedAchievements[category].push(ach);
+  });
+  
+  // Sort categories in desired order
+  const categoryOrder = ['🏆 Achievements', '💼 Leadership & Community', '🏅 Awards'];
+  const sortedCategories = categoryOrder.filter(cat => groupedAchievements[cat] && groupedAchievements[cat].length > 0);
   
   return (
     <section id="achievements" className="py-16 bg-gradient-to-b from-gray-900 to-dark">
@@ -45,8 +92,9 @@ const Achievements = () => {
         </motion.div>
         
         <div className="space-y-10">
-          {Object.entries(categories).map(([category, items]) => 
-            items.length > 0 && (
+          {sortedCategories.map((category) => {
+            const items = groupedAchievements[category];
+            return (
               <motion.div
                 key={category}
                 initial={{ opacity: 0, y: 20 }}
@@ -77,9 +125,9 @@ const Achievements = () => {
                         {category === '💼 Leadership & Community' && '👔'}
                         {category === '🏅 Awards' && '🏅'}
                       </div>
-                      <h3 className="text-lg font-bold text-accent mb-1">{ach.title}</h3>
+                      <h3 className="text-lg font-bold text-accent mb-1 line-clamp-2">{ach.title}</h3>
                       {ach.subcategory && <p className="text-gray-400 text-xs">{ach.subcategory}</p>}
-                      <p className="text-gray-300 text-sm mt-2">{ach.description}</p>
+                      <p className="text-gray-300 text-sm mt-2 line-clamp-3">{ach.description}</p>
                       {ach.date && <p className="text-gray-500 text-xs mt-2">{ach.date}</p>}
                       <div className="flex flex-wrap gap-2 mt-3">
                         {ach.certificateLink && (
@@ -97,8 +145,8 @@ const Achievements = () => {
                   ))}
                 </div>
               </motion.div>
-            )
-          )}
+            );
+          })}
         </div>
       </div>
     </section>

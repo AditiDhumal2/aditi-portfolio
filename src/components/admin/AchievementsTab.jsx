@@ -13,7 +13,8 @@ const AchievementsTab = ({ achievements, setAchievements, showMessage, setUpload
     image: '',
     certificateLink: '',
     subcategory: '',
-    type: ''
+    type: '',
+    order: 0
   });
 
   const addAchievement = async () => {
@@ -34,6 +35,7 @@ const AchievementsTab = ({ achievements, setAchievements, showMessage, setUpload
       await fetchAllData();
       showMessage('Achievement added!');
     } catch (error) {
+      console.error('Add error:', error);
       showMessage('Error adding achievement', true);
     }
   };
@@ -61,6 +63,7 @@ const AchievementsTab = ({ achievements, setAchievements, showMessage, setUpload
       showMessage('Achievement updated!');
       setEditingAch(null);
     } catch (error) {
+      console.error('Save error:', error);
       showMessage('Error updating achievement', true);
     }
   };
@@ -76,6 +79,7 @@ const AchievementsTab = ({ achievements, setAchievements, showMessage, setUpload
         await fetchAllData();
         showMessage('Achievement deleted!');
       } catch (error) {
+        console.error('Delete error:', error);
         showMessage('Error deleting achievement', true);
       }
     }
@@ -89,13 +93,27 @@ const AchievementsTab = ({ achievements, setAchievements, showMessage, setUpload
       setEditForm({...editForm, [field]: imageUrl});
       showMessage('✅ Image uploaded!');
     } catch (error) {
+      console.error('Upload error:', error);
       showMessage('❌ Upload failed', true);
     } finally {
       setUploading(false);
     }
   };
 
-  // Categories - Removed Research & Publications
+  // Save order function
+  const saveOrder = async (orderedAchievements) => {
+    try {
+      for (const ach of orderedAchievements) {
+        await axios.put(`/api/achievements/${ach._id}`, { order: ach.order });
+      }
+      showMessage('Order updated!');
+    } catch (error) {
+      console.error('Order save error:', error);
+      showMessage('Error saving order', true);
+    }
+  };
+
+  // Categories
   const categories = [
     '🏆 Achievements',
     '💼 Leadership & Community',
@@ -127,7 +145,7 @@ const AchievementsTab = ({ achievements, setAchievements, showMessage, setUpload
               <div className="flex items-center gap-3">
                 <span className="text-gray-500 text-sm font-mono">#{index + 1}</span>
                 <h3 className="text-lg font-bold text-accent">
-                  {editingAch === ach._id ? 'Editing:' : '🏆'} {ach.title || 'Untitled Achievement'}
+                  {editingAch === ach._id ? '✏️ Editing:' : '🏆'} {ach.title || 'Untitled Achievement'}
                 </h3>
               </div>
               <div className="flex items-center gap-2">
@@ -173,13 +191,21 @@ const AchievementsTab = ({ achievements, setAchievements, showMessage, setUpload
                 
                 {editingAch === ach._id ? (
                   <>
-                    <button onClick={() => saveEdit(ach._id)} className="bg-green-500 px-3 py-1 rounded text-sm">Save</button>
-                    <button onClick={cancelEdit} className="bg-gray-500 px-3 py-1 rounded text-sm">Cancel</button>
+                    <button onClick={() => saveEdit(ach._id)} className="bg-green-500 px-3 py-1 rounded text-sm">
+                      💾 Save
+                    </button>
+                    <button onClick={cancelEdit} className="bg-gray-500 px-3 py-1 rounded text-sm">
+                      Cancel
+                    </button>
                   </>
                 ) : (
                   <>
-                    <button onClick={() => startEdit(ach)} className="bg-blue-500 px-3 py-1 rounded text-sm">Edit</button>
-                    <button onClick={() => deleteAchievement(ach._id)} className="bg-red-500 px-3 py-1 rounded text-sm">Delete</button>
+                    <button onClick={() => startEdit(ach)} className="bg-blue-500 px-3 py-1 rounded text-sm">
+                      Edit
+                    </button>
+                    <button onClick={() => deleteAchievement(ach._id)} className="bg-red-500 px-3 py-1 rounded text-sm">
+                      Delete
+                    </button>
                   </>
                 )}
               </div>
@@ -256,6 +282,7 @@ const AchievementsTab = ({ achievements, setAchievements, showMessage, setUpload
                     onChange={(e) => e.target.files[0] && uploadImage(e.target.files[0], 'image')}
                     className="block w-full text-sm text-gray-400"
                   />
+                  <p className="text-xs text-gray-500 mt-1">Upload achievement photo (JPG, PNG)</p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold mb-1 text-green-400">📄 Certificate Link</label>
