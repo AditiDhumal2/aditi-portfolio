@@ -117,20 +117,83 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
     });
   };
 
+  // ============ REORDER FUNCTIONS ============
+  const moveProjectUp = (index) => {
+    if (index === 0) return;
+    const newProjects = [...projects];
+    [newProjects[index], newProjects[index - 1]] = [newProjects[index - 1], newProjects[index]];
+    // Update order field
+    newProjects.forEach((p, i) => p.order = i);
+    setProjects(newProjects);
+    // Save order to database
+    saveOrder(newProjects);
+  };
+
+  const moveProjectDown = (index) => {
+    if (index === projects.length - 1) return;
+    const newProjects = [...projects];
+    [newProjects[index], newProjects[index + 1]] = [newProjects[index + 1], newProjects[index]];
+    newProjects.forEach((p, i) => p.order = i);
+    setProjects(newProjects);
+    saveOrder(newProjects);
+  };
+
+  const saveOrder = async (orderedProjects) => {
+    try {
+      for (const project of orderedProjects) {
+        await axios.put(`/api/projects/${project._id}`, { order: project.order });
+      }
+      showMessage('Project order updated!');
+    } catch (error) {
+      showMessage('Error saving order', true);
+    }
+  };
+
+  // Sort projects by order
+  const sortedProjects = [...projects].sort((a, b) => (a.order || 0) - (b.order || 0));
+
   return (
     <div>
-      <button onClick={addProject} className="bg-green-500 px-4 py-2 rounded-lg mb-4 hover:bg-green-600 transition">
-        + Add New Project
-      </button>
+      <div className="flex justify-between items-center mb-4">
+        <button onClick={addProject} className="bg-green-500 px-4 py-2 rounded-lg hover:bg-green-600 transition">
+          + Add New Project
+        </button>
+        <p className="text-sm text-gray-400">⬆⬇ Drag or use arrows to reorder</p>
+      </div>
       
-      <div className="space-y-6">
-        {projects.map(project => (
+      <div className="space-y-4">
+        {sortedProjects.map((project, index) => (
           <div key={project._id} className="bg-gray-800 rounded-xl p-4 border border-gray-700">
             <div className="flex justify-between items-start mb-4">
-              <h3 className="text-lg font-bold text-accent">
-                {editingProject === project._id ? '✏️ Editing:' : '📊'} {project.title || 'Untitled Project'}
-              </h3>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-3">
+                <span className="text-gray-500 text-sm font-mono">#{index + 1}</span>
+                <h3 className="text-lg font-bold text-accent">
+                  {editingProject === project._id ? '✏️ Editing:' : '📊'} {project.title || 'Untitled Project'}
+                </h3>
+              </div>
+              <div className="flex items-center gap-2">
+                {/* Reorder Buttons */}
+                <div className="flex flex-col mr-2">
+                  <button
+                    onClick={() => moveProjectUp(index)}
+                    disabled={index === 0}
+                    className={`text-xs px-2 py-0.5 rounded ${
+                      index === 0 ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-600 hover:bg-accent text-white'
+                    }`}
+                  >
+                    ↑
+                  </button>
+                  <button
+                    onClick={() => moveProjectDown(index)}
+                    disabled={index === sortedProjects.length - 1}
+                    className={`text-xs px-2 py-0.5 rounded ${
+                      index === sortedProjects.length - 1 ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-600 hover:bg-accent text-white'
+                    }`}
+                  >
+                    ↓
+                  </button>
+                </div>
+                
                 {editingProject === project._id ? (
                   <>
                     <button onClick={() => saveEdit(project._id)} className="bg-green-500 px-3 py-1 rounded text-sm">
@@ -410,18 +473,17 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                 </div>
               </div>
             ) : (
-              // View Mode
+              // View Mode - Show order number
               <div className="text-sm text-gray-300">
-                <p><strong className="text-red-400">Problem:</strong> {project.problem?.substring(0, 100)}...</p>
-                <p><strong className="text-green-400">Methodology:</strong> {project.methodology?.substring(0, 100)}...</p>
+                <p className="text-gray-500 text-xs">Position: #{index + 1}</p>
+                <p><strong className="text-red-400">Problem:</strong> {project.problem?.substring(0, 80)}...</p>
                 <p><strong className="text-purple-400">Tech Stack:</strong> {project.tools}</p>
-                <p><strong className="text-yellow-400">Results:</strong> {project.results?.substring(0, 100)}...</p>
+                <p><strong className="text-yellow-400">Results:</strong> {project.results?.substring(0, 60)}...</p>
                 {project.images && project.images.length > 0 && (
                   <p><strong>Images:</strong> {project.images.length} uploaded</p>
                 )}
                 {project.githubLink && <p><strong>GitHub:</strong> <a href={project.githubLink} target="_blank" className="text-accent">Repository</a></p>}
                 {project.deployedLink && <p><strong>Live Demo:</strong> <a href={project.deployedLink} target="_blank" className="text-accent">View Project</a></p>}
-                {project.documentation?.title && <p><strong>Documentation:</strong> {project.documentation.title}</p>}
               </div>
             )}
           </div>

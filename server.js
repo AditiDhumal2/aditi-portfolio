@@ -81,7 +81,8 @@ const projectSchema = new mongoose.Schema({
   },
   challenges: { type: String, default: '' },
   futureWork: { type: String, default: '' },
-  featured: { type: Boolean, default: true }
+  featured: { type: Boolean, default: true },
+  order: { type: Number, default: 0 }
 }, { timestamps: true });
 
 // ============ UPDATED EXPERIENCE SCHEMA ============
@@ -107,25 +108,35 @@ const currentProjectSchema = new mongoose.Schema({
   technologies: [{ type: String }],
   timeline: { type: String, default: '' },
   githubLink: { type: String, default: '' },
-  demoLink: { type: String, default: '' }
+  demoLink: { type: String, default: '' },
+  order: { type: Number, default: 0 }
 }, { timestamps: true });
 
+// ============ UPDATED RESEARCH SCHEMA ============
 const researchSchema = new mongoose.Schema({
   title: { type: String, required: true },
   type: { type: String, default: 'Conference Paper' },
   status: { type: String, default: 'Submitted' },
   description: { type: String, default: '' },
+  abstract: { type: String, default: '' },
   authors: { type: String, default: '' },
   venue: { type: String, default: '' },
   year: { type: String, default: '' },
   paperLink: { type: String, default: '' },
+  pdfLink: { type: String, default: '' },
+  arxivLink: { type: String, default: '' },
   doi: { type: String, default: '' },
   citations: { type: String, default: '' },
+  impact: { type: String, default: '' },
   theme: { type: String, default: 'Decision Support Systems' },
   featured: { type: Boolean, default: false },
-  impact: { type: String, default: '' }
+  image: { type: String, default: '' },
+  skills: [{ type: String }],
+  projectLink: { type: String, default: '' },
+  order: { type: Number, default: 0 }
 }, { timestamps: true });
 
+// ============ UPDATED CERTIFICATION SCHEMA ============
 const certificationSchema = new mongoose.Schema({
   name: { type: String, default: 'New Certification' },
   issuer: { type: String, default: 'Unknown Issuer' },
@@ -137,14 +148,25 @@ const certificationSchema = new mongoose.Schema({
   certificateLink: { type: String, default: '' },
   credentialId: { type: String, default: '' },
   validity: { type: String, default: '' },
-  grade: { type: String, default: '' }
+  grade: { type: String, default: '' },
+  order: { type: Number, default: 0 }
 }, { timestamps: true });
 
+// ============ UPDATED ACHIEVEMENT SCHEMA ============
 const achievementSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, default: '' },
-  category: { type: String, default: 'Academic' },
-  date: { type: String, default: '' }
+  category: { type: String, default: '🏆 Achievements' },
+  subcategory: { type: String, default: '' },
+  date: { type: String, default: '' },
+  link: { type: String, default: '' },
+  image: { type: String, default: '' },
+  certificateLink: { type: String, default: '' },
+  authors: { type: String, default: '' },
+  venue: { type: String, default: '' },
+  year: { type: String, default: '' },
+  type: { type: String, default: '' },
+  order: { type: Number, default: 0 }
 }, { timestamps: true });
 
 const skillsSchema = new mongoose.Schema({
@@ -252,7 +274,7 @@ app.put('/api/profile', async (req, res) => {
 // ============ PROJECTS ROUTES ============
 app.get('/api/projects', async (req, res) => {
   try {
-    const projects = await Project.find().sort({ createdAt: -1 });
+    const projects = await Project.find().sort({ order: 1, createdAt: -1 });
     res.json(projects);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -289,7 +311,7 @@ app.delete('/api/projects/:id', async (req, res) => {
 // ============ EXPERIENCE ROUTES ============
 app.get('/api/experience', async (req, res) => {
   try {
-    const experiences = await Experience.find().sort({ createdAt: -1 });
+    const experiences = await Experience.find().sort({ order: 1, createdAt: -1 });
     res.json(experiences);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -326,7 +348,7 @@ app.delete('/api/experience/:id', async (req, res) => {
 // ============ CURRENT PROJECTS ROUTES ============
 app.get('/api/current-projects', async (req, res) => {
   try {
-    const projects = await CurrentProject.find().sort({ createdAt: -1 });
+    const projects = await CurrentProject.find().sort({ order: 1, createdAt: -1 });
     res.json(projects);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -363,7 +385,7 @@ app.delete('/api/current-projects/:id', async (req, res) => {
 // ============ RESEARCH ROUTES ============
 app.get('/api/research', async (req, res) => {
   try {
-    const research = await Research.find().sort({ year: -1 });
+    const research = await Research.find().sort({ order: 1, year: -1 });
     res.json(research);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -400,7 +422,7 @@ app.delete('/api/research/:id', async (req, res) => {
 // ============ CERTIFICATIONS ROUTES ============
 app.get('/api/certifications', async (req, res) => {
   try {
-    const certs = await Certification.find().sort({ date: -1 });
+    const certs = await Certification.find().sort({ order: 1, date: -1 });
     console.log(`📜 Found ${certs.length} certifications`);
     res.json(certs);
   } catch (error) {
@@ -424,7 +446,8 @@ app.post('/api/certifications', async (req, res) => {
       certificateLink: req.body.certificateLink || '',
       credentialId: req.body.credentialId || '',
       validity: req.body.validity || '',
-      grade: req.body.grade || ''
+      grade: req.body.grade || '',
+      order: req.body.order || 0
     };
     
     const cert = await Certification.create(certData);
@@ -485,7 +508,7 @@ app.post('/api/certifications-test', async (req, res) => {
 // ============ ACHIEVEMENTS ROUTES ============
 app.get('/api/achievements', async (req, res) => {
   try {
-    const achievements = await Achievement.find().sort({ createdAt: -1 });
+    const achievements = await Achievement.find().sort({ order: 1, createdAt: -1 });
     res.json(achievements);
   } catch (error) {
     res.status(500).json({ error: error.message });

@@ -217,16 +217,36 @@ const Projects = () => {
     <>
       <section id="projects" className="py-16 bg-gradient-to-b from-dark to-gray-900">
         <div className="container mx-auto px-6">
+          {/* Title + Quote Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="text-center mb-10"
+            className="text-center mb-12"
           >
             <h2 className="text-4xl font-bold">My <span className="text-accent">Projects</span></h2>
             <div className="w-16 h-0.5 bg-accent mx-auto rounded-full mt-2"></div>
+            
+            {/* Quote directly under the title */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="mt-4"
+            >
+              <div className="relative inline-block">
+                <div className="absolute -top-4 -left-4 text-3xl text-accent/20">"</div>
+                <div className="absolute -bottom-4 -right-4 text-3xl text-accent/20">"</div>
+                <p className="text-lg md:text-xl font-light text-gray-300 px-4">
+                  <span className="text-accent font-medium">From Ideas</span> to{' '}
+                  <span className="text-accent font-medium">Impactful Solutions</span>
+                </p>
+                <div className="w-16 h-0.5 bg-accent/50 mx-auto rounded-full mt-2"></div>
+              </div>
+            </motion.div>
           </motion.div>
           
+          {/* Projects Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredProjects.map((project, idx) => (
               <motion.div
@@ -273,24 +293,6 @@ const Projects = () => {
               </motion.div>
             ))}
           </div>
-          
-          {/* Quote Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="mt-16 text-center"
-          >
-            <div className="relative inline-block">
-              <div className="absolute -top-6 -left-6 text-6xl text-accent/20">"</div>
-              <div className="absolute -bottom-6 -right-6 text-6xl text-accent/20">"</div>
-              <p className="text-2xl md:text-3xl font-light text-gray-200 px-8 py-4 max-w-3xl mx-auto">
-                <span className="text-accent font-medium">From Ideas</span> to{' '}
-                <span className="text-accent font-medium">Impactful Solutions</span>
-              </p>
-              <div className="w-24 h-0.5 bg-accent/50 mx-auto rounded-full mt-3"></div>
-            </div>
-          </motion.div>
         </div>
       </section>
       

@@ -7,8 +7,8 @@ const CertificationsTab = ({ certifications, setCertifications, showMessage, set
   const [editForm, setEditForm] = useState({
     name: '',
     issuer: '',
-    link: '',           // Course link
-    certificateLink: '', // Certificate verification link
+    link: '',
+    certificateLink: '',
     date: '',
     image: '',
     description: '',
@@ -112,20 +112,81 @@ const CertificationsTab = ({ certifications, setCertifications, showMessage, set
     }
   };
 
+  // ============ REORDER FUNCTIONS ============
+  const moveCertUp = (index) => {
+    if (index === 0) return;
+    const newCerts = [...certifications];
+    [newCerts[index], newCerts[index - 1]] = [newCerts[index - 1], newCerts[index]];
+    newCerts.forEach((c, i) => c.order = i);
+    setCertifications(newCerts);
+    saveOrder(newCerts);
+  };
+
+  const moveCertDown = (index) => {
+    if (index === certifications.length - 1) return;
+    const newCerts = [...certifications];
+    [newCerts[index], newCerts[index + 1]] = [newCerts[index + 1], newCerts[index]];
+    newCerts.forEach((c, i) => c.order = i);
+    setCertifications(newCerts);
+    saveOrder(newCerts);
+  };
+
+  const saveOrder = async (orderedCerts) => {
+    try {
+      for (const cert of orderedCerts) {
+        await axios.put(`/api/certifications/${cert._id}`, { order: cert.order });
+      }
+      showMessage('Certification order updated!');
+    } catch (error) {
+      showMessage('Error saving order', true);
+    }
+  };
+
+  // Sort certifications by order
+  const sortedCerts = [...certifications].sort((a, b) => (a.order || 0) - (b.order || 0));
+
   return (
     <div>
-      <button onClick={addCertification} className="bg-green-500 px-4 py-2 rounded-lg mb-4 hover:bg-green-600 transition">
-        + Add Certification
-      </button>
+      <div className="flex justify-between items-center mb-4">
+        <button onClick={addCertification} className="bg-green-500 px-4 py-2 rounded-lg hover:bg-green-600 transition">
+          + Add Certification
+        </button>
+        <p className="text-sm text-gray-400">⬆⬇ Use arrows to reorder</p>
+      </div>
       
       <div className="space-y-6">
-        {certifications.map(cert => (
+        {sortedCerts.map((cert, index) => (
           <div key={cert._id} className="bg-gray-800 rounded-xl p-4 border border-gray-700">
             <div className="flex justify-between items-start mb-4">
-              <h3 className="text-lg font-bold text-accent">
-                {editingCert === cert._id ? 'Editing:' : '📜'} {cert.name || 'Untitled Certification'}
-              </h3>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-3">
+                <span className="text-gray-500 text-sm font-mono">#{index + 1}</span>
+                <h3 className="text-lg font-bold text-accent">
+                  {editingCert === cert._id ? 'Editing:' : '📜'} {cert.name || 'Untitled Certification'}
+                </h3>
+              </div>
+              <div className="flex items-center gap-2">
+                {/* Reorder Buttons */}
+                <div className="flex flex-col mr-2">
+                  <button
+                    onClick={() => moveCertUp(index)}
+                    disabled={index === 0}
+                    className={`text-xs px-2 py-0.5 rounded ${
+                      index === 0 ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-600 hover:bg-accent text-white'
+                    }`}
+                  >
+                    ↑
+                  </button>
+                  <button
+                    onClick={() => moveCertDown(index)}
+                    disabled={index === sortedCerts.length - 1}
+                    className={`text-xs px-2 py-0.5 rounded ${
+                      index === sortedCerts.length - 1 ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-600 hover:bg-accent text-white'
+                    }`}
+                  >
+                    ↓
+                  </button>
+                </div>
+                
                 {editingCert === cert._id ? (
                   <>
                     <button onClick={() => saveEdit(cert._id)} className="bg-green-500 px-3 py-1 rounded text-sm">
@@ -298,8 +359,7 @@ const CertificationsTab = ({ certifications, setCertifications, showMessage, set
                       </div>
                     )}
                     <p className="text-xs text-gray-500">
-                      Upload a certificate image, logo, or badge (JPG, PNG, WEBP). 
-                      Will be uploaded to Cloudinary automatically.
+                      Upload a certificate image, logo, or badge (JPG, PNG, WEBP).
                     </p>
                   </div>
                   
@@ -317,13 +377,13 @@ const CertificationsTab = ({ certifications, setCertifications, showMessage, set
               </div>
             ) : (
               <div className="text-sm text-gray-300">
+                <p className="text-gray-500 text-xs">Position: #{index + 1}</p>
                 <p><strong className="text-blue-400">Issuer:</strong> {cert.issuer || 'Not specified'}</p>
                 <p><strong className="text-blue-400">Date:</strong> {cert.date || 'Not specified'}</p>
                 {cert.grade && <p><strong className="text-blue-400">Grade:</strong> {cert.grade}</p>}
                 {cert.credentialId && <p><strong className="text-blue-400">Credential ID:</strong> {cert.credentialId}</p>}
                 <p><strong className="text-blue-400">Skills:</strong> {cert.skills?.join(', ') || 'Not specified'}</p>
                 
-                {/* Two separate link display */}
                 {cert.certificateLink && cert.certificateLink !== "#" && (
                   <p className="mt-2">
                     <a href={cert.certificateLink} target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline">
@@ -334,13 +394,6 @@ const CertificationsTab = ({ certifications, setCertifications, showMessage, set
                 {cert.link && cert.link !== "#" && !cert.certificateLink && (
                   <p className="mt-2">
                     <a href={cert.link} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
-                      📚 View Course →
-                    </a>
-                  </p>
-                )}
-                {cert.link && cert.link !== "#" && cert.certificateLink && (
-                  <p className="mt-2">
-                    <a href={cert.link} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
                       📚 View Course →
                     </a>
                   </p>
