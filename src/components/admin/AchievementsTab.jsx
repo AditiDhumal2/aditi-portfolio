@@ -7,27 +7,24 @@ const AchievementsTab = ({ achievements, setAchievements, showMessage, setUpload
   const [editForm, setEditForm] = useState({
     title: '',
     description: '',
-    category: '🏆 Achievements',
+    category: '💼 Leadership & Community',
     date: '',
     link: '',
-    image: '',
+    images: [],
     certificateLink: '',
-    subcategory: '',
-    type: '',
     order: 0
   });
+  const [uploadingImages, setUploadingImages] = useState(false);
 
   const addAchievement = async () => {
     const newAchievement = {
       title: "New Achievement",
       description: "Achievement description",
-      category: "🏆 Achievements",
+      category: "💼 Leadership & Community",
       date: "",
       link: "",
-      image: "",
+      images: [],
       certificateLink: "",
-      subcategory: "",
-      type: "",
       order: achievements.length
     };
     try {
@@ -45,13 +42,11 @@ const AchievementsTab = ({ achievements, setAchievements, showMessage, setUpload
     setEditForm({
       title: ach.title || '',
       description: ach.description || '',
-      category: ach.category || '🏆 Achievements',
+      category: ach.category || '💼 Leadership & Community',
       date: ach.date || '',
       link: ach.link || '',
-      image: ach.image || '',
+      images: ach.images || [],
       certificateLink: ach.certificateLink || '',
-      subcategory: ach.subcategory || '',
-      type: ach.type || '',
       order: ach.order || 0
     });
   };
@@ -85,19 +80,37 @@ const AchievementsTab = ({ achievements, setAchievements, showMessage, setUpload
     }
   };
 
-  const uploadImage = async (file, field) => {
+  // Upload multiple images
+  const uploadAchievementImage = async (file) => {
+    if (!file) return;
+    
+    setUploadingImages(true);
     setUploading(true);
     showMessage('📤 Uploading image...');
+    
     try {
       const imageUrl = await uploadToCloudinary(file);
-      setEditForm({...editForm, [field]: imageUrl});
+      console.log('Uploaded image URL:', imageUrl);
+      
+      // Add new image to the images array
+      const updatedImages = [...(editForm.images || []), imageUrl];
+      setEditForm({...editForm, images: updatedImages});
+      
       showMessage('✅ Image uploaded!');
     } catch (error) {
       console.error('Upload error:', error);
-      showMessage('❌ Upload failed', true);
+      showMessage('❌ Upload failed. Check Cloudinary settings.', true);
     } finally {
+      setUploadingImages(false);
       setUploading(false);
     }
+  };
+
+  // Remove image from the array
+  const removeImage = (index) => {
+    const updatedImages = editForm.images.filter((_, i) => i !== index);
+    setEditForm({...editForm, images: updatedImages});
+    showMessage('Image removed');
   };
 
   // Save order function
@@ -115,16 +128,9 @@ const AchievementsTab = ({ achievements, setAchievements, showMessage, setUpload
 
   // Categories
   const categories = [
-    '🏆 Achievements',
     '💼 Leadership & Community',
     '🏅 Awards'
   ];
-
-  const subcategories = {
-    '🏆 Achievements': ['Academic', 'Competition', 'Professional', 'Skill Based'],
-    '💼 Leadership & Community': ['Leadership', 'Community Service', 'Volunteer', 'Event Coordination'],
-    '🏅 Awards': ['Academic Award', 'Competition Award', 'Recognition', 'Scholarship']
-  };
 
   // Sort achievements by order
   const sortedAchievements = [...achievements].sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -212,47 +218,50 @@ const AchievementsTab = ({ achievements, setAchievements, showMessage, setUpload
             </div>
             
             {editingAch === ach._id ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-semibold mb-1">Title</label>
-                  <input
-                    value={editForm.title}
-                    onChange={(e) => setEditForm({...editForm, title: e.target.value})}
-                    className="w-full bg-gray-700 p-2 rounded"
-                    placeholder="Achievement Title"
-                  />
+              <div className="grid grid-cols-1 gap-3">
+                <div className="grid md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Title</label>
+                    <input
+                      value={editForm.title}
+                      onChange={(e) => setEditForm({...editForm, title: e.target.value})}
+                      className="w-full bg-gray-700 p-2 rounded"
+                      placeholder="Achievement Title"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Category</label>
+                    <select
+                      value={editForm.category}
+                      onChange={(e) => setEditForm({...editForm, category: e.target.value})}
+                      className="w-full bg-gray-700 p-2 rounded"
+                    >
+                      {categories.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Date / Year</label>
+                    <input
+                      value={editForm.date}
+                      onChange={(e) => setEditForm({...editForm, date: e.target.value})}
+                      className="w-full bg-gray-700 p-2 rounded"
+                      placeholder="2024"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Link (Optional)</label>
+                    <input
+                      value={editForm.link}
+                      onChange={(e) => setEditForm({...editForm, link: e.target.value})}
+                      className="w-full bg-gray-700 p-2 rounded"
+                      placeholder="https://..."
+                    />
+                  </div>
                 </div>
+                
                 <div>
-                  <label className="block text-sm font-semibold mb-1">Category</label>
-                  <select
-                    value={editForm.category}
-                    onChange={(e) => setEditForm({...editForm, category: e.target.value})}
-                    className="w-full bg-gray-700 p-2 rounded"
-                  >
-                    {categories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-1">Subcategory</label>
-                  <input
-                    value={editForm.subcategory}
-                    onChange={(e) => setEditForm({...editForm, subcategory: e.target.value})}
-                    className="w-full bg-gray-700 p-2 rounded"
-                    placeholder="e.g., Academic, Leadership, Competition"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-1">Date / Year</label>
-                  <input
-                    value={editForm.date}
-                    onChange={(e) => setEditForm({...editForm, date: e.target.value})}
-                    className="w-full bg-gray-700 p-2 rounded"
-                    placeholder="2024"
-                  />
-                </div>
-                <div className="md:col-span-2">
                   <label className="block text-sm font-semibold mb-1">Description</label>
                   <textarea
                     value={editForm.description}
@@ -262,28 +271,51 @@ const AchievementsTab = ({ achievements, setAchievements, showMessage, setUpload
                     placeholder="Detailed description of the achievement"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-1">Link (Optional)</label>
-                  <input
-                    value={editForm.link}
-                    onChange={(e) => setEditForm({...editForm, link: e.target.value})}
-                    className="w-full bg-gray-700 p-2 rounded"
-                    placeholder="https://..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-1">📸 Photo / Image</label>
-                  {editForm.image && (
-                    <img src={editForm.image} alt="Achievement" className="w-24 h-24 object-cover rounded mb-2" />
+                
+                {/* Multiple Images Upload Section */}
+                <div className="border-t border-gray-700 pt-3 mt-2">
+                  <label className="block text-sm font-semibold mb-2">📸 Images / Photos</label>
+                  
+                  {/* Display existing images */}
+                  {editForm.images && editForm.images.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {editForm.images.map((img, idx) => (
+                        <div key={idx} className="relative">
+                          <img 
+                            src={img} 
+                            alt={`Image ${idx + 1}`} 
+                            className="w-24 h-24 object-cover rounded border border-gray-600" 
+                          />
+                          <button
+                            onClick={() => removeImage(idx)}
+                            className="absolute -top-2 -right-2 bg-red-500 rounded-full w-5 h-5 text-xs flex items-center justify-center hover:bg-red-600"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => e.target.files[0] && uploadImage(e.target.files[0], 'image')}
-                    className="block w-full text-sm text-gray-400"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Upload achievement photo (JPG, PNG)</p>
+                  
+                  {/* Upload new image */}
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files[0]) {
+                          uploadAchievementImage(e.target.files[0]);
+                        }
+                      }}
+                      className="block w-full text-sm text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded file:bg-accent file:text-white file:cursor-pointer"
+                    />
+                    {uploadingImages && (
+                      <span className="text-accent text-sm animate-pulse">Uploading...</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Upload multiple images. They will auto-slide in the modal.</p>
                 </div>
+                
                 <div>
                   <label className="block text-sm font-semibold mb-1 text-green-400">📄 Certificate Link</label>
                   <input
@@ -292,18 +324,24 @@ const AchievementsTab = ({ achievements, setAchievements, showMessage, setUpload
                     className="w-full bg-gray-700 p-2 rounded"
                     placeholder="https://drive.google.com/your-certificate.pdf"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Upload PDF to Google Drive or Cloudinary</p>
                 </div>
               </div>
             ) : (
               <div className="text-sm text-gray-300">
-                <p><strong className="text-yellow-400">Category:</strong> {ach.category || '🏆 Achievements'}</p>
-                {ach.subcategory && <p><strong className="text-yellow-400">Subcategory:</strong> {ach.subcategory}</p>}
+                <p><strong className="text-yellow-400">Category:</strong> {ach.category || '💼 Leadership & Community'}</p>
                 {ach.date && <p><strong className="text-yellow-400">Date:</strong> {ach.date}</p>}
                 <p><strong className="text-yellow-400">Description:</strong> {ach.description}</p>
-                {ach.image && (
+                {ach.images && ach.images.length > 0 && (
                   <div className="mt-2">
-                    <img src={ach.image} alt={ach.title} className="w-20 h-20 object-cover rounded" />
+                    <p><strong className="text-yellow-400">Images:</strong> {ach.images.length} uploaded</p>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {ach.images.slice(0, 3).map((img, idx) => (
+                        <img key={idx} src={img} alt={`Achievement ${idx + 1}`} className="w-12 h-12 object-cover rounded" />
+                      ))}
+                      {ach.images.length > 3 && (
+                        <span className="text-gray-500 text-xs">+{ach.images.length - 3} more</span>
+                      )}
+                    </div>
                   </div>
                 )}
                 {ach.certificateLink && (
