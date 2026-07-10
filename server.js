@@ -152,20 +152,15 @@ const certificationSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// ============ UPDATED ACHIEVEMENT SCHEMA ============
+// ============ UPDATED ACHIEVEMENT SCHEMA (with multiple images) ============
 const achievementSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, default: '' },
-  category: { type: String, default: '🏆 Achievements' },
-  subcategory: { type: String, default: '' },
+  category: { type: String, default: '💼 Leadership & Community' },
   date: { type: String, default: '' },
   link: { type: String, default: '' },
-  image: { type: String, default: '' },
+  images: [{ type: String }],  // Changed from single 'image' to array
   certificateLink: { type: String, default: '' },
-  authors: { type: String, default: '' },
-  venue: { type: String, default: '' },
-  year: { type: String, default: '' },
-  type: { type: String, default: '' },
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
