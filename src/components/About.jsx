@@ -23,6 +23,7 @@ const About = () => {
         axios.get('/api/certifications'),
         axios.get('/api/research')
       ]);
+      console.log('Profile data:', profileData.data); // Debug log
       setProfile(profileData.data);
       setAchievements(achievementsData.data);
       setProjectsCount(projectsData.data.length);
@@ -53,12 +54,12 @@ const About = () => {
     "Aiming for MSIM to create intelligent systems"
   ];
   
-  // Get highlights from profile - THESE ARE THE KEY HIGHLIGHTS (short, impactful statements)
+  // Get highlights from profile
   const highlights = profile?.highlights || [
-    "9.2 CGPA - Top 5% of class",
-    "Data Hackathon Winner - 500+ participants",
-    "2 Research Papers Published",
-    "AI Research Intern"
+    "🏆 Final Year SGPA: 9.46 (Top 5% of Class)",
+    "📚 Overall CGPA: 8.02",
+    "🏅 Academic Excellence Award",
+    "🔬 2 Research Papers Published"
   ];
   
   return (
@@ -105,7 +106,7 @@ const About = () => {
               </p>
             </div>
             
-            {/* Education Card */}
+            {/* Education Card with SGPA and CGPA */}
             <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 border border-gray-700">
               <div className="flex items-center gap-3 mb-4">
                 <div className="text-3xl">🎓</div>
@@ -113,6 +114,22 @@ const About = () => {
               </div>
               <p className="text-gray-300 font-semibold">{profile?.education || 'BE in Information Technology'}</p>
               <p className="text-gray-400 text-sm mt-1">{profile?.graduation || 'Graduated in 2026'}</p>
+              
+              {/* SGPA and CGPA Display */}
+              {(profile?.sgpa || profile?.cgpa) && (
+                <div className="mt-3 bg-accent/10 border border-accent/30 rounded-lg p-3">
+                  <p className="text-accent font-semibold text-sm">🏆 Academic Excellence</p>
+                  {profile?.sgpa && (
+                    <p className="text-gray-300 text-sm mt-1">
+                      Final Year SGPA: <span className="text-accent font-bold">{profile.sgpa}</span> 
+                      {profile.sgpa.includes('9.46') && <span className="text-green-400 text-xs ml-2">(Top 5% of Class)</span>}
+                    </p>
+                  )}
+                  {profile?.cgpa && (
+                    <p className="text-gray-400 text-xs mt-1">Overall CGPA: {profile.cgpa}</p>
+                  )}
+                </div>
+              )}
             </div>
             
             {/* Quick Stats */}
