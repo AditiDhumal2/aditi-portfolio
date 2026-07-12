@@ -4,10 +4,38 @@ import axios from 'axios';
 
 const ProjectModal = ({ project, onClose }) => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
   if (!project) return null;
   
-  const hasGallery = project.images && project.images.length > 0;
+  const images = project.images && project.images.length > 0 ? project.images : [];
+  const hasMultipleImages = images.length > 1;
+  
+  // Auto-slide effect
+  useEffect(() => {
+    if (!hasMultipleImages) return;
+    
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % images.length);
+    }, 3000); // Change image every 3 seconds
+    
+    return () => clearInterval(interval);
+  }, [images.length, hasMultipleImages]);
+  
+  // Navigation functions
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+  
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+  
+  const goToImage = (index) => {
+    setCurrentImageIndex(index);
+  };
+  
+  const hasGallery = images.length > 0;
   const hasDocumentation = project.documentation?.title || project.documentation?.link;
   const hasPreprint = project.preprint?.title || project.preprint?.doi || project.preprint?.link;
   const hasPublication = project.publication?.title || project.publication?.doi || project.publication?.link;
@@ -36,18 +64,68 @@ const ProjectModal = ({ project, onClose }) => {
         className="bg-gradient-to-br from-gray-900 to-dark border border-gray-700 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
-        {/* Hero Section */}
-        <div className="relative h-56 bg-gradient-to-r from-accent/20 to-purple-500/20 rounded-t-2xl overflow-hidden">
-          {project.images && project.images.length > 0 ? (
-            <img src={project.images[0]} alt={project.title} className="w-full h-full object-cover opacity-60" />
+        {/* Image Slider Section */}
+        <div className="relative h-64 md:h-80 bg-gradient-to-r from-accent/20 to-purple-500/20 rounded-t-2xl overflow-hidden">
+          {images.length > 0 ? (
+            <>
+              <div className="relative w-full h-full">
+                <AnimatePresence mode="wait">
+                  <motion.img 
+                    key={currentImageIndex}
+                    src={images[currentImageIndex]} 
+                    alt={project.title}
+                    className="w-full h-full object-contain bg-gray-900"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 1.05 }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </AnimatePresence>
+                
+                {/* Navigation Arrows */}
+                {hasMultipleImages && (
+                  <>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition z-10"
+                    >
+                      ◀
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition z-10"
+                    >
+                      ▶
+                    </button>
+                    
+                    {/* Dot indicators */}
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                      {images.map((_, idx) => (
+                        <button
+                          key={idx}
+                          onClick={(e) => { e.stopPropagation(); goToImage(idx); }}
+                          className={`w-2.5 h-2.5 rounded-full transition ${
+                            currentImageIndex === idx ? 'bg-accent w-6' : 'bg-gray-500/50 hover:bg-gray-400'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    
+                    {/* Image counter */}
+                    <div className="absolute top-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full z-10">
+                      {currentImageIndex + 1} / {images.length}
+                    </div>
+                  </>
+                )}
+              </div>
+            </>
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <div className="text-6xl">📊</div>
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div>
           <button onClick={onClose} className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 rounded-full p-2 text-white transition z-10">✕</button>
-          <div className="absolute bottom-4 left-4">
+          <div className="absolute bottom-4 left-4 z-10">
             <h2 className="text-2xl font-bold text-white">{project.title}</h2>
             <div className="flex flex-wrap gap-1 mt-1">
               {project.tools?.split(',').slice(0, 3).map((tool, idx) => (
@@ -137,9 +215,9 @@ const ProjectModal = ({ project, onClose }) => {
             </div>
           )}
           
-          {activeTab === 'gallery' && project.images && project.images.length > 0 && (
+          {activeTab === 'gallery' && images.length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {project.images.map((img, idx) => (
+              {images.map((img, idx) => (
                 <img key={idx} src={img} alt={`Screenshot ${idx + 1}`} className="rounded-lg border border-gray-700 hover:scale-105 transition cursor-pointer" onClick={() => window.open(img, '_blank')} />
               ))}
             </div>
@@ -217,12 +295,11 @@ const Projects = () => {
     <>
       <section id="projects" className="py-16 bg-gradient-to-b from-dark to-gray-900">
         <div className="container mx-auto px-6">
-          {/* Title + Quote Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="text-center mb-12"
+            className="text-center mb-10"
           >
             <h2 className="text-4xl font-bold">My <span className="text-accent">Projects</span></h2>
             <div className="w-16 h-0.5 bg-accent mx-auto rounded-full mt-2"></div>
@@ -246,7 +323,6 @@ const Projects = () => {
             </motion.div>
           </motion.div>
           
-          {/* Projects Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredProjects.map((project, idx) => (
               <motion.div
@@ -258,9 +334,9 @@ const Projects = () => {
                 onClick={() => setSelectedProject(project)}
               >
                 <div className="relative rounded-xl overflow-hidden bg-gray-800 border border-gray-700 hover:border-accent transition-all h-[280px]">
-                  {/* Project Image */}
+                  {/* Project Image - shows first image or fallback */}
                   <div className="w-full h-full">
-                    {project.images && project.images[0] ? (
+                    {project.images && project.images.length > 0 ? (
                       <img 
                         src={project.images[0]} 
                         alt={project.title}

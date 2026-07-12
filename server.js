@@ -34,6 +34,7 @@ mongoose.connect(MONGODB_URI, {
   });
 
 // ============ SCHEMAS ============
+// ============ UPDATED PROFILE SCHEMA with SGPA, CGPA, and Highlights ============
 const profileSchema = new mongoose.Schema({
   name: { type: String, default: 'Aditi' },
   photo: { type: String, default: '' },
@@ -43,13 +44,16 @@ const profileSchema = new mongoose.Schema({
   education: { type: String, default: 'BE in Information Technology' },
   interests: { type: String, default: 'Data Analytics + AI Systems' },
   description: { type: String, default: '' },
+  sgpa: { type: String, default: '' },
+  cgpa: { type: String, default: '' },
   stats: {
     achievements: { type: Number, default: 0 },
     projects: { type: Number, default: 0 },
     certifications: { type: Number, default: 0 },
     researchPapers: { type: Number, default: 0 }
   },
-  journey: [{ type: String }]
+  journey: [{ type: String }],
+  highlights: [{ type: String }]
 }, { timestamps: true });
 
 const projectSchema = new mongoose.Schema({
@@ -159,7 +163,7 @@ const achievementSchema = new mongoose.Schema({
   category: { type: String, default: '💼 Leadership & Community' },
   date: { type: String, default: '' },
   link: { type: String, default: '' },
-  images: [{ type: String }],  // Changed from single 'image' to array
+  images: [{ type: String }],
   certificateLink: { type: String, default: '' },
   order: { type: Number, default: 0 }
 }, { timestamps: true });
@@ -205,12 +209,20 @@ async function seedInitialData() {
         education: 'BE in Information Technology',
         interests: 'Data Analytics + AI Systems',
         description: "I'm a passionate IT student with a strong research mindset, aiming to solve real-world problems through data.",
+        sgpa: '9.46',
+        cgpa: '8.02',
         stats: { achievements: 6, projects: 3, certifications: 4, researchPapers: 2 },
         journey: [
           "Passionate about turning data into actionable insights",
           "Experienced in Python, SQL, and Machine Learning",
           "Research-oriented with 2 published papers",
           "Aiming for MSIM to create intelligent systems"
+        ],
+        highlights: [
+          "🏆 Final Year SGPA: 9.46 (Top 5% of Class)",
+          "📚 Overall CGPA: 8.02",
+          "🏅 Academic Excellence Award",
+          "🔬 2 Research Papers Published"
         ]
       });
       

@@ -53,6 +53,14 @@ const About = () => {
     "Aiming for MSIM to create intelligent systems"
   ];
   
+  // Get highlights from profile - THESE ARE THE KEY HIGHLIGHTS (short, impactful statements)
+  const highlights = profile?.highlights || [
+    "9.2 CGPA - Top 5% of class",
+    "Data Hackathon Winner - 500+ participants",
+    "2 Research Papers Published",
+    "AI Research Intern"
+  ];
+  
   return (
     <section id="about" className="py-20 bg-gradient-to-b from-dark to-gray-900">
       <div className="container mx-auto px-6">
@@ -132,7 +140,7 @@ const About = () => {
             </div>
           </motion.div>
           
-          {/* Right Side - Journey & Achievements */}
+          {/* Right Side - Journey & Highlights */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -155,20 +163,17 @@ const About = () => {
               </div>
             </div>
             
-            {/* Key Achievements */}
+            {/* Key Highlights - Controlled by Admin */}
             <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 border border-gray-700">
               <div className="flex items-center gap-3 mb-4">
-                <div className="text-3xl">🏆</div>
+                <div className="text-3xl">⭐</div>
                 <h3 className="text-xl font-bold text-accent">Key Highlights</h3>
               </div>
               <div className="space-y-3">
-                {achievements.slice(0, 4).map((ach, idx) => (
+                {highlights.map((highlight, idx) => (
                   <div key={idx} className="flex items-start gap-3 group">
                     <div className="text-accent mt-1 group-hover:scale-110 transition">✓</div>
-                    <div>
-                      <p className="text-gray-300 font-semibold">{ach.title}</p>
-                      <p className="text-gray-400 text-sm">{ach.description}</p>
-                    </div>
+                    <p className="text-gray-300 text-sm">{highlight}</p>
                   </div>
                 ))}
               </div>
