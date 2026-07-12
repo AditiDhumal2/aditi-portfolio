@@ -6,6 +6,16 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
   const [newCategory, setNewCategory] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // If skills is null or undefined, show loading or empty state
+  if (!skills) {
+    return (
+      <div className="bg-gray-800 rounded-xl p-6">
+        <h2 className="text-2xl font-bold mb-4">💻 Edit Skills</h2>
+        <p className="text-gray-400">Loading skills data...</p>
+      </div>
+    );
+  }
+
   const updateSkills = async (category, value) => {
     const newSkills = { ...skills, [category]: value.split(',').map(s => s.trim()) };
     setSkills(newSkills);
@@ -59,9 +69,6 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
     { name: 'web', label: '🌐 Web Technologies', icon: '🌐', color: 'text-pink-400' }
   ];
 
-  // Check if skills exist and log for debugging
-  console.log('Skills data in SkillsTab:', skills);
-
   return (
     <div className="bg-gray-800 rounded-xl p-6">
       <h2 className="text-2xl font-bold mb-4">💻 Edit Skills</h2>
@@ -76,7 +83,7 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
             value={newCategory}
             onChange={(e) => setNewCategory(e.target.value)}
             placeholder="e.g., Cloud Platforms, Soft Skills"
-            className="flex-1 p-2 rounded bg-gray-700"
+            className="flex-1 p-2 rounded bg-gray-700 text-white"
           />
           <button onClick={addCategory} className="bg-accent px-4 py-2 rounded hover:bg-blue-600">
             Add Category
@@ -102,7 +109,7 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
             
             {editingCategory === name ? (
               <textarea
-                value={skills && skills[name] ? skills[name].join(', ') : ''}
+                value={skills[name] ? skills[name].join(', ') : ''}
                 onChange={(e) => updateSkills(name, e.target.value)}
                 className="w-full p-3 rounded bg-gray-700 text-white border border-gray-600 focus:border-accent outline-none"
                 rows="3"
@@ -110,7 +117,7 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
               />
             ) : (
               <div className="flex flex-wrap gap-2">
-                {skills && skills[name] && skills[name].length > 0 ? (
+                {skills[name] && skills[name].length > 0 ? (
                   skills[name].map((skill, idx) => (
                     <span key={idx} className="bg-accent/20 text-accent px-3 py-1 rounded-full text-sm">
                       {skill}
