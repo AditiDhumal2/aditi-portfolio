@@ -19,6 +19,8 @@ const AboutTab = ({ profile, setProfile, showMessage, setUploading, uploading, f
     title: '',
     subtitle: '',
     description: '',
+    sgpa: '',
+    cgpa: '',
     stats: { achievements: 0, projects: 0, certifications: 0, researchPapers: 0 },
     journey: [],
     highlights: []
@@ -37,6 +39,8 @@ const AboutTab = ({ profile, setProfile, showMessage, setUploading, uploading, f
         title: profile.title || '',
         subtitle: profile.subtitle || '',
         description: profile.description || '',
+        sgpa: profile.sgpa || '',
+        cgpa: profile.cgpa || '',
         stats: profile.stats || { achievements: 0, projects: 0, certifications: 0, researchPapers: 0 },
         journey: profile.journey || [],
         highlights: profile.highlights || []
@@ -69,6 +73,7 @@ const AboutTab = ({ profile, setProfile, showMessage, setUploading, uploading, f
       showMessage('✅ Profile updated successfully!');
       await fetchAllData();
     } catch (error) {
+      console.error('Save error:', error);
       showMessage('❌ Error updating profile', true);
     }
   };
@@ -83,6 +88,8 @@ const AboutTab = ({ profile, setProfile, showMessage, setUploading, uploading, f
       title: profile.title || '',
       subtitle: profile.subtitle || '',
       description: profile.description || '',
+      sgpa: profile.sgpa || '',
+      cgpa: profile.cgpa || '',
       stats: profile.stats || { achievements: 0, projects: 0, certifications: 0, researchPapers: 0 },
       journey: profile.journey || [],
       highlights: profile.highlights || []
@@ -172,6 +179,7 @@ const AboutTab = ({ profile, setProfile, showMessage, setUploading, uploading, f
       </div>
       
       {isEditing ? (
+        // Edit Mode
         <div className="space-y-4">
           <div>
             <label className="block mb-2 text-sm font-semibold">Name</label>
@@ -189,6 +197,32 @@ const AboutTab = ({ profile, setProfile, showMessage, setUploading, uploading, f
             <label className="block mb-2 text-sm font-semibold">Interests</label>
             <input type="text" value={editForm.interests} onChange={(e) => setEditForm({...editForm, interests: e.target.value})} className="w-full p-3 rounded bg-gray-700" />
           </div>
+          
+          {/* SGPA and CGPA Fields */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block mb-2 text-sm font-semibold text-accent">🎓 Final Year SGPA</label>
+              <input 
+                type="text" 
+                value={editForm.sgpa || ''} 
+                onChange={(e) => setEditForm({...editForm, sgpa: e.target.value})} 
+                className="w-full p-3 rounded bg-gray-700" 
+                placeholder="9.46"
+              />
+              <p className="text-xs text-gray-500 mt-1">e.g., 9.46 (Top 5% of Class)</p>
+            </div>
+            <div>
+              <label className="block mb-2 text-sm font-semibold text-accent">📚 Overall CGPA</label>
+              <input 
+                type="text" 
+                value={editForm.cgpa || ''} 
+                onChange={(e) => setEditForm({...editForm, cgpa: e.target.value})} 
+                className="w-full p-3 rounded bg-gray-700" 
+                placeholder="8.02"
+              />
+            </div>
+          </div>
+          
           <div>
             <label className="block mb-2 text-sm font-semibold">Hero Title</label>
             <textarea value={editForm.title} onChange={(e) => setEditForm({...editForm, title: e.target.value})} className="w-full p-3 rounded bg-gray-700" rows="2" />
@@ -257,30 +291,78 @@ const AboutTab = ({ profile, setProfile, showMessage, setUploading, uploading, f
           <div className="mt-8 pt-6 border-t border-gray-700">
             <h3 className="text-xl font-bold mb-2">⭐ Key Highlights</h3>
             <p className="text-sm text-gray-400 mb-4">Short, impactful statements that appear on your About page (keep them brief!)</p>
+            
             <div className="space-y-2 mb-4">
               {editForm.highlights?.map((highlight, idx) => (
                 <div key={idx} className="flex items-center gap-2 bg-gray-700/50 p-2 rounded">
                   {editingHighlightIndex === idx ? (
                     <>
-                      <input type="text" value={editingHighlightText} onChange={(e) => setEditingHighlightText(e.target.value)} className="flex-1 p-2 rounded bg-gray-600" autoFocus />
-                      <button onClick={() => updateHighlight(idx, editingHighlightText)} className="bg-green-500 px-3 py-1 rounded text-sm">Save</button>
-                      <button onClick={() => setEditingHighlightIndex(null)} className="bg-gray-500 px-3 py-1 rounded text-sm">Cancel</button>
+                      <input 
+                        type="text" 
+                        value={editingHighlightText} 
+                        onChange={(e) => setEditingHighlightText(e.target.value)} 
+                        className="flex-1 p-2 rounded bg-gray-600" 
+                        autoFocus 
+                      />
+                      <button 
+                        onClick={() => updateHighlight(idx, editingHighlightText)} 
+                        className="bg-green-500 px-3 py-1 rounded text-sm"
+                      >
+                        Save
+                      </button>
+                      <button 
+                        onClick={() => setEditingHighlightIndex(null)} 
+                        className="bg-gray-500 px-3 py-1 rounded text-sm"
+                      >
+                        Cancel
+                      </button>
                     </>
                   ) : (
                     <>
-                      <span className="flex-1 text-gray-300 text-sm">{highlight}</span>
-                      <button onClick={() => { setEditingHighlightIndex(idx); setEditingHighlightText(highlight); }} className="bg-blue-500 px-3 py-1 rounded text-sm">Edit</button>
-                      <button onClick={() => deleteHighlight(idx)} className="bg-red-500 px-3 py-1 rounded text-sm">Delete</button>
+                      <span className="flex-1 text-gray-300 text-sm">✓ {highlight}</span>
+                      <button 
+                        onClick={() => { 
+                          setEditingHighlightIndex(idx); 
+                          setEditingHighlightText(highlight); 
+                        }} 
+                        className="bg-blue-500 px-3 py-1 rounded text-sm"
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        onClick={() => deleteHighlight(idx)} 
+                        className="bg-red-500 px-3 py-1 rounded text-sm"
+                      >
+                        Delete
+                      </button>
                     </>
                   )}
                 </div>
               ))}
+              {editForm.highlights?.length === 0 && (
+                <p className="text-gray-500 text-sm italic">No highlights added yet. Add your achievements below.</p>
+              )}
             </div>
+            
             <div className="flex gap-2">
-              <input type="text" value={highlightsInput} onChange={(e) => setHighlightsInput(e.target.value)} placeholder="Add a new highlight..." className="flex-1 p-2 rounded bg-gray-700" onKeyPress={(e) => e.key === 'Enter' && addHighlight()} />
-              <button onClick={addHighlight} className="bg-green-500 px-4 py-2 rounded hover:bg-green-600">Add Highlight</button>
+              <input 
+                type="text" 
+                value={highlightsInput} 
+                onChange={(e) => setHighlightsInput(e.target.value)} 
+                placeholder="Add a new highlight..." 
+                className="flex-1 p-2 rounded bg-gray-700" 
+                onKeyPress={(e) => e.key === 'Enter' && addHighlight()} 
+              />
+              <button 
+                onClick={addHighlight} 
+                className="bg-green-500 px-4 py-2 rounded hover:bg-green-600"
+              >
+                Add Highlight
+              </button>
             </div>
-            <p className="text-xs text-gray-500 mt-2">Example: "9.2 CGPA - Top 5% of class" or "Data Hackathon Winner - 500+ participants"</p>
+            <p className="text-xs text-gray-500 mt-2">
+              Example: "🏆 Final Year SGPA: 9.46 (Top 5% of Class)" or "📚 Overall CGPA: 8.02"
+            </p>
           </div>
         </div>
       ) : (
@@ -290,16 +372,26 @@ const AboutTab = ({ profile, setProfile, showMessage, setUploading, uploading, f
           <div><label className="block text-sm font-semibold text-gray-400">Education</label><p className="text-white">{profile?.education || 'Not set'}</p></div>
           <div><label className="block text-sm font-semibold text-gray-400">Graduation</label><p className="text-white">{profile?.graduation || 'Not set'}</p></div>
           <div><label className="block text-sm font-semibold text-gray-400">Interests</label><p className="text-white">{profile?.interests || 'Not set'}</p></div>
+          <div className="grid grid-cols-2 gap-2">
+            <div><label className="block text-sm font-semibold text-gray-400">🎓 SGPA</label><p className="text-white">{profile?.sgpa || 'Not set'}</p></div>
+            <div><label className="block text-sm font-semibold text-gray-400">📚 CGPA</label><p className="text-white">{profile?.cgpa || 'Not set'}</p></div>
+          </div>
           <div><label className="block text-sm font-semibold text-gray-400">Hero Title</label><p className="text-white">{profile?.title || 'Not set'}</p></div>
           <div><label className="block text-sm font-semibold text-gray-400">Hero Subtitle</label><p className="text-white">{profile?.subtitle || 'Not set'}</p></div>
           <div><label className="block text-sm font-semibold text-gray-400">Description</label><p className="text-white">{profile?.description || 'Not set'}</p></div>
-          <div><label className="block text-sm font-semibold text-gray-400">Key Highlights</label>
+          <div>
+            <label className="block text-sm font-semibold text-gray-400">⭐ Key Highlights</label>
             {profile?.highlights && profile.highlights.length > 0 ? (
-              <ul className="text-gray-300 list-disc list-inside">
-                {profile.highlights.map((h, i) => <li key={i} className="text-sm">{h}</li>)}
+              <ul className="text-gray-300 space-y-1 mt-1">
+                {profile.highlights.map((h, i) => (
+                  <li key={i} className="text-sm flex items-start gap-2">
+                    <span className="text-accent">✓</span>
+                    <span>{h}</span>
+                  </li>
+                ))}
               </ul>
             ) : (
-              <p className="text-gray-500">No highlights added</p>
+              <p className="text-gray-500 text-sm">No highlights added</p>
             )}
           </div>
         </div>
