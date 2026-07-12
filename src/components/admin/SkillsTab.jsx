@@ -4,6 +4,7 @@ import axios from 'axios';
 const SkillsTab = ({ skills, setSkills, showMessage }) => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [newCategory, setNewCategory] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const updateSkills = async (category, value) => {
     const newSkills = { ...skills, [category]: value.split(',').map(s => s.trim()) };
@@ -14,7 +15,8 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
       showMessage('Skills updated!');
       setEditingCategory(null);
     } catch (error) {
-      showMessage('Error updating skills', true);
+      console.error('Update skills error:', error);
+      showMessage('Error updating skills: ' + (error.response?.data?.error || error.message), true);
     }
   };
 
@@ -28,7 +30,8 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
       showMessage('Category added!');
       setNewCategory('');
     } catch (error) {
-      showMessage('Error adding category', true);
+      console.error('Add category error:', error);
+      showMessage('Error adding category: ' + (error.response?.data?.error || error.message), true);
     }
   };
 
@@ -42,7 +45,8 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
         setSkills(response.data);
         showMessage('Category deleted!');
       } catch (error) {
-        showMessage('Error deleting category', true);
+        console.error('Delete category error:', error);
+        showMessage('Error deleting category: ' + (error.response?.data?.error || error.message), true);
       }
     }
   };
@@ -54,6 +58,9 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
     { name: 'databases', label: '🗄️ Databases', icon: '🗄️', color: 'text-orange-400' },
     { name: 'web', label: '🌐 Web Technologies', icon: '🌐', color: 'text-pink-400' }
   ];
+
+  // Check if skills exist and log for debugging
+  console.log('Skills data in SkillsTab:', skills);
 
   return (
     <div className="bg-gray-800 rounded-xl p-6">
@@ -80,47 +87,45 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
       {/* Existing Categories */}
       <div className="space-y-6">
         {skillCategories.map(({ name, label, icon, color }) => (
-          skills[name] && (
-            <div key={name} className="border border-gray-700 rounded-lg p-4">
-              <div className="flex justify-between items-center mb-2">
-                <label className="block font-semibold text-lg">
-                  <span className={color}>{icon}</span> {label}
-                </label>
-                <button
-                  onClick={() => setEditingCategory(editingCategory === name ? null : name)}
-                  className="text-accent text-sm"
-                >
-                  {editingCategory === name ? 'Cancel' : 'Edit'}
-                </button>
-              </div>
-              
-              {editingCategory === name ? (
-                <textarea
-                  value={skills[name] ? skills[name].join(', ') : ''}
-                  onChange={(e) => updateSkills(name, e.target.value)}
-                  className="w-full p-3 rounded bg-gray-700 text-white border border-gray-600 focus:border-accent outline-none"
-                  rows="3"
-                  placeholder="Python, SQL, JavaScript, React, Tableau"
-                />
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {skills[name] && skills[name].length > 0 ? (
-                    skills[name].map((skill, idx) => (
-                      <span key={idx} className="bg-accent/20 text-accent px-3 py-1 rounded-full text-sm">
-                        {skill}
-                      </span>
-                    ))
-                  ) : (
-                    <p className="text-gray-500 text-sm italic">No skills added yet. Click Edit to add.</p>
-                  )}
-                </div>
-              )}
+          <div key={name} className="border border-gray-700 rounded-lg p-4">
+            <div className="flex justify-between items-center mb-2">
+              <label className="block font-semibold text-lg">
+                <span className={color}>{icon}</span> {label}
+              </label>
+              <button
+                onClick={() => setEditingCategory(editingCategory === name ? null : name)}
+                className="text-accent text-sm"
+              >
+                {editingCategory === name ? 'Cancel' : 'Edit'}
+              </button>
             </div>
-          )
+            
+            {editingCategory === name ? (
+              <textarea
+                value={skills && skills[name] ? skills[name].join(', ') : ''}
+                onChange={(e) => updateSkills(name, e.target.value)}
+                className="w-full p-3 rounded bg-gray-700 text-white border border-gray-600 focus:border-accent outline-none"
+                rows="3"
+                placeholder="Python, SQL, JavaScript, React, Tableau"
+              />
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {skills && skills[name] && skills[name].length > 0 ? (
+                  skills[name].map((skill, idx) => (
+                    <span key={idx} className="bg-accent/20 text-accent px-3 py-1 rounded-full text-sm">
+                      {skill}
+                    </span>
+                  ))
+                ) : (
+                  <p className="text-gray-500 text-sm italic">No skills added yet. Click Edit to add.</p>
+                )}
+              </div>
+            )}
+          </div>
         ))}
         
         {/* Dynamic Categories (user-added) */}
-        {Object.keys(skills).filter(key => !skillCategories.some(c => c.name === key)).map(category => (
+        {skills && Object.keys(skills).filter(key => !skillCategories.some(c => c.name === key)).map(category => (
           <div key={category} className="border border-gray-700 rounded-lg p-4">
             <div className="flex justify-between items-center mb-2">
               <label className="block font-semibold text-lg capitalize">

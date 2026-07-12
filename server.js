@@ -553,9 +553,19 @@ app.delete('/api/achievements/:id', async (req, res) => {
 app.get('/api/skills', async (req, res) => {
   try {
     let skills = await Skills.findOne();
-    if (!skills) skills = await Skills.create({});
+    if (!skills) {
+      // Create default skills if none exist
+      skills = await Skills.create({
+        programming: ['Python', 'SQL', 'JavaScript', 'R'],
+        dataTools: ['Pandas', 'Tableau', 'Power BI'],
+        mlTools: ['Scikit-learn', 'TensorFlow'],
+        databases: ['PostgreSQL', 'MySQL', 'MongoDB'],
+        web: ['React', 'Flask', 'Streamlit']
+      });
+    }
     res.json(skills);
   } catch (error) {
+    console.error('GET skills error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -571,6 +581,7 @@ app.put('/api/skills', async (req, res) => {
     }
     res.json(skills);
   } catch (error) {
+    console.error('PUT skills error:', error);
     res.status(500).json({ error: error.message });
   }
 });
