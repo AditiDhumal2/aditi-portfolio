@@ -19,19 +19,20 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
     arxivLink: '',
     citations: '',
     impact: '',
-    theme: 'Decision Support Systems',
+    theme: 'Information Systems',
     featured: false,
     image: '',
     skills: [],
     projectLink: '',
     order: 0
   });
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const addResearch = async () => {
     const newResearch = {
       title: "New Research Paper",
       type: "Conference Paper",
-      status: "Under Review",
+      status: "Submitted",
       description: "",
       abstract: "",
       doi: "",
@@ -43,7 +44,7 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
       arxivLink: "",
       citations: "",
       impact: "",
-      theme: "Decision Support Systems",
+      theme: "Information Systems",
       featured: false,
       image: "",
       skills: [],
@@ -55,6 +56,7 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
       await fetchAllData();
       showMessage('Research added!');
     } catch (error) {
+      console.error('Add error:', error);
       showMessage('Error adding research', true);
     }
   };
@@ -76,7 +78,7 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
       arxivLink: item.arxivLink || '',
       citations: item.citations || '',
       impact: item.impact || '',
-      theme: item.theme || 'Decision Support Systems',
+      theme: item.theme || 'Information Systems',
       featured: item.featured || false,
       image: item.image || '',
       skills: item.skills || [],
@@ -92,6 +94,7 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
       showMessage('Research updated!');
       setEditingResearch(null);
     } catch (error) {
+      console.error('Save error:', error);
       showMessage('Error updating research', true);
     }
   };
@@ -107,12 +110,14 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
         await fetchAllData();
         showMessage('Research deleted!');
       } catch (error) {
+        console.error('Delete error:', error);
         showMessage('Error deleting research', true);
       }
     }
   };
 
   const uploadResearchImage = async (file) => {
+    setUploadingImage(true);
     setUploading(true);
     showMessage('📤 Uploading image...');
     try {
@@ -120,21 +125,47 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
       setEditForm({...editForm, image: imageUrl});
       showMessage('✅ Image uploaded!');
     } catch (error) {
+      console.error('Upload error:', error);
       showMessage('❌ Upload failed', true);
     } finally {
+      setUploadingImage(false);
       setUploading(false);
     }
   };
 
+  const removeImage = () => {
+    setEditForm({...editForm, image: ''});
+    showMessage('Image removed');
+  };
+
+  // Save order function
+  const saveOrder = async (orderedResearch) => {
+    try {
+      for (const item of orderedResearch) {
+        await axios.put(`/api/research/${item._id}`, { order: item.order });
+      }
+      showMessage('Order updated!');
+    } catch (error) {
+      console.error('Order save error:', error);
+      showMessage('Error saving order', true);
+    }
+  };
+
   const themes = [
-    'Human-Centered AI Systems',
-    'Decision Support Systems',
-    'Early Systems Exploration',
     'Information Systems',
-    'Data Analytics'
+    'Decision Support',
+    'Artificial Intelligence',
+    'Computer Vision',
+    'Natural Language Processing',
+    'Data Analytics',
+    'Human-Computer Interaction',
+    'Educational Technology',
+    'Social Computing',
+    'Sustainable Systems'
   ];
 
   const statusOptions = [
+    'Under Peer Review – Discover Education (Springer Nature)',
     'Peer-Reviewed Journal Publication',
     'Under Review (Indexed Journal)',
     'Preprint (Research Dissemination Stage)',
@@ -165,7 +196,7 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
         <p className="text-sm text-gray-400">⬆⬇ Use arrows to reorder</p>
       </div>
       
-      <div className="space-y-4">
+      <div className="space-y-6">
         {sortedResearch.map((item, index) => (
           <div key={item._id} className="bg-gray-800 rounded-xl p-4 border border-gray-700">
             <div className="flex justify-between items-start mb-4">
@@ -233,6 +264,7 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
             
             {editingResearch === item._id ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {/* Basic Info */}
                 <div>
                   <label className="block text-sm font-semibold mb-1">Title</label>
                   <input
@@ -250,6 +282,8 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
                     placeholder="First Author, Co-author"
                   />
                 </div>
+                
+                {/* Type and Status */}
                 <div>
                   <label className="block text-sm font-semibold mb-1">Type</label>
                   <select
@@ -263,22 +297,6 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-1">Venue / Journal</label>
-                  <input
-                    value={editForm.venue}
-                    onChange={(e) => setEditForm({...editForm, venue: e.target.value})}
-                    className="w-full bg-gray-700 p-2 rounded"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-1">Year</label>
-                  <input
-                    value={editForm.year}
-                    onChange={(e) => setEditForm({...editForm, year: e.target.value})}
-                    className="w-full bg-gray-700 p-2 rounded"
-                  />
-                </div>
-                <div>
                   <label className="block text-sm font-semibold mb-1">Status</label>
                   <select
                     value={editForm.status}
@@ -290,6 +308,8 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
                     ))}
                   </select>
                 </div>
+                
+                {/* Theme and Featured */}
                 <div>
                   <label className="block text-sm font-semibold mb-1">Research Theme</label>
                   <select
@@ -313,6 +333,27 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
                     <option value="true">⭐ Yes (Featured)</option>
                   </select>
                 </div>
+                
+                {/* Venue and Year */}
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Venue / Journal</label>
+                  <input
+                    value={editForm.venue}
+                    onChange={(e) => setEditForm({...editForm, venue: e.target.value})}
+                    className="w-full bg-gray-700 p-2 rounded"
+                    placeholder="Discover Education (Springer Nature)"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Year</label>
+                  <input
+                    value={editForm.year}
+                    onChange={(e) => setEditForm({...editForm, year: e.target.value})}
+                    className="w-full bg-gray-700 p-2 rounded"
+                  />
+                </div>
+                
+                {/* DOI and Citations */}
                 <div>
                   <label className="block text-sm font-semibold mb-1">DOI</label>
                   <input
@@ -331,27 +372,79 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
                     placeholder="Number of citations"
                   />
                 </div>
+                
+                {/* Abstract */}
                 <div className="col-span-2">
-                  <label className="block text-sm font-semibold mb-1">📸 Research Image / Certificate</label>
+                  <label className="block text-sm font-semibold mb-1">Abstract / Research Focus</label>
+                  <textarea
+                    value={editForm.abstract}
+                    onChange={(e) => setEditForm({...editForm, abstract: e.target.value})}
+                    className="w-full bg-gray-700 p-2 rounded"
+                    rows="3"
+                    placeholder="Brief summary of the research..."
+                  />
+                </div>
+                
+                {/* Description / Key Contributions */}
+                <div className="col-span-2">
+                  <label className="block text-sm font-semibold mb-1">Key Contributions (one per line)</label>
+                  <textarea
+                    value={editForm.description}
+                    onChange={(e) => setEditForm({...editForm, description: e.target.value})}
+                    className="w-full bg-gray-700 p-2 rounded"
+                    rows="4"
+                    placeholder="Designed and developed the platform&#10;Conducted mixed-method user evaluation&#10;Analyzed student perceptions"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Each contribution will appear as a bullet point</p>
+                </div>
+                
+                {/* Impact */}
+                <div className="col-span-2">
+                  <label className="block text-sm font-semibold mb-1">🔥 Impact Statement</label>
+                  <textarea
+                    value={editForm.impact}
+                    onChange={(e) => setEditForm({...editForm, impact: e.target.value})}
+                    className="w-full bg-gray-700 p-2 rounded"
+                    rows="2"
+                    placeholder="How does this research make an impact?"
+                  />
+                </div>
+                
+                {/* Skills */}
+                <div className="col-span-2">
+                  <label className="block text-sm font-semibold mb-1">🛠️ Skills (comma-separated)</label>
+                  <input
+                    value={editForm.skills?.join(', ') || ''}
+                    onChange={(e) => setEditForm({...editForm, skills: e.target.value.split(',').map(s => s.trim())})}
+                    className="w-full bg-gray-700 p-2 rounded"
+                    placeholder="Information Systems, Research Methodology, User Research"
+                  />
+                </div>
+                
+                {/* Image Upload */}
+                <div className="col-span-2">
+                  <label className="block text-sm font-semibold mb-1">📸 Research Image</label>
                   {editForm.image && (
-                    <img src={editForm.image} alt="Research" className="w-32 h-32 object-cover rounded mb-2" />
+                    <div className="relative inline-block mb-2">
+                      <img src={editForm.image} alt="Research" className="w-32 h-32 object-cover rounded" />
+                      <button
+                        onClick={removeImage}
+                        className="absolute -top-2 -right-2 bg-red-500 rounded-full w-5 h-5 text-xs flex items-center justify-center hover:bg-red-600"
+                      >
+                        ✕
+                      </button>
+                    </div>
                   )}
                   <input
                     type="file"
                     accept="image/*"
                     onChange={(e) => e.target.files[0] && uploadResearchImage(e.target.files[0])}
-                    className="block w-full text-sm text-gray-400"
+                    className="block w-full text-sm text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded file:bg-accent file:text-white file:cursor-pointer"
                   />
+                  <p className="text-xs text-gray-500 mt-1">Upload a research image, diagram, or certificate</p>
                 </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-semibold mb-1">🛠️ Skills / Technologies (comma-separated)</label>
-                  <input
-                    value={editForm.skills?.join(', ') || ''}
-                    onChange={(e) => setEditForm({...editForm, skills: e.target.value.split(',').map(s => s.trim())})}
-                    className="w-full bg-gray-700 p-2 rounded"
-                    placeholder="Next.js, TypeScript, MongoDB, Research Methodology"
-                  />
-                </div>
+                
+                {/* Links */}
                 <div>
                   <label className="block text-sm font-semibold mb-1">Paper Link</label>
                   <input
@@ -388,42 +481,16 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
                     placeholder="https://github.com/your-project"
                   />
                 </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-semibold mb-1">🔥 Impact Statement</label>
-                  <textarea
-                    value={editForm.impact}
-                    onChange={(e) => setEditForm({...editForm, impact: e.target.value})}
-                    className="w-full bg-gray-700 p-2 rounded"
-                    rows="2"
-                    placeholder="e.g., Improves career decision-making for engineering students..."
-                  />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-semibold mb-1">Abstract</label>
-                  <textarea
-                    value={editForm.abstract}
-                    onChange={(e) => setEditForm({...editForm, abstract: e.target.value})}
-                    className="w-full bg-gray-700 p-2 rounded"
-                    rows="3"
-                  />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-semibold mb-1">Description / Contribution</label>
-                  <textarea
-                    value={editForm.description}
-                    onChange={(e) => setEditForm({...editForm, description: e.target.value})}
-                    className="w-full bg-gray-700 p-2 rounded"
-                    rows="3"
-                  />
-                </div>
               </div>
             ) : (
+              // View Mode
               <div className="text-sm text-gray-300">
+                {item.featured && <p className="text-yellow-400 font-bold">⭐ Featured Research</p>}
                 <p><strong className="text-blue-400">Theme:</strong> {item.theme || 'Not specified'}</p>
                 <p><strong className="text-blue-400">Authors:</strong> {item.authors || 'Not specified'}</p>
                 <p><strong className="text-blue-400">Venue:</strong> {item.venue || 'Not specified'}</p>
+                <p><strong className="text-blue-400">Year:</strong> {item.year || 'Not specified'}</p>
                 <p><strong className="text-blue-400">Status:</strong> {item.status}</p>
-                {item.featured && <p className="text-yellow-400 font-bold">⭐ Featured Research</p>}
                 {item.image && (
                   <div className="mt-2">
                     <img src={item.image} alt={item.title} className="w-20 h-20 object-cover rounded" />

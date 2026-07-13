@@ -23,7 +23,6 @@ const ResearchModal = ({ item, onClose }) => {
         <div className="p-6">
           <button onClick={onClose} className="float-right text-gray-400 hover:text-white text-2xl">✕</button>
           
-          {/* Image at top of modal */}
           {item.image && (
             <div className="mb-4">
               <img src={item.image} alt={item.title} className="w-full max-h-56 object-cover rounded-lg" />
@@ -42,15 +41,13 @@ const ResearchModal = ({ item, onClose }) => {
           </div>
           
           <div className="space-y-4">
-            {/* Research Area */}
             {item.theme && (
               <div>
-                <h3 className="text-lg font-semibold text-accent mb-1">📌 Research Area</h3>
+                <h3 className="text-lg font-semibold text-accent mb-1">📌 Research Focus</h3>
                 <p className="text-gray-300">{item.theme}</p>
               </div>
             )}
             
-            {/* Overview / Abstract */}
             {item.abstract && (
               <div>
                 <h3 className="text-lg font-semibold text-accent mb-1">📝 Overview</h3>
@@ -58,15 +55,22 @@ const ResearchModal = ({ item, onClose }) => {
               </div>
             )}
             
-            {/* Contribution */}
             {item.description && (
               <div>
-                <h3 className="text-lg font-semibold text-accent mb-1">💡 Contribution</h3>
-                <p className="text-gray-300 leading-relaxed">{item.description}</p>
+                <h3 className="text-lg font-semibold text-accent mb-1">💡 Key Contributions</h3>
+                <ul className="space-y-1">
+                  {item.description.split('\n').map((line, idx) => (
+                    line.trim() && (
+                      <li key={idx} className="flex items-start gap-2 text-gray-300 text-sm">
+                        <span className="text-accent mt-1">▹</span>
+                        <span>{line}</span>
+                      </li>
+                    )
+                  ))}
+                </ul>
               </div>
             )}
             
-            {/* Impact */}
             {item.impact && (
               <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl p-4 border border-blue-500/20">
                 <h3 className="text-lg font-semibold text-blue-400 mb-2">🔥 Impact</h3>
@@ -74,10 +78,9 @@ const ResearchModal = ({ item, onClose }) => {
               </div>
             )}
             
-            {/* Skills/Technologies */}
             {item.skills && item.skills.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold text-accent mb-2">🛠️ Skills & Technologies</h3>
+                <h3 className="text-lg font-semibold text-accent mb-2">🛠️ Skills</h3>
                 <div className="flex flex-wrap gap-2">
                   {item.skills.map(skill => (
                     <span key={skill} className="bg-accent/20 text-accent px-3 py-1 rounded-full text-sm">{skill}</span>
@@ -86,18 +89,16 @@ const ResearchModal = ({ item, onClose }) => {
               </div>
             )}
             
-            {/* Venue */}
             {item.venue && (
               <div>
-                <h3 className="text-lg font-semibold text-accent mb-1">📅 Publication Venue</h3>
+                <h3 className="text-lg font-semibold text-accent mb-1">📅 Publication</h3>
                 <p className="text-gray-300">{item.venue} {item.year && `(${item.year})`}</p>
               </div>
             )}
             
-            {/* DOI Link */}
             {item.doi && (
               <div>
-                <h3 className="text-lg font-semibold text-accent mb-1">🔗 Digital Object Identifier (DOI)</h3>
+                <h3 className="text-lg font-semibold text-accent mb-1">🔗 DOI</h3>
                 <a 
                   href={`https://doi.org/${item.doi}`} 
                   target="_blank" 
@@ -109,11 +110,10 @@ const ResearchModal = ({ item, onClose }) => {
               </div>
             )}
             
-            {/* Links Section */}
             <div className="flex flex-wrap gap-3 pt-2">
               {item.paperLink && (
                 <a href={item.paperLink} target="_blank" rel="noopener noreferrer" className="bg-accent hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition flex items-center gap-2">
-                  📄 Read Paper
+                  📄 View Research
                 </a>
               )}
               {item.pdfLink && (
@@ -172,140 +172,199 @@ const Research = () => {
   // Sort by order
   const sortedResearch = [...research].sort((a, b) => (a.order || 0) - (b.order || 0));
   
-  // Featured Research
+  // Featured Research (Mentorly)
   const featuredPaper = sortedResearch.find(r => r.featured === true);
-  const otherPapers = sortedResearch.filter(r => r.featured !== true);
+  const previousResearch = sortedResearch.filter(r => r.featured !== true);
+  
+  // Research Snapshot Stats
+  const totalPublications = research.length;
+  const years = ['2022', '2024', '2025', '2026'];
+  const domains = ['AI', 'Information Systems', 'Analytics', 'Computer Vision'];
   
   return (
-    <>
-      <section id="research" className="py-16 bg-gradient-to-b from-dark to-gray-900">
-        <div className="container mx-auto px-6">
+    <section id="research" className="py-20 bg-gradient-to-b from-dark to-gray-900">
+      <div className="container mx-auto px-6">
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-12"
+        >
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">📚 <span className="text-accent">Research</span></h2>
+          <div className="w-20 h-1 bg-accent rounded-full mb-4"></div>
+          <p className="text-gray-300 max-w-3xl leading-relaxed">
+            Exploring AI, Analytics, Information Systems, and Decision Support through Applied Research
+          </p>
+          <p className="text-gray-400 text-sm mt-2 max-w-3xl">
+            Over the past four years, I have transformed academic projects into research publications, allowing me to develop skills in 
+            literature review, research methodology, system evaluation, technical writing, and communicating engineering solutions 
+            through scholarly work. My research interests have gradually evolved from software engineering to AI, analytics, and 
+            information systems.
+          </p>
+        </motion.div>
+        
+        {/* Featured Research */}
+        {featuredPaper && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="text-center mb-10"
+            transition={{ duration: 0.5 }}
+            className="mb-16"
           >
-            <h2 className="text-4xl font-bold">📚 <span className="text-accent">Research & Publications</span></h2>
-            <div className="w-16 h-0.5 bg-accent mx-auto rounded-full mt-2"></div>
-            <p className="text-gray-400 mt-3 max-w-2xl mx-auto">
-              Demonstrates academic curiosity and research potential
-            </p>
-          </motion.div>
-          
-          {/* Featured Research */}
-          {featuredPaper && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="mb-10"
+            <h3 className="text-2xl font-bold text-yellow-400 mb-6 flex items-center gap-2">
+              <span>⭐</span> Featured Research
+            </h3>
+            <div 
+              onClick={() => setSelectedItem(featuredPaper)}
+              className="bg-gradient-to-br from-yellow-500/5 to-orange-500/5 border-2 border-yellow-500/30 rounded-2xl p-6 cursor-pointer hover:scale-[1.01] transition-all group"
             >
-              <div className="text-center mb-4">
-                <span className="bg-yellow-500/20 text-yellow-400 px-4 py-1 rounded-full text-sm font-semibold">
-                  ⭐ Featured Research
-                </span>
+              <h4 className="text-2xl font-bold text-yellow-400 group-hover:text-yellow-300 transition">
+                {featuredPaper.title}
+              </h4>
+              <p className="text-gray-300 mt-2">
+                <span className="font-semibold">Role:</span> {featuredPaper.authors || 'First Author'}
+              </p>
+              
+              <div className="flex flex-wrap gap-3 mt-3">
+                {featuredPaper.paperLink && (
+                  <span className="text-sm text-gray-400">📄 Research Square Preprint</span>
+                )}
+                {featuredPaper.status && (
+                  <span className="text-sm text-yellow-400">🔄 {featuredPaper.status}</span>
+                )}
               </div>
-              <div 
-                onClick={() => setSelectedItem(featuredPaper)}
-                className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border-2 border-yellow-500/30 rounded-xl p-6 cursor-pointer hover:scale-[1.01] transition-all group"
-              >
-                <div className="flex flex-col md:flex-row gap-4">
-                  {featuredPaper.image && (
-                    <div className="md:w-48 h-48 rounded-lg overflow-hidden flex-shrink-0">
-                      <img src={featuredPaper.image} alt={featuredPaper.title} className="w-full h-full object-cover" />
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-bold text-yellow-400 group-hover:text-yellow-300 transition">
-                      {featuredPaper.title}
-                    </h3>
-                    <p className="text-gray-300 mt-1">
-                      <span className="font-semibold">Role:</span> {featuredPaper.authors || 'Not specified'}
+              
+              <div className="mt-4">
+                <h5 className="text-sm font-semibold text-accent mb-2">Research Focus</h5>
+                <p className="text-gray-300 text-sm">{featuredPaper.abstract || 'No abstract available'}</p>
+              </div>
+              
+              {featuredPaper.description && (
+                <div className="mt-3">
+                  <h5 className="text-sm font-semibold text-accent mb-2">Key Contributions</h5>
+                  <ul className="space-y-1">
+                    {featuredPaper.description.split('\n').map((line, idx) => (
+                      line.trim() && (
+                        <li key={idx} className="flex items-start gap-2 text-gray-300 text-sm">
+                          <span className="text-accent mt-1">▹</span>
+                          <span>{line}</span>
+                        </li>
+                      )
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {featuredPaper.skills && featuredPaper.skills.length > 0 && (
+                <div className="mt-3">
+                  <h5 className="text-sm font-semibold text-accent mb-2">Skills</h5>
+                  <div className="flex flex-wrap gap-2">
+                    {featuredPaper.skills.map(skill => (
+                      <span key={skill} className="bg-accent/20 text-accent px-3 py-1 rounded-full text-sm">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <button className="text-yellow-400 hover:underline mt-4 inline-flex items-center gap-1 group-hover:gap-2 transition-all">
+                📄 View Research →
+              </button>
+            </div>
+          </motion.div>
+        )}
+        
+        {/* Previous Research */}
+        {previousResearch.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-16"
+          >
+            <h3 className="text-2xl font-bold text-accent mb-6">Previous Research</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {previousResearch.map((item, idx) => (
+                <motion.div
+                  key={item._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  onClick={() => setSelectedItem(item)}
+                  className="bg-gray-800/50 rounded-xl p-5 border border-gray-700 hover:border-accent transition-all cursor-pointer group"
+                >
+                  <h4 className="text-lg font-bold text-white group-hover:text-accent transition">
+                    {item.title}
+                  </h4>
+                  
+                  {item.venue && (
+                    <p className="text-sm text-gray-400 mt-1">
+                      {item.venue} • {item.year || ''}
                     </p>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      <span className="bg-yellow-500/20 text-yellow-400 px-3 py-1 rounded-full text-sm">{featuredPaper.type}</span>
-                      <span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm">{featuredPaper.status}</span>
-                      {featuredPaper.venue && (
-                        <span className="bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-sm">{featuredPaper.venue}</span>
+                  )}
+                  
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-300">{item.abstract || item.description?.substring(0, 100)}...</p>
+                  </div>
+                  
+                  {item.skills && item.skills.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {item.skills.slice(0, 3).map(skill => (
+                        <span key={skill} className="bg-accent/10 text-accent text-xs px-2 py-0.5 rounded">
+                          {skill}
+                        </span>
+                      ))}
+                      {item.skills.length > 3 && (
+                        <span className="text-gray-500 text-xs">+{item.skills.length - 3}</span>
                       )}
                     </div>
-                    {featuredPaper.abstract && (
-                      <p className="text-gray-400 mt-3 text-sm line-clamp-2">{featuredPaper.abstract}</p>
-                    )}
-                    <button className="text-yellow-400 hover:underline mt-3 inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                      Read More →
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-          
-          {/* Research Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {otherPapers.map((item, idx) => (
-              <motion.div
-                key={item._id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                className="group cursor-pointer"
-                onClick={() => setSelectedItem(item)}
-              >
-                <div className="relative rounded-xl overflow-hidden bg-gray-800 border border-gray-700 hover:border-accent transition-all h-[320px]">
-                  {/* Image */}
-                  <div className="w-full h-40 overflow-hidden">
-                    {item.image ? (
-                      <img 
-                        src={item.image} 
-                        alt={item.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-accent/20 to-purple-500/20 flex items-center justify-center">
-                        <div className="text-5xl">📚</div>
-                      </div>
-                    )}
-                  </div>
+                  )}
                   
-                  {/* Dark overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent transition-opacity group-hover:opacity-100"></div>
-                  
-                  {/* Content overlay - bottom aligned */}
-                  <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <div className="flex flex-wrap gap-1 mb-1">
-                      <span className="bg-accent/20 text-accent text-xs px-2 py-0.5 rounded">{item.type}</span>
-                      <span className="bg-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded">{item.status}</span>
-                    </div>
-                    <h3 className="text-base font-bold text-white group-hover:text-accent transition line-clamp-2">
-                      {item.title}
-                    </h3>
-                    <p className="text-gray-400 text-xs mt-1">
-                      <span className="font-semibold">Role:</span> {item.authors || 'Not specified'}
-                    </p>
-                    {item.venue && (
-                      <p className="text-gray-500 text-xs mt-1">{item.venue} {item.year && `• ${item.year}`}</p>
-                    )}
-                  </div>
-                  
-                  {/* Learn More - appears on hover */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="bg-accent/90 hover:bg-accent text-white px-6 py-3 rounded-lg font-semibold transform transition-transform group-hover:scale-105 shadow-lg">
-                      Learn More →
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                  <button className="text-accent text-sm mt-3 inline-flex items-center gap-1 group-hover:gap-2 transition-all">
+                    View Details →
+                  </button>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+        
+        {/* Research Snapshot */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-gray-800/30 rounded-2xl p-6 border border-gray-700"
+        >
+          <h3 className="text-xl font-bold text-accent mb-4">📊 Research Snapshot</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <p className="text-gray-500 text-sm">Publications</p>
+              <p className="text-2xl font-bold text-white">{totalPublications}</p>
+            </div>
+            <div>
+              <p className="text-gray-500 text-sm">Years</p>
+              <p className="text-2xl font-bold text-white">2022–2026</p>
+            </div>
+            <div>
+              <p className="text-gray-500 text-sm">Primary Domains</p>
+              <p className="text-sm font-semibold text-white">AI, Information Systems, Analytics</p>
+            </div>
+            <div>
+              <p className="text-gray-500 text-sm">Featured Research</p>
+              <p className="text-sm font-semibold text-yellow-400">Mentorly Decision Support</p>
+            </div>
           </div>
-        </div>
-      </section>
+        </motion.div>
+      </div>
       
       <AnimatePresence>
         {selectedItem && <ResearchModal item={selectedItem} onClose={() => setSelectedItem(null)} />}
       </AnimatePresence>
-    </>
+    </section>
   );
 };
 
