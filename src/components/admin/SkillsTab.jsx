@@ -1,23 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const SkillsTab = ({ skills, setSkills, showMessage }) => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [newCategory, setNewCategory] = useState('');
   const [loading, setLoading] = useState(false);
+  const [localSkills, setLocalSkills] = useState(null);
 
-  // If skills is null, undefined, or empty, show loading/empty state
-  if (!skills || Object.keys(skills).length === 0) {
+  // Debug: Log what we receive
+  console.log('SkillsTab received skills prop:', skills);
+
+  // If skills is null, undefined, or empty
+  if (!skills) {
+    console.log('Skills is null or undefined');
     return (
       <div className="bg-gray-800 rounded-xl p-6">
         <h2 className="text-2xl font-bold mb-4">💻 Edit Skills</h2>
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-700 rounded w-1/3 mb-4"></div>
-          <div className="h-24 bg-gray-700 rounded mb-2"></div>
-          <div className="h-24 bg-gray-700 rounded mb-2"></div>
-          <div className="h-24 bg-gray-700 rounded"></div>
+        <div className="text-center py-8">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-700 rounded w-1/3 mx-auto mb-4"></div>
+            <div className="h-24 bg-gray-700 rounded mb-2"></div>
+            <div className="h-24 bg-gray-700 rounded mb-2"></div>
+            <div className="h-24 bg-gray-700 rounded"></div>
+          </div>
+          <p className="text-gray-400 mt-4">Loading skills data...</p>
         </div>
-        <p className="text-gray-400 mt-4">Loading skills data...</p>
+      </div>
+    );
+  }
+
+  // If skills is an empty object
+  if (Object.keys(skills).length === 0) {
+    console.log('Skills is an empty object');
+    return (
+      <div className="bg-gray-800 rounded-xl p-6">
+        <h2 className="text-2xl font-bold mb-4">💻 Edit Skills</h2>
+        <p className="text-gray-400 mb-6">No skill categories found. Add a new category below.</p>
+        
+        {/* Add New Category */}
+        <div className="mb-6 p-4 bg-gray-700/50 rounded-lg">
+          <h3 className="text-md font-semibold mb-2">Add New Category</h3>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              placeholder="e.g., Cloud Platforms, Soft Skills"
+              className="flex-1 p-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-accent outline-none"
+            />
+            <button onClick={addCategory} className="bg-accent px-4 py-2 rounded hover:bg-blue-600 transition">
+              Add Category
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -77,9 +112,6 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
     { name: 'databases', label: '🗄️ Databases', icon: '🗄️', color: 'text-orange-400' },
     { name: 'web', label: '🌐 Web Technologies', icon: '🌐', color: 'text-pink-400' }
   ];
-
-  // Check if any category has skills
-  const hasSkills = Object.values(skills).some(arr => arr && arr.length > 0);
 
   return (
     <div className="bg-gray-800 rounded-xl p-6">
