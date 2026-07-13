@@ -6,12 +6,18 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
   const [newCategory, setNewCategory] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // If skills is null or undefined, show loading or empty state
-  if (!skills) {
+  // If skills is null, undefined, or empty, show loading/empty state
+  if (!skills || Object.keys(skills).length === 0) {
     return (
       <div className="bg-gray-800 rounded-xl p-6">
         <h2 className="text-2xl font-bold mb-4">💻 Edit Skills</h2>
-        <p className="text-gray-400">Loading skills data...</p>
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-700 rounded w-1/3 mb-4"></div>
+          <div className="h-24 bg-gray-700 rounded mb-2"></div>
+          <div className="h-24 bg-gray-700 rounded mb-2"></div>
+          <div className="h-24 bg-gray-700 rounded"></div>
+        </div>
+        <p className="text-gray-400 mt-4">Loading skills data...</p>
       </div>
     );
   }
@@ -22,26 +28,29 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
     try {
       const response = await axios.put('/api/skills', newSkills);
       setSkills(response.data);
-      showMessage('Skills updated!');
+      showMessage('✅ Skills updated!');
       setEditingCategory(null);
     } catch (error) {
       console.error('Update skills error:', error);
-      showMessage('Error updating skills: ' + (error.response?.data?.error || error.message), true);
+      showMessage('❌ Error updating skills: ' + (error.response?.data?.error || error.message), true);
     }
   };
 
   const addCategory = async () => {
-    if (!newCategory.trim()) return;
+    if (!newCategory.trim()) {
+      showMessage('Please enter a category name', true);
+      return;
+    }
     const newSkills = { ...skills, [newCategory]: [] };
     setSkills(newSkills);
     try {
       const response = await axios.put('/api/skills', newSkills);
       setSkills(response.data);
-      showMessage('Category added!');
+      showMessage('✅ Category added!');
       setNewCategory('');
     } catch (error) {
       console.error('Add category error:', error);
-      showMessage('Error adding category: ' + (error.response?.data?.error || error.message), true);
+      showMessage('❌ Error adding category: ' + (error.response?.data?.error || error.message), true);
     }
   };
 
@@ -53,10 +62,10 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
       try {
         const response = await axios.put('/api/skills', newSkills);
         setSkills(response.data);
-        showMessage('Category deleted!');
+        showMessage('✅ Category deleted!');
       } catch (error) {
         console.error('Delete category error:', error);
-        showMessage('Error deleting category: ' + (error.response?.data?.error || error.message), true);
+        showMessage('❌ Error deleting category: ' + (error.response?.data?.error || error.message), true);
       }
     }
   };
@@ -68,6 +77,9 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
     { name: 'databases', label: '🗄️ Databases', icon: '🗄️', color: 'text-orange-400' },
     { name: 'web', label: '🌐 Web Technologies', icon: '🌐', color: 'text-pink-400' }
   ];
+
+  // Check if any category has skills
+  const hasSkills = Object.values(skills).some(arr => arr && arr.length > 0);
 
   return (
     <div className="bg-gray-800 rounded-xl p-6">
@@ -83,9 +95,9 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
             value={newCategory}
             onChange={(e) => setNewCategory(e.target.value)}
             placeholder="e.g., Cloud Platforms, Soft Skills"
-            className="flex-1 p-2 rounded bg-gray-700 text-white"
+            className="flex-1 p-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-accent outline-none"
           />
-          <button onClick={addCategory} className="bg-accent px-4 py-2 rounded hover:bg-blue-600">
+          <button onClick={addCategory} className="bg-accent px-4 py-2 rounded hover:bg-blue-600 transition">
             Add Category
           </button>
         </div>
@@ -101,7 +113,7 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
               </label>
               <button
                 onClick={() => setEditingCategory(editingCategory === name ? null : name)}
-                className="text-accent text-sm"
+                className="text-accent text-sm hover:text-blue-400 transition"
               >
                 {editingCategory === name ? 'Cancel' : 'Edit'}
               </button>
@@ -132,7 +144,7 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
         ))}
         
         {/* Dynamic Categories (user-added) */}
-        {skills && Object.keys(skills).filter(key => !skillCategories.some(c => c.name === key)).map(category => (
+        {Object.keys(skills).filter(key => !skillCategories.some(c => c.name === key)).map(category => (
           <div key={category} className="border border-gray-700 rounded-lg p-4">
             <div className="flex justify-between items-center mb-2">
               <label className="block font-semibold text-lg capitalize">
@@ -141,13 +153,13 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
               <div className="flex gap-2">
                 <button
                   onClick={() => setEditingCategory(editingCategory === category ? null : category)}
-                  className="text-accent text-sm"
+                  className="text-accent text-sm hover:text-blue-400 transition"
                 >
                   {editingCategory === category ? 'Cancel' : 'Edit'}
                 </button>
                 <button
                   onClick={() => deleteCategory(category)}
-                  className="text-red-400 text-sm hover:text-red-300"
+                  className="text-red-400 text-sm hover:text-red-300 transition"
                 >
                   Delete
                 </button>
