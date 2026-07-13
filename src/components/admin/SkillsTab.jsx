@@ -1,18 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 
 const SkillsTab = ({ skills, setSkills, showMessage }) => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [newCategory, setNewCategory] = useState('');
   const [loading, setLoading] = useState(false);
-  const [localSkills, setLocalSkills] = useState(null);
 
   // Debug: Log what we receive
-  console.log('SkillsTab received skills prop:', skills);
+  console.log('SkillsTab received skills:', skills);
 
   // If skills is null, undefined, or empty
   if (!skills) {
-    console.log('Skills is null or undefined');
     return (
       <div className="bg-gray-800 rounded-xl p-6">
         <h2 className="text-2xl font-bold mb-4">💻 Edit Skills</h2>
@@ -31,7 +29,6 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
 
   // If skills is an empty object
   if (Object.keys(skills).length === 0) {
-    console.log('Skills is an empty object');
     return (
       <div className="bg-gray-800 rounded-xl p-6">
         <h2 className="text-2xl font-bold mb-4">💻 Edit Skills</h2>
@@ -58,7 +55,9 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
   }
 
   const updateSkills = async (category, value) => {
-    const newSkills = { ...skills, [category]: value.split(',').map(s => s.trim()) };
+    // Ensure value is always an array
+    const skillsArray = value.split(',').map(s => s.trim()).filter(s => s !== '');
+    const newSkills = { ...skills, [category]: skillsArray };
     setSkills(newSkills);
     try {
       const response = await axios.put('/api/skills', newSkills);
@@ -105,13 +104,46 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
     }
   };
 
-  const skillCategories = [
+  // Helper function to safely get skills array
+  const getSkillsArray = (category) => {
+    const value = skills[category];
+    if (Array.isArray(value)) {
+      return value;
+    }
+    // If it's not an array, return an empty array
+    return [];
+  };
+
+  // Helper function to check if a value should be displayed as a category
+  const isSkillCategory = (key) => {
+    // Skip MongoDB internal fields and non-array values
+    if (key === '_id' || key === '__v' || key === 'createdAt' || key === 'updatedAt') {
+      return false;
+    }
+    // Only show if the value is an array
+    return Array.isArray(skills[key]);
+  };
+
+  // Get only the categories that are arrays (skill categories)
+  const skillCategoryKeys = Object.keys(skills).filter(isSkillCategory);
+
+  const defaultCategories = [
     { name: 'programming', label: '💻 Programming Languages', icon: '💻', color: 'text-blue-400' },
     { name: 'dataTools', label: '📊 Data Tools', icon: '📊', color: 'text-green-400' },
     { name: 'mlTools', label: '🤖 Machine Learning', icon: '🤖', color: 'text-purple-400' },
     { name: 'databases', label: '🗄️ Databases', icon: '🗄️', color: 'text-orange-400' },
     { name: 'web', label: '🌐 Web Technologies', icon: '🌐', color: 'text-pink-400' }
   ];
+
+  // Only show categories that exist in skills and are arrays
+  const displayCategories = defaultCategories.filter(cat => 
+    skillCategoryKeys.includes(cat.name)
+  );
+
+  // Dynamic categories (user-added) that are arrays
+  const dynamicCategories = skillCategoryKeys.filter(key => 
+    !defaultCategories.some(c => c.name === key)
+  );
 
   return (
     <div className="bg-gray-800 rounded-xl p-6">
@@ -136,92 +168,105 @@ const SkillsTab = ({ skills, setSkills, showMessage }) => {
       </div>
       
       {/* Existing Categories */}
-      <div className="space-y-6">
-        {skillCategories.map(({ name, label, icon, color }) => (
-          <div key={name} className="border border-gray-700 rounded-lg p-4">
-            <div className="flex justify-between items-center mb-2">
-              <label className="block font-semibold text-lg">
-                <span className={color}>{icon}</span> {label}
-              </label>
-              <button
-                onClick={() => setEditingCategory(editingCategory === name ? null : name)}
-                className="text-accent text-sm hover:text-blue-400 transition"
-              >
-                {editingCategory === name ? 'Cancel' : 'Edit'}
-              </button>
-            </div>
-            
-            {editingCategory === name ? (
-              <textarea
-                value={skills[name] ? skills[name].join(', ') : ''}
-                onChange={(e) => updateSkills(name, e.target.value)}
-                className="w-full p-3 rounded bg-gray-700 text-white border border-gray-600 focus:border-accent outline-none"
-                rows="3"
-                placeholder="Python, SQL, JavaScript, React, Tableau"
-              />
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {skills[name] && skills[name].length > 0 ? (
-                  skills[name].map((skill, idx) => (
-                    <span key={idx} className="bg-accent/20 text-accent px-3 py-1 rounded-full text-sm">
-                      {skill}
-                    </span>
-                  ))
+      {skillCategoryKeys.length === 0 ? (
+        <div className="text-center py-8 text-gray-400">
+          <p>No skill categories found. Add a new category above.</p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {/* Default Categories */}
+          {displayCategories.map(({ name, label, icon, color }) => {
+            const skillsList = getSkillsArray(name);
+            return (
+              <div key={name} className="border border-gray-700 rounded-lg p-4">
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block font-semibold text-lg">
+                    <span className={color}>{icon}</span> {label}
+                  </label>
+                  <button
+                    onClick={() => setEditingCategory(editingCategory === name ? null : name)}
+                    className="text-accent text-sm hover:text-blue-400 transition"
+                  >
+                    {editingCategory === name ? 'Cancel' : 'Edit'}
+                  </button>
+                </div>
+                
+                {editingCategory === name ? (
+                  <textarea
+                    value={skillsList.join(', ')}
+                    onChange={(e) => updateSkills(name, e.target.value)}
+                    className="w-full p-3 rounded bg-gray-700 text-white border border-gray-600 focus:border-accent outline-none"
+                    rows="3"
+                    placeholder="Python, SQL, JavaScript, React, Tableau"
+                  />
                 ) : (
-                  <p className="text-gray-500 text-sm italic">No skills added yet. Click Edit to add.</p>
+                  <div className="flex flex-wrap gap-2">
+                    {skillsList.length > 0 ? (
+                      skillsList.map((skill, idx) => (
+                        <span key={idx} className="bg-accent/20 text-accent px-3 py-1 rounded-full text-sm">
+                          {skill}
+                        </span>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 text-sm italic">No skills added yet. Click Edit to add.</p>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
-          </div>
-        ))}
-        
-        {/* Dynamic Categories (user-added) */}
-        {Object.keys(skills).filter(key => !skillCategories.some(c => c.name === key)).map(category => (
-          <div key={category} className="border border-gray-700 rounded-lg p-4">
-            <div className="flex justify-between items-center mb-2">
-              <label className="block font-semibold text-lg capitalize">
-                📁 {category}
-              </label>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setEditingCategory(editingCategory === category ? null : category)}
-                  className="text-accent text-sm hover:text-blue-400 transition"
-                >
-                  {editingCategory === category ? 'Cancel' : 'Edit'}
-                </button>
-                <button
-                  onClick={() => deleteCategory(category)}
-                  className="text-red-400 text-sm hover:text-red-300 transition"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-            
-            {editingCategory === category ? (
-              <textarea
-                value={skills[category] ? skills[category].join(', ') : ''}
-                onChange={(e) => updateSkills(category, e.target.value)}
-                className="w-full p-3 rounded bg-gray-700 text-white border border-gray-600 focus:border-accent outline-none"
-                rows="3"
-                placeholder="Skill 1, Skill 2, Skill 3"
-              />
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {skills[category] && skills[category].length > 0 ? (
-                  skills[category].map((skill, idx) => (
-                    <span key={idx} className="bg-accent/20 text-accent px-3 py-1 rounded-full text-sm">
-                      {skill}
-                    </span>
-                  ))
+            );
+          })}
+          
+          {/* Dynamic Categories (user-added) */}
+          {dynamicCategories.map(category => {
+            const skillsList = getSkillsArray(category);
+            return (
+              <div key={category} className="border border-gray-700 rounded-lg p-4">
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block font-semibold text-lg capitalize">
+                    📁 {category}
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setEditingCategory(editingCategory === category ? null : category)}
+                      className="text-accent text-sm hover:text-blue-400 transition"
+                    >
+                      {editingCategory === category ? 'Cancel' : 'Edit'}
+                    </button>
+                    <button
+                      onClick={() => deleteCategory(category)}
+                      className="text-red-400 text-sm hover:text-red-300 transition"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+                
+                {editingCategory === category ? (
+                  <textarea
+                    value={skillsList.join(', ')}
+                    onChange={(e) => updateSkills(category, e.target.value)}
+                    className="w-full p-3 rounded bg-gray-700 text-white border border-gray-600 focus:border-accent outline-none"
+                    rows="3"
+                    placeholder="Skill 1, Skill 2, Skill 3"
+                  />
                 ) : (
-                  <p className="text-gray-500 text-sm italic">No skills added yet. Click Edit to add.</p>
+                  <div className="flex flex-wrap gap-2">
+                    {skillsList.length > 0 ? (
+                      skillsList.map((skill, idx) => (
+                        <span key={idx} className="bg-accent/20 text-accent px-3 py-1 rounded-full text-sm">
+                          {skill}
+                        </span>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 text-sm italic">No skills added yet. Click Edit to add.</p>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
-          </div>
-        ))}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
