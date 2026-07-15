@@ -27,6 +27,8 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
     order: 0
   });
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [customTheme, setCustomTheme] = useState('');
+  const [showCustomTheme, setShowCustomTheme] = useState(false);
 
   const addResearch = async () => {
     const newResearch = {
@@ -85,6 +87,26 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
       projectLink: item.projectLink || '',
       order: item.order || 0
     });
+    // Check if the current theme is in the preset list
+    const presetThemes = [
+      'Information Systems',
+      'Decision Support',
+      'Artificial Intelligence',
+      'Computer Vision',
+      'Natural Language Processing',
+      'Data Analytics',
+      'Human-Computer Interaction',
+      'Educational Technology',
+      'Social Computing',
+      'Sustainable Systems'
+    ];
+    if (item.theme && !presetThemes.includes(item.theme)) {
+      setShowCustomTheme(true);
+      setCustomTheme(item.theme);
+    } else {
+      setShowCustomTheme(false);
+      setCustomTheme('');
+    }
   };
 
   const saveEdit = async (id) => {
@@ -101,6 +123,8 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
 
   const cancelEdit = () => {
     setEditingResearch(null);
+    setShowCustomTheme(false);
+    setCustomTheme('');
   };
 
   const deleteResearch = async (id) => {
@@ -151,7 +175,7 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
     }
   };
 
-  const themes = [
+  const presetThemes = [
     'Information Systems',
     'Decision Support',
     'Artificial Intelligence',
@@ -161,7 +185,27 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
     'Human-Computer Interaction',
     'Educational Technology',
     'Social Computing',
-    'Sustainable Systems'
+    'Sustainable Systems',
+    'Machine Learning',
+    'Deep Learning',
+    'NLP',
+    'Reinforcement Learning',
+    'Knowledge Representation',
+    'Human-AI Interaction',
+    'AI Ethics',
+    'Explainable AI',
+    'Data Science',
+    'Big Data',
+    'Cloud Computing',
+    'Edge Computing',
+    'IoT',
+    'Cybersecurity',
+    'Software Engineering',
+    'Web Development',
+    'Mobile Computing',
+    'Database Systems',
+    'Information Retrieval',
+    'Recommendation Systems'
   ];
 
   const statusOptions = [
@@ -183,6 +227,23 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
     'Research Report',
     'Book Chapter'
   ];
+
+  // Handle theme selection - if "Other" is selected, show custom input
+  const handleThemeChange = (value) => {
+    if (value === 'other') {
+      setShowCustomTheme(true);
+      setEditForm({...editForm, theme: ''});
+    } else {
+      setShowCustomTheme(false);
+      setEditForm({...editForm, theme: value});
+      setCustomTheme('');
+    }
+  };
+
+  const handleCustomThemeChange = (value) => {
+    setCustomTheme(value);
+    setEditForm({...editForm, theme: value});
+  };
 
   // Sort by order
   const sortedResearch = [...research].sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -309,17 +370,18 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
                   </select>
                 </div>
                 
-                {/* Theme and Featured */}
+                {/* Theme with Custom Option */}
                 <div>
                   <label className="block text-sm font-semibold mb-1">Research Theme</label>
                   <select
-                    value={editForm.theme}
-                    onChange={(e) => setEditForm({...editForm, theme: e.target.value})}
+                    value={showCustomTheme ? 'other' : editForm.theme}
+                    onChange={(e) => handleThemeChange(e.target.value)}
                     className="w-full bg-gray-700 p-2 rounded"
                   >
-                    {themes.map(theme => (
+                    {presetThemes.map(theme => (
                       <option key={theme} value={theme}>{theme}</option>
                     ))}
+                    <option value="other">✏️ Other (Type manually)</option>
                   </select>
                 </div>
                 <div>
@@ -333,6 +395,21 @@ const ResearchTab = ({ research, setResearch, showMessage, setUploading, uploadi
                     <option value="true">⭐ Yes (Featured)</option>
                   </select>
                 </div>
+                
+                {/* Custom Theme Input - shows when "Other" is selected */}
+                {showCustomTheme && (
+                  <div className="col-span-2">
+                    <label className="block text-sm font-semibold mb-1">Custom Theme</label>
+                    <input
+                      type="text"
+                      value={customTheme}
+                      onChange={(e) => handleCustomThemeChange(e.target.value)}
+                      className="w-full bg-gray-700 p-2 rounded border border-accent/50"
+                      placeholder="Enter your custom research theme..."
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Type your own research theme (e.g., "Explainable AI in Healthcare")</p>
+                  </div>
+                )}
                 
                 {/* Venue and Year */}
                 <div>

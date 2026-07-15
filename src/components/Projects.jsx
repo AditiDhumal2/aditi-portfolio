@@ -17,7 +17,7 @@ const ProjectModal = ({ project, onClose }) => {
     
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % images.length);
-    }, 3000); // Change image every 3 seconds
+    }, 3000);
     
     return () => clearInterval(interval);
   }, [images.length, hasMultipleImages]);
@@ -64,7 +64,7 @@ const ProjectModal = ({ project, onClose }) => {
         className="bg-gradient-to-br from-gray-900 to-dark border border-gray-700 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
-        {/* Image Slider Section */}
+        {/* Image Slider Section - Title removed from here */}
         <div className="relative h-64 md:h-80 bg-gradient-to-r from-accent/20 to-purple-500/20 rounded-t-2xl overflow-hidden">
           {images.length > 0 ? (
             <>
@@ -125,12 +125,18 @@ const ProjectModal = ({ project, onClose }) => {
             </div>
           )}
           <button onClick={onClose} className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 rounded-full p-2 text-white transition z-10">✕</button>
-          <div className="absolute bottom-4 left-4 z-10">
-            <h2 className="text-2xl font-bold text-white">{project.title}</h2>
-            <div className="flex flex-wrap gap-1 mt-1">
-              {project.tools?.split(',').slice(0, 3).map((tool, idx) => (
-                <span key={idx} className="bg-accent/20 text-accent px-2 py-0.5 rounded text-xs">{tool.trim()}</span>
-              ))}
+        </div>
+        
+        {/* Project Title - Now below the image with clear visibility */}
+        <div className="p-4 border-b border-gray-700">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-white">{project.title}</h2>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {project.tools?.split(',').slice(0, 4).map((tool, idx) => (
+                  <span key={idx} className="bg-accent/20 text-accent px-2 py-0.5 rounded text-xs">{tool.trim()}</span>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -304,7 +310,6 @@ const Projects = () => {
             <h2 className="text-4xl font-bold">My <span className="text-accent">Projects</span></h2>
             <div className="w-16 h-0.5 bg-accent mx-auto rounded-full mt-2"></div>
             
-            {/* Quote directly under the title */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -334,7 +339,6 @@ const Projects = () => {
                 onClick={() => setSelectedProject(project)}
               >
                 <div className="relative rounded-xl overflow-hidden bg-gray-800 border border-gray-700 hover:border-accent transition-all h-[280px]">
-                  {/* Project Image - shows first image or fallback */}
                   <div className="w-full h-full">
                     {project.images && project.images.length > 0 ? (
                       <img 
@@ -349,17 +353,14 @@ const Projects = () => {
                     )}
                   </div>
                   
-                  {/* Dark overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent transition-opacity group-hover:opacity-100"></div>
                   
-                  {/* Content overlay - bottom aligned */}
                   <div className="absolute bottom-0 left-0 right-0 p-5">
                     <h3 className="text-xl font-bold text-white group-hover:text-accent transition line-clamp-2">
                       {project.title}
                     </h3>
                   </div>
                   
-                  {/* Learn More - appears on hover */}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="bg-accent/90 hover:bg-accent text-white px-6 py-3 rounded-lg font-semibold transform transition-transform group-hover:scale-105 shadow-lg">
                       Learn More →
