@@ -69,23 +69,23 @@ const Contact = () => {
   const activeLinks = socialLinks.filter(link => link.url && link.url !== '#');
   
   return (
-    <section id="contact" className="py-20 bg-gradient-to-b from-gray-900 to-dark">
+    <section id="contact" className="py-16 bg-gradient-to-b from-gray-900 to-dark">
       <div className="container mx-auto px-6">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.4 }}
           className="text-center"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Get In <span className="text-accent">Touch</span>
+          <h2 className="text-3xl md:text-4xl font-bold mb-3">
+            📧 <span className="text-accent">Contact</span>
           </h2>
-          <div className="w-20 h-1 bg-accent mx-auto rounded-full mb-6"></div>
-          <p className="text-gray-400 mb-12 max-w-2xl mx-auto">
-            Let's connect! I'm always open to discussing research opportunities, collaborations, or data analytics projects
+          <div className="w-16 h-0.5 bg-accent mx-auto rounded-full mb-4"></div>
+          <p className="text-gray-400 text-sm mb-8 max-w-xl mx-auto">
+            Let's connect! I'm open to discussing research opportunities, collaborations, or data analytics projects.
           </p>
           
-          <div className="flex flex-wrap justify-center gap-6 mb-12">
+          <div className="flex flex-wrap justify-center gap-4">
             {activeLinks.map((link, idx) => (
               <motion.a
                 key={link.name}
@@ -95,22 +95,17 @@ const Contact = () => {
                 initial={{ opacity: 0, scale: 0 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ delay: idx * 0.1 }}
-                whileHover={{ y: -5, scale: 1.05 }}
-                className={`bg-gray-800 ${link.bgHover} transition-all p-6 rounded-2xl inline-flex flex-col items-center gap-3 group w-32 hover:shadow-xl`}
+                whileHover={{ y: -4, scale: 1.05 }}
+                className={`bg-gray-800 ${link.bgHover} transition-all p-4 rounded-xl inline-flex flex-col items-center gap-2 group w-24 hover:shadow-xl`}
               >
-                <div className="text-4xl group-hover:scale-110 transition-transform text-white">
+                <div className="text-3xl group-hover:scale-110 transition-transform text-white">
                   {link.icon}
                 </div>
-                <span className="font-semibold text-gray-300 group-hover:text-white transition">
+                <span className="text-xs font-medium text-gray-300 group-hover:text-white transition">
                   {link.name}
                 </span>
               </motion.a>
             ))}
-          </div>
-          
-          <div className="text-gray-500 text-sm">
-            <p>📍 Based in India | Open to global opportunities</p>
-            <p className="mt-2">📅 Available for Summer 2025 Research Internships</p>
           </div>
         </motion.div>
       </div>
