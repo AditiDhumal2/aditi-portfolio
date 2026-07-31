@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import compression from 'compression';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,30 +14,38 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
-app.use(express.json({ limit: '50mb' }));
+// ============ OPTIMIZATION MIDDLEWARE ============
+// Enable compression (reduces file sizes by 60-80%)
+app.use(compression());
 
-// ============ MONGODB CONNECTION ============
+app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+
+// ============ MONGODB CONNECTION with Optimizations ============
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://aditidhumal704_db_user:kaqJeBFcCKabk2k6@cluster0.1iqtkir.mongodb.net/aditi_portfolio?retryWrites=true&w=majority&appName=Cluster0';
 
 console.log('📡 Connecting to MongoDB Atlas...');
-console.log('📍 Cluster: cluster0.1iqtkir.mongodb.net');
-console.log('💾 Database: aditi_portfolio');
 
-mongoose.connect(MONGODB_URI, {
-  serverSelectionTimeoutMS: 10000,
-  socketTimeoutMS: 45000,
-})
-  .then(() => console.log('✅ Connected to MongoDB - Data will persist forever!'))
+// Connection options for faster connection
+const connectionOptions = {
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 30000,
+  connectTimeoutMS: 10000,
+  maxPoolSize: 10,
+  minPoolSize: 1,
+  family: 4, // Force IPv4
+};
+
+mongoose.connect(MONGODB_URI, connectionOptions)
+  .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => {
     console.error('❌ MongoDB connection error:', err.message);
-    console.log('⚠️ Make sure your IP is whitelisted in MongoDB Atlas');
   });
 
 // ============ SCHEMAS ============
-// ============ UPDATED PROFILE SCHEMA with SGPA, CGPA, and Highlights ============
+// Profile Schema
 const profileSchema = new mongoose.Schema({
-  name: { type: String, default: 'Aditi' },
+  name: { type: String, default: 'Aditi Dhumal' },
   photo: { type: String, default: '' },
   graduation: { type: String, default: '' },
   title: { type: String, default: 'Information Technology Student specializing in Data Analytics & Intelligent Systems' },
@@ -56,6 +65,7 @@ const profileSchema = new mongoose.Schema({
   highlights: [{ type: String }]
 }, { timestamps: true });
 
+// Project Schema
 const projectSchema = new mongoose.Schema({
   title: { type: String, required: true },
   problem: { type: String, default: '' },
@@ -89,7 +99,7 @@ const projectSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// ============ UPDATED EXPERIENCE SCHEMA ============
+// Experience Schema
 const experienceSchema = new mongoose.Schema({
   title: { type: String, required: true },
   company: { type: String, required: true },
@@ -104,6 +114,7 @@ const experienceSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
+// Current Project Schema
 const currentProjectSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, default: '' },
@@ -116,7 +127,7 @@ const currentProjectSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// ============ UPDATED RESEARCH SCHEMA ============
+// Research Schema
 const researchSchema = new mongoose.Schema({
   title: { type: String, required: true },
   type: { type: String, default: 'Conference Paper' },
@@ -132,7 +143,7 @@ const researchSchema = new mongoose.Schema({
   doi: { type: String, default: '' },
   citations: { type: String, default: '' },
   impact: { type: String, default: '' },
-  theme: { type: String, default: 'Decision Support Systems' },
+  theme: { type: String, default: 'Information Systems' },
   featured: { type: Boolean, default: false },
   image: { type: String, default: '' },
   skills: [{ type: String }],
@@ -140,7 +151,7 @@ const researchSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// ============ UPDATED CERTIFICATION SCHEMA ============
+// Certification Schema
 const certificationSchema = new mongoose.Schema({
   name: { type: String, default: 'New Certification' },
   issuer: { type: String, default: 'Unknown Issuer' },
@@ -156,7 +167,7 @@ const certificationSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// ============ UPDATED ACHIEVEMENT SCHEMA (with multiple images) ============
+// Achievement Schema
 const achievementSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, default: '' },
@@ -168,6 +179,7 @@ const achievementSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
+// Skills Schema
 const skillsSchema = new mongoose.Schema({
   programming: [{ type: String }],
   dataTools: [{ type: String }],
@@ -176,6 +188,7 @@ const skillsSchema = new mongoose.Schema({
   web: [{ type: String }]
 }, { timestamps: true });
 
+// Contact Schema
 const contactSchema = new mongoose.Schema({
   linkedin: { type: String, default: '' },
   github: { type: String, default: '' },
@@ -195,7 +208,7 @@ const Achievement = mongoose.model('Achievement', achievementSchema);
 const Skills = mongoose.model('Skills', skillsSchema);
 const Contact = mongoose.model('Contact', contactSchema);
 
-// ============ SEED INITIAL DATA (Only if empty) ============
+// ============ SEED INITIAL DATA ============
 async function seedInitialData() {
   try {
     const profileCount = await Profile.countDocuments();
@@ -203,7 +216,7 @@ async function seedInitialData() {
       console.log('🌱 Seeding initial data...');
       
       await Profile.create({
-        name: 'Aditi',
+        name: 'Aditi Dhumal',
         title: 'Information Technology Student specializing in Data Analytics & Intelligent Systems',
         subtitle: 'Building data-driven solutions and research-backed systems for real-world impact',
         education: 'BE in Information Technology',
@@ -256,7 +269,7 @@ app.get('/test', (req, res) => {
 app.get('/api/profile', async (req, res) => {
   try {
     let profile = await Profile.findOne();
-    if (!profile) profile = await Profile.create({ name: 'Aditi' });
+    if (!profile) profile = await Profile.create({ name: 'Aditi Dhumal' });
     res.json(profile);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -554,7 +567,6 @@ app.get('/api/skills', async (req, res) => {
   try {
     let skills = await Skills.findOne();
     if (!skills) {
-      // Create default skills if none exist
       skills = await Skills.create({
         programming: ['Python', 'SQL', 'JavaScript', 'R'],
         dataTools: ['Pandas', 'Tableau', 'Power BI'],
@@ -623,21 +635,24 @@ app.get('/api/health', (req, res) => {
 
 // ============ SERVE STATIC FILES (Production) ============
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'dist')));
+  // Cache static files for faster loading
+  app.use(express.static(path.join(__dirname, 'dist'), {
+    maxAge: '1d',
+    etag: true,
+    lastModified: true,
+  }));
   
   app.get(/^\/(?!api).*/, (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'), {
+      maxAge: '1d',
+    });
   });
 }
 
 // ============ START SERVER ============
 app.listen(PORT, async () => {
-  console.log(`\n🚀 ========================================`);
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📊 API available at http://localhost:${PORT}/api`);
-  console.log(`💾 Using MongoDB Atlas - Data will persist forever!`);
-  console.log(`✅ Portfolio ready for MSIM applications!`);
-  console.log(`🚀 ========================================\n`);
+  console.log(`\n🚀 Server running on port ${PORT}`);
+  console.log(`✅ Portfolio ready!`);
   
   await seedInitialData();
 });

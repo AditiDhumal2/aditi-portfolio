@@ -1,43 +1,83 @@
-import React from 'react';
+import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import About from './components/About';
-import Experience from './components/Experience';
-import Projects from './components/Projects';
-import CurrentProjects from './components/CurrentProjects';
-import Research from './components/Research';
-import Certifications from './components/Certifications';
-import Achievements from './components/Achievements';
-import Skills from './components/Skills';
-import Contact from './components/Contact';
-import AdminDashboard from './components/admin/AdminDashboard';
+
+// Lazy load components for faster initial load
+const Hero = lazy(() => import('./components/Hero'));
+const About = lazy(() => import('./components/About'));
+const Experience = lazy(() => import('./components/Experience'));
+const Projects = lazy(() => import('./components/Projects'));
+const CurrentProjects = lazy(() => import('./components/CurrentProjects'));
+const Research = lazy(() => import('./components/Research'));
+const Certifications = lazy(() => import('./components/Certifications'));
+const Achievements = lazy(() => import('./components/Achievements'));
+const Skills = lazy(() => import('./components/Skills'));
+const Contact = lazy(() => import('./components/Contact'));
+const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
+
+// Professional Loading Component with Rolling Box
+const LoadingSpinner = () => {
+  const [showTimeout, setShowTimeout] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowTimeout(true);
+    }, 8000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-dark">
+      {/* Rolling Box Animation */}
+      <div className="relative mb-8">
+        <div className="w-16 h-16 bg-accent rounded-lg animate-rolling-box shadow-[0_0_30px_rgba(79,140,255,0.3)]"></div>
+        <div className="w-20 h-2 bg-accent/20 rounded-full mx-auto mt-4 animate-shadow-pulse"></div>
+      </div>
+      
+      <p className="text-gray-400 text-lg font-light tracking-wider animate-pulse">
+        Loading<span className="animate-dots">...</span>
+      </p>
+      
+      {showTimeout && (
+        <p className="text-gray-500 text-sm mt-6">
+          Taking longer than usual? <br />
+          <span className="text-accent hover:underline cursor-pointer" onClick={() => window.location.reload()}>
+            Refresh the page
+          </span>
+        </p>
+      )}
+    </div>
+  );
+};
 
 function App() {
   return (
     <Router>
       <div className="bg-dark min-h-screen">
-        <Routes>
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/" element={
-            <>
-              <Navbar />
-              <Hero />
-              <About />
-              <Experience />
-              <Projects />
-              <CurrentProjects />
-              <Research />
-              <Certifications />
-              <Achievements />
-              <Skills />
-              <Contact />
-              <footer className="py-6 text-center text-gray-500 text-sm border-t border-gray-800">
-                <p>© 2024 Aditi | Built with React & Tailwind CSS</p>
-              </footer>
-            </>
-          } />
-        </Routes>
+        <Suspense fallback={<LoadingSpinner />}>
+          <Routes>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/" element={
+              <>
+                <Navbar />
+                <Hero />
+                <About />
+                <Experience />
+                <Projects />
+                <CurrentProjects />
+                <Research />
+                <Certifications />
+                <Achievements />
+                <Skills />
+                <Contact />
+                <footer className="py-6 text-center text-gray-500 text-sm border-t border-gray-800">
+                  <p>© 2024 Aditi Dhumal | Built with React & Tailwind CSS</p>
+                </footer>
+              </>
+            } />
+          </Routes>
+        </Suspense>
       </div>
     </Router>
   );
