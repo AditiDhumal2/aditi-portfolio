@@ -15,25 +15,42 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ============ OPTIMIZATION MIDDLEWARE ============
-// Enable compression (reduces file sizes by 60-80%)
 app.use(compression());
-
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-// ============ MONGODB CONNECTION with Optimizations ============
+// ============ KEEP-ALIVE (Prevents Cold Starts) ============
+// This keeps the server alive by pinging itself every 5 minutes
+if (process.env.NODE_ENV === 'production') {
+  const keepAlive = () => {
+    try {
+      const url = `http://localhost:${PORT}/api/health`;
+      fetch(url).catch(() => {});
+    } catch (e) {
+      // Silently fail
+    }
+  };
+  
+  // Ping every 5 minutes to keep server alive
+  setInterval(keepAlive, 300000);
+  
+  // Initial ping after 30 seconds
+  setTimeout(keepAlive, 30000);
+  console.log('💓 Keep-alive enabled - server will stay warm');
+}
+
+// ============ MONGODB CONNECTION ============
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://aditidhumal704_db_user:kaqJeBFcCKabk2k6@cluster0.1iqtkir.mongodb.net/aditi_portfolio?retryWrites=true&w=majority&appName=Cluster0';
 
 console.log('📡 Connecting to MongoDB Atlas...');
 
-// Connection options for faster connection
 const connectionOptions = {
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 30000,
   connectTimeoutMS: 10000,
   maxPoolSize: 10,
   minPoolSize: 1,
-  family: 4, // Force IPv4
+  family: 4,
 };
 
 mongoose.connect(MONGODB_URI, connectionOptions)
@@ -43,7 +60,6 @@ mongoose.connect(MONGODB_URI, connectionOptions)
   });
 
 // ============ SCHEMAS ============
-// Profile Schema
 const profileSchema = new mongoose.Schema({
   name: { type: String, default: 'Aditi Dhumal' },
   photo: { type: String, default: '' },
@@ -65,7 +81,6 @@ const profileSchema = new mongoose.Schema({
   highlights: [{ type: String }]
 }, { timestamps: true });
 
-// Project Schema
 const projectSchema = new mongoose.Schema({
   title: { type: String, required: true },
   problem: { type: String, default: '' },
@@ -99,7 +114,6 @@ const projectSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// Experience Schema
 const experienceSchema = new mongoose.Schema({
   title: { type: String, required: true },
   company: { type: String, required: true },
@@ -114,7 +128,6 @@ const experienceSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// Current Project Schema
 const currentProjectSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, default: '' },
@@ -127,7 +140,6 @@ const currentProjectSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// Research Schema
 const researchSchema = new mongoose.Schema({
   title: { type: String, required: true },
   type: { type: String, default: 'Conference Paper' },
@@ -151,7 +163,6 @@ const researchSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// Certification Schema
 const certificationSchema = new mongoose.Schema({
   name: { type: String, default: 'New Certification' },
   issuer: { type: String, default: 'Unknown Issuer' },
@@ -167,7 +178,6 @@ const certificationSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// Achievement Schema
 const achievementSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, default: '' },
@@ -179,7 +189,6 @@ const achievementSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// Skills Schema
 const skillsSchema = new mongoose.Schema({
   programming: [{ type: String }],
   dataTools: [{ type: String }],
@@ -188,7 +197,6 @@ const skillsSchema = new mongoose.Schema({
   web: [{ type: String }]
 }, { timestamps: true });
 
-// Contact Schema
 const contactSchema = new mongoose.Schema({
   linkedin: { type: String, default: '' },
   github: { type: String, default: '' },
@@ -509,22 +517,6 @@ app.delete('/api/certifications/:id', async (req, res) => {
   }
 });
 
-// Test endpoint for certifications
-app.post('/api/certifications-test', async (req, res) => {
-  try {
-    const cert = await Certification.create({
-      name: "Test Certification",
-      issuer: "Test Issuer",
-      date: "2024",
-      skills: ["Test Skill"]
-    });
-    res.json({ success: true, cert });
-  } catch (error) {
-    console.error('Test endpoint error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
 // ============ ACHIEVEMENTS ROUTES ============
 app.get('/api/achievements', async (req, res) => {
   try {
@@ -635,7 +627,6 @@ app.get('/api/health', (req, res) => {
 
 // ============ SERVE STATIC FILES (Production) ============
 if (process.env.NODE_ENV === 'production') {
-  // Cache static files for faster loading
   app.use(express.static(path.join(__dirname, 'dist'), {
     maxAge: '1d',
     etag: true,
@@ -652,6 +643,7 @@ if (process.env.NODE_ENV === 'production') {
 // ============ START SERVER ============
 app.listen(PORT, async () => {
   console.log(`\n🚀 Server running on port ${PORT}`);
+  console.log(`💓 Keep-alive active - server will stay warm`);
   console.log(`✅ Portfolio ready!`);
   
   await seedInitialData();

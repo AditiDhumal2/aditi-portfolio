@@ -2,13 +2,133 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>my-portfolio</title>
-    <script type="module" crossorigin src="/assets/index-AKw7b3Lb.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-Dz17uRn8.css">
+    <title>Aditi Dhumal | Portfolio</title>
+    <style>
+      /* ===== LOADING SCREEN - SHOWS IMMEDIATELY ===== */
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      
+      body {
+        background: #0B0F19;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      #root { width: 100%; min-height: 100vh; }
+      
+      .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: #0B0F19;
+      }
+      
+      /* Rolling Box */
+      .loading-box {
+        width: 64px;
+        height: 64px;
+        background: #4F8CFF;
+        border-radius: 4px;
+        animation: rolling-box 2.5s ease-in-out infinite;
+        box-shadow: 0 0 40px rgba(79, 140, 255, 0.3);
+      }
+      
+      @keyframes rolling-box {
+        0% { transform: translateX(-30px) rotate(0deg) scale(1); border-radius: 4px; }
+        25% { transform: translateX(0px) rotate(90deg) scale(1.1); border-radius: 50%; background: #4F8CFF; }
+        50% { transform: translateX(30px) rotate(180deg) scale(1); border-radius: 4px; background: #6b9fff; }
+        75% { transform: translateX(0px) rotate(270deg) scale(1.1); border-radius: 50%; background: #4F8CFF; }
+        100% { transform: translateX(-30px) rotate(360deg) scale(1); border-radius: 4px; }
+      }
+      
+      /* Shadow */
+      .loading-shadow {
+        width: 80px;
+        height: 8px;
+        background: rgba(79, 140, 255, 0.2);
+        border-radius: 50%;
+        margin-top: 16px;
+        animation: shadow-pulse 2.5s ease-in-out infinite;
+      }
+      
+      @keyframes shadow-pulse {
+        0%, 100% { transform: scale(1); opacity: 0.3; }
+        50% { transform: scale(1.2); opacity: 0.6; }
+      }
+      
+      .loading-text {
+        color: #9ca3af;
+        font-size: 1.125rem;
+        font-weight: 300;
+        letter-spacing: 0.05em;
+        margin-top: 32px;
+        animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+      
+      .loading-dots::after {
+        content: '...';
+        animation: dots 1.5s steps(3) infinite;
+        display: inline-block;
+        width: 1.5em;
+        text-align: left;
+      }
+      
+      @keyframes dots {
+        0%, 20% { content: ''; opacity: 0; }
+        40% { content: '.'; opacity: 1; }
+        60% { content: '..'; opacity: 1; }
+        80%, 100% { content: '...'; opacity: 1; }
+      }
+      
+      .loading-subtext {
+        color: #6b7280;
+        font-size: 0.875rem;
+        margin-top: 16px;
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/index-CBVw-R3v.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-Dai8tw9p.css">
   </head>
   <body>
+    <!-- Loading Screen - Shows Immediately -->
+    <div id="loading-screen">
+      <div class="loading-container">
+        <div class="loading-box"></div>
+        <div class="loading-shadow"></div>
+        <p class="loading-text">
+          Loading<span class="loading-dots"></span>
+        </p>
+        <p class="loading-subtext">First visit may take a moment</p>
+      </div>
+    </div>
+    
     <div id="root"></div>
+    
+    <script>
+      // Hide loading screen when React loads
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+          var loadingScreen = document.getElementById('loading-screen');
+          if (loadingScreen) {
+            loadingScreen.style.transition = 'opacity 0.5s';
+            loadingScreen.style.opacity = '0';
+            setTimeout(function() {
+              loadingScreen.style.display = 'none';
+            }, 500);
+          }
+        }, 200);
+      });
+    </script>
   </body>
 </html>
