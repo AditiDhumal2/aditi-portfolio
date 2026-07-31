@@ -76,7 +76,7 @@ const Hero = () => {
               </span>
             </div>
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              Hi, I'm <span className="text-accent">{profile?.name || 'Aditi'}</span>
+              Hi, I'm <span className="text-accent">{profile?.name || 'Aditi Dhumal'}</span>
             </h1>
             <div className="h-28 mb-6">
               <p className="text-xl md:text-2xl text-gray-300">{text}<span className="animate-pulse text-accent">|</span></p>

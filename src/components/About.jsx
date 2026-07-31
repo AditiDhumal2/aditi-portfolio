@@ -97,7 +97,7 @@ const About = () => {
                   )}
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-accent">{profile?.name || 'Aditi'}</h3>
+                  <h3 className="text-2xl font-bold text-accent">{profile?.name || 'Aditi Dhumal'}</h3>
                   <p className="text-gray-400">{profile?.interests || 'Data Analytics + AI Systems'}</p>
                 </div>
               </div>
