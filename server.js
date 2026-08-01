@@ -14,29 +14,29 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ============ OPTIMIZATION MIDDLEWARE ============
+// ============ MIDDLEWARE ============
 app.use(compression());
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-// ============ KEEP-ALIVE (Prevents Cold Starts) ============
-// This keeps the server alive by pinging itself every 5 minutes
+// ============ AGGRESSIVE KEEP-ALIVE ============
+// This prevents cold starts completely
 if (process.env.NODE_ENV === 'production') {
+  console.log('💓 Aggressive keep-alive enabled');
+  
+  // Ping every 2 minutes (120,000 ms) - prevents sleep
   const keepAlive = () => {
-    try {
-      const url = `http://localhost:${PORT}/api/health`;
-      fetch(url).catch(() => {});
-    } catch (e) {
-      // Silently fail
-    }
+    const url = `http://localhost:${PORT}/api/health`;
+    fetch(url)
+      .then(() => console.log('💓 Keep-alive ping successful'))
+      .catch(() => {});
   };
   
-  // Ping every 5 minutes to keep server alive
-  setInterval(keepAlive, 300000);
+  // Ping every 2 minutes
+  setInterval(keepAlive, 120000);
   
-  // Initial ping after 30 seconds
-  setTimeout(keepAlive, 30000);
-  console.log('💓 Keep-alive enabled - server will stay warm');
+  // Initial ping after 5 seconds
+  setTimeout(keepAlive, 5000);
 }
 
 // ============ MONGODB CONNECTION ============
@@ -268,12 +268,12 @@ async function seedInitialData() {
   }
 }
 
-// ============ TEST ENDPOINT ============
+// ============ ROUTES ============
 app.get('/test', (req, res) => {
   res.json({ message: 'Server is working!', timestamp: new Date().toISOString() });
 });
 
-// ============ PROFILE ROUTES ============
+// Profile
 app.get('/api/profile', async (req, res) => {
   try {
     let profile = await Profile.findOne();
@@ -299,7 +299,7 @@ app.put('/api/profile', async (req, res) => {
   }
 });
 
-// ============ PROJECTS ROUTES ============
+// Projects
 app.get('/api/projects', async (req, res) => {
   try {
     const projects = await Project.find().sort({ order: 1, createdAt: -1 });
@@ -336,7 +336,7 @@ app.delete('/api/projects/:id', async (req, res) => {
   }
 });
 
-// ============ EXPERIENCE ROUTES ============
+// Experience
 app.get('/api/experience', async (req, res) => {
   try {
     const experiences = await Experience.find().sort({ order: 1, createdAt: -1 });
@@ -373,7 +373,7 @@ app.delete('/api/experience/:id', async (req, res) => {
   }
 });
 
-// ============ CURRENT PROJECTS ROUTES ============
+// Current Projects
 app.get('/api/current-projects', async (req, res) => {
   try {
     const projects = await CurrentProject.find().sort({ order: 1, createdAt: -1 });
@@ -410,7 +410,7 @@ app.delete('/api/current-projects/:id', async (req, res) => {
   }
 });
 
-// ============ RESEARCH ROUTES ============
+// Research
 app.get('/api/research', async (req, res) => {
   try {
     const research = await Research.find().sort({ order: 1, year: -1 });
@@ -447,77 +447,44 @@ app.delete('/api/research/:id', async (req, res) => {
   }
 });
 
-// ============ CERTIFICATIONS ROUTES ============
+// Certifications
 app.get('/api/certifications', async (req, res) => {
   try {
     const certs = await Certification.find().sort({ order: 1, date: -1 });
-    console.log(`📜 Found ${certs.length} certifications`);
     res.json(certs);
   } catch (error) {
-    console.error('GET certifications error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
 app.post('/api/certifications', async (req, res) => {
   try {
-    console.log('📝 Creating certification with data:', req.body);
-    
-    const certData = {
-      name: req.body.name || 'New Certification',
-      issuer: req.body.issuer || 'Unknown Issuer',
-      date: req.body.date || new Date().getFullYear().toString(),
-      image: req.body.image || '',
-      description: req.body.description || '',
-      skills: req.body.skills || [],
-      link: req.body.link || '',
-      certificateLink: req.body.certificateLink || '',
-      credentialId: req.body.credentialId || '',
-      validity: req.body.validity || '',
-      grade: req.body.grade || '',
-      order: req.body.order || 0
-    };
-    
-    const cert = await Certification.create(certData);
-    console.log('✅ Certification created:', cert._id);
+    const cert = await Certification.create(req.body);
     res.json(cert);
   } catch (error) {
-    console.error('❌ POST certification error:', error);
-    res.status(500).json({ error: error.message, stack: error.stack });
+    res.status(500).json({ error: error.message });
   }
 });
 
 app.put('/api/certifications/:id', async (req, res) => {
   try {
-    const cert = await Certification.findByIdAndUpdate(
-      req.params.id, 
-      req.body, 
-      { new: true, runValidators: false }
-    );
-    if (!cert) {
-      return res.status(404).json({ error: 'Certification not found' });
-    }
+    const cert = await Certification.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(cert);
   } catch (error) {
-    console.error('PUT certification error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
 app.delete('/api/certifications/:id', async (req, res) => {
   try {
-    const cert = await Certification.findByIdAndDelete(req.params.id);
-    if (!cert) {
-      return res.status(404).json({ error: 'Certification not found' });
-    }
-    res.json({ message: 'Certification deleted successfully' });
+    await Certification.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Deleted' });
   } catch (error) {
-    console.error('DELETE certification error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// ============ ACHIEVEMENTS ROUTES ============
+// Achievements
 app.get('/api/achievements', async (req, res) => {
   try {
     const achievements = await Achievement.find().sort({ order: 1, createdAt: -1 });
@@ -554,7 +521,7 @@ app.delete('/api/achievements/:id', async (req, res) => {
   }
 });
 
-// ============ SKILLS ROUTES ============
+// Skills
 app.get('/api/skills', async (req, res) => {
   try {
     let skills = await Skills.findOne();
@@ -569,7 +536,6 @@ app.get('/api/skills', async (req, res) => {
     }
     res.json(skills);
   } catch (error) {
-    console.error('GET skills error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -585,12 +551,11 @@ app.put('/api/skills', async (req, res) => {
     }
     res.json(skills);
   } catch (error) {
-    console.error('PUT skills error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// ============ CONTACT ROUTES ============
+// Contact
 app.get('/api/contact', async (req, res) => {
   try {
     let contact = await Contact.findOne();
@@ -616,7 +581,7 @@ app.put('/api/contact', async (req, res) => {
   }
 });
 
-// ============ HEALTH CHECK ENDPOINT ============
+// Health Check
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok', 
@@ -625,7 +590,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// ============ SERVE STATIC FILES (Production) ============
+// Serve Static Files
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'dist'), {
     maxAge: '1d',
@@ -642,9 +607,11 @@ if (process.env.NODE_ENV === 'production') {
 
 // ============ START SERVER ============
 app.listen(PORT, async () => {
-  console.log(`\n🚀 Server running on port ${PORT}`);
-  console.log(`💓 Keep-alive active - server will stay warm`);
-  console.log(`✅ Portfolio ready!`);
+  console.log(`\n🚀 ========================================`);
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`💓 Aggressive keep-alive active - pinging every 2 minutes`);
+  console.log(`✅ Portfolio ready for MSIM applications!`);
+  console.log(`🚀 ========================================\n`);
   
   await seedInitialData();
 });

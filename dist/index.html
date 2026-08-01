@@ -5,13 +5,18 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Aditi Dhumal | Portfolio</title>
+    
+    <!-- Preconnect for faster loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
     <style>
       /* ===== LOADING SCREEN - SHOWS IMMEDIATELY ===== */
       * { margin: 0; padding: 0; box-sizing: border-box; }
       
-      body {
-        background: #0B0F19;
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      body { 
+        background: #0B0F19; 
+        font-family: 'Inter', sans-serif;
         min-height: 100vh;
         display: flex;
         align-items: center;
@@ -29,7 +34,6 @@
         background: #0B0F19;
       }
       
-      /* Rolling Box */
       .loading-box {
         width: 64px;
         height: 64px;
@@ -47,7 +51,6 @@
         100% { transform: translateX(-30px) rotate(360deg) scale(1); border-radius: 4px; }
       }
       
-      /* Shadow */
       .loading-shadow {
         width: 80px;
         height: 8px;
