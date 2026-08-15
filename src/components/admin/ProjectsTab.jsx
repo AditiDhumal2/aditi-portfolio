@@ -10,12 +10,10 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
   const addProject = async () => {
     const newProject = {
       title: "New Project",
-      problem: "",
-      dataset: "",
-      methodology: "",
-      tools: "",
-      results: "",
-      impact: "",
+      subtitle: "Project subtitle",
+      overview: "Brief overview of what this project does and why it matters.",
+      features: "Feature 1, Feature 2, Feature 3, Feature 4, Feature 5",
+      tools: "Python, Pandas, Scikit-learn, Tableau",
       images: [],
       githubLink: "",
       deployedLink: "",
@@ -24,19 +22,6 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
         link: "",
         description: ""
       },
-      preprint: {
-        title: "",
-        doi: "",
-        link: ""
-      },
-      publication: {
-        title: "",
-        doi: "",
-        link: "",
-        conference: ""
-      },
-      challenges: "",
-      futureWork: "",
       featured: true,
       order: projects.length
     };
@@ -122,10 +107,8 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
     if (index === 0) return;
     const newProjects = [...projects];
     [newProjects[index], newProjects[index - 1]] = [newProjects[index - 1], newProjects[index]];
-    // Update order field
     newProjects.forEach((p, i) => p.order = i);
     setProjects(newProjects);
-    // Save order to database
     saveOrder(newProjects);
   };
 
@@ -158,7 +141,7 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
         <button onClick={addProject} className="bg-green-500 px-4 py-2 rounded-lg hover:bg-green-600 transition">
           + Add New Project
         </button>
-        <p className="text-sm text-gray-400">⬆⬇ Drag or use arrows to reorder</p>
+        <p className="text-sm text-gray-400">⬆⬇ Use arrows to reorder</p>
       </div>
       
       <div className="space-y-4">
@@ -218,7 +201,7 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
             
             {editingProject === project._id ? (
               <div className="grid grid-cols-1 gap-4">
-                {/* Basic Info */}
+                {/* ===== BASIC INFO ===== */}
                 <div className="grid md:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-semibold mb-1 text-blue-400">Project Title *</label>
@@ -230,76 +213,54 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1 text-purple-400">Tech Stack</label>
+                    <label className="block text-sm font-semibold mb-1 text-purple-400">Subtitle</label>
                     <input
-                      value={editForm.tools || ''}
-                      onChange={(e) => updateField('tools', e.target.value)}
+                      value={editForm.subtitle || ''}
+                      onChange={(e) => updateField('subtitle', e.target.value)}
                       className="w-full bg-gray-700 p-2 rounded"
-                      placeholder="Python, Pandas, Scikit-learn, Tableau"
+                      placeholder="Brief subtitle (appears under title)"
                     />
                   </div>
                 </div>
                 
-                {/* Problem Statement */}
+                {/* ===== OVERVIEW ===== */}
                 <div>
-                  <label className="block text-sm font-semibold mb-1 text-red-400">🎯 Problem Statement</label>
+                  <label className="block text-sm font-semibold mb-1 text-green-400">📝 Overview</label>
                   <textarea
-                    value={editForm.problem || ''}
-                    onChange={(e) => updateField('problem', e.target.value)}
+                    value={editForm.overview || ''}
+                    onChange={(e) => updateField('overview', e.target.value)}
                     className="w-full bg-gray-700 p-2 rounded"
-                    placeholder="What problem does this solve?"
-                    rows="3"
-                  />
-                </div>
-                
-                {/* Dataset */}
-                <div>
-                  <label className="block text-sm font-semibold mb-1 text-blue-400">📊 Dataset Used</label>
-                  <input
-                    value={editForm.dataset || ''}
-                    onChange={(e) => updateField('dataset', e.target.value)}
-                    className="w-full bg-gray-700 p-2 rounded"
-                    placeholder="Describe dataset: size, source, features"
-                  />
-                </div>
-                
-                {/* Methodology */}
-                <div>
-                  <label className="block text-sm font-semibold mb-1 text-green-400">⚙️ Methodology & Approach</label>
-                  <textarea
-                    value={editForm.methodology || ''}
-                    onChange={(e) => updateField('methodology', e.target.value)}
-                    className="w-full bg-gray-700 p-2 rounded"
-                    placeholder="Explain your approach, algorithms used, data processing steps"
-                    rows="3"
-                  />
-                </div>
-                
-                {/* Results */}
-                <div>
-                  <label className="block text-sm font-semibold mb-1 text-yellow-400">📈 Results & Insights</label>
-                  <textarea
-                    value={editForm.results || ''}
-                    onChange={(e) => updateField('results', e.target.value)}
-                    className="w-full bg-gray-700 p-2 rounded"
-                    placeholder="Include specific metrics: accuracy, precision, recall, business impact"
-                    rows="3"
-                  />
-                </div>
-                
-                {/* Impact */}
-                <div>
-                  <label className="block text-sm font-semibold mb-1 text-orange-400">🚀 Real-World Impact</label>
-                  <textarea
-                    value={editForm.impact || ''}
-                    onChange={(e) => updateField('impact', e.target.value)}
-                    className="w-full bg-gray-700 p-2 rounded"
-                    placeholder="Quantify the impact (e.g., reduced waste by 23%, saved $45k annually)"
+                    placeholder="2-3 lines explaining what this project does"
                     rows="2"
                   />
                 </div>
                 
-                {/* Links */}
+                {/* ===== KEY FEATURES ===== */}
+                <div>
+                  <label className="block text-sm font-semibold mb-1 text-yellow-400">✨ Key Features (comma-separated)</label>
+                  <textarea
+                    value={editForm.features || ''}
+                    onChange={(e) => updateField('features', e.target.value)}
+                    className="w-full bg-gray-700 p-2 rounded"
+                    placeholder="AI Career Advisor, Skill Gap Analysis, Resume Analysis, Salary Prediction, Job Market Analytics"
+                    rows="2"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Separate features with commas</p>
+                </div>
+                
+                {/* ===== TECH STACK ===== */}
+                <div>
+                  <label className="block text-sm font-semibold mb-1 text-purple-400">🛠 Tech Stack</label>
+                  <input
+                    value={editForm.tools || ''}
+                    onChange={(e) => updateField('tools', e.target.value)}
+                    className="w-full bg-gray-700 p-2 rounded"
+                    placeholder="Python, Pandas, Scikit-learn, Tableau, SQLite"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Separate technologies with commas</p>
+                </div>
+                
+                {/* ===== LINKS ===== */}
                 <div className="grid md:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-semibold mb-1">🐙 GitHub Repository</label>
@@ -311,7 +272,7 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1">🌐 Deployed / Live Demo Link</label>
+                    <label className="block text-sm font-semibold mb-1">🌐 Live Demo</label>
                     <input
                       value={editForm.deployedLink || ''}
                       onChange={(e) => updateField('deployedLink', e.target.value)}
@@ -321,7 +282,7 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                   </div>
                 </div>
                 
-                {/* Documentation Section */}
+                {/* ===== DOCUMENTATION ===== */}
                 <div className="border-t border-gray-700 pt-4 mt-2">
                   <h4 className="text-md font-bold text-blue-400 mb-3">📄 Documentation</h4>
                   <div className="bg-gray-700/30 p-3 rounded-lg">
@@ -345,72 +306,10 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                         placeholder="Short description"
                       />
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">Add project documentation, report, or detailed write-up</p>
                   </div>
                 </div>
                 
-                {/* Publication Details */}
-                <div className="border-t border-gray-700 pt-4 mt-2">
-                  <h4 className="text-md font-bold text-accent mb-3">📄 Publication & Preprint Details</h4>
-                  
-                  {/* Preprint */}
-                  <div className="bg-gray-700/30 p-3 rounded-lg mb-3">
-                    <label className="block text-sm font-semibold mb-2 text-blue-400">📑 Preprint</label>
-                    <div className="grid md:grid-cols-3 gap-2">
-                      <input
-                        value={editForm.preprint?.title || ''}
-                        onChange={(e) => updateNestedField('preprint', 'title', e.target.value)}
-                        className="w-full bg-gray-700 p-2 rounded"
-                        placeholder="Preprint Title"
-                      />
-                      <input
-                        value={editForm.preprint?.doi || ''}
-                        onChange={(e) => updateNestedField('preprint', 'doi', e.target.value)}
-                        className="w-full bg-gray-700 p-2 rounded"
-                        placeholder="DOI (e.g., 10.xxxx/xxxxx)"
-                      />
-                      <input
-                        value={editForm.preprint?.link || ''}
-                        onChange={(e) => updateNestedField('preprint', 'link', e.target.value)}
-                        className="w-full bg-gray-700 p-2 rounded"
-                        placeholder="Link to preprint"
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Publication */}
-                  <div className="bg-gray-700/30 p-3 rounded-lg">
-                    <label className="block text-sm font-semibold mb-2 text-green-400">📖 Published Paper</label>
-                    <div className="grid md:grid-cols-4 gap-2">
-                      <input
-                        value={editForm.publication?.title || ''}
-                        onChange={(e) => updateNestedField('publication', 'title', e.target.value)}
-                        className="w-full bg-gray-700 p-2 rounded"
-                        placeholder="Paper Title"
-                      />
-                      <input
-                        value={editForm.publication?.conference || ''}
-                        onChange={(e) => updateNestedField('publication', 'conference', e.target.value)}
-                        className="w-full bg-gray-700 p-2 rounded"
-                        placeholder="Conference/Journal"
-                      />
-                      <input
-                        value={editForm.publication?.doi || ''}
-                        onChange={(e) => updateNestedField('publication', 'doi', e.target.value)}
-                        className="w-full bg-gray-700 p-2 rounded"
-                        placeholder="DOI"
-                      />
-                      <input
-                        value={editForm.publication?.link || ''}
-                        onChange={(e) => updateNestedField('publication', 'link', e.target.value)}
-                        className="w-full bg-gray-700 p-2 rounded"
-                        placeholder="Link to paper"
-                      />
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Multiple Images Upload */}
+                {/* ===== IMAGES ===== */}
                 <div className="border-t border-gray-700 pt-4 mt-2">
                   <label className="block text-sm font-semibold mb-2">🖼️ Project Images / Screenshots</label>
                   
@@ -445,45 +344,25 @@ const ProjectsTab = ({ projects, setProjects, showMessage, setUploading, uploadi
                       <span className="text-accent text-sm">Uploading...</span>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">Upload multiple screenshots, graphs, or visualizations</p>
-                </div>
-                
-                {/* Challenges & Future Work */}
-                <div className="grid md:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-semibold mb-1">⚠️ Challenges Faced</label>
-                    <textarea
-                      value={editForm.challenges || ''}
-                      onChange={(e) => updateField('challenges', e.target.value)}
-                      className="w-full bg-gray-700 p-2 rounded"
-                      placeholder="What challenges did you encounter?"
-                      rows="2"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold mb-1">🔮 Future Work</label>
-                    <textarea
-                      value={editForm.futureWork || ''}
-                      onChange={(e) => updateField('futureWork', e.target.value)}
-                      className="w-full bg-gray-700 p-2 rounded"
-                      placeholder="What improvements could be made?"
-                      rows="2"
-                    />
-                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Upload screenshots, graphs, or visualizations</p>
                 </div>
               </div>
             ) : (
-              // View Mode - Show order number
-              <div className="text-sm text-gray-300">
-                <p className="text-gray-500 text-xs">Position: #{index + 1}</p>
-                <p><strong className="text-red-400">Problem:</strong> {project.problem?.substring(0, 80)}...</p>
-                <p><strong className="text-purple-400">Tech Stack:</strong> {project.tools}</p>
-                <p><strong className="text-yellow-400">Results:</strong> {project.results?.substring(0, 60)}...</p>
+              // ===== VIEW MODE =====
+              <div className="text-sm text-gray-300 space-y-1">
+                <p><strong className="text-gray-400">Position:</strong> #{index + 1}</p>
+                {project.subtitle && <p><strong className="text-gray-400">Subtitle:</strong> {project.subtitle}</p>}
+                {project.overview && <p className="text-gray-400"><strong>Overview:</strong> {project.overview}</p>}
+                {project.features && <p><strong className="text-gray-400">Features:</strong> {project.features}</p>}
+                <p><strong className="text-gray-400">Tech Stack:</strong> {project.tools || 'N/A'}</p>
                 {project.images && project.images.length > 0 && (
-                  <p><strong>Images:</strong> {project.images.length} uploaded</p>
+                  <p><strong className="text-gray-400">Images:</strong> {project.images.length} uploaded</p>
                 )}
-                {project.githubLink && <p><strong>GitHub:</strong> <a href={project.githubLink} target="_blank" className="text-accent">Repository</a></p>}
-                {project.deployedLink && <p><strong>Live Demo:</strong> <a href={project.deployedLink} target="_blank" className="text-accent">View Project</a></p>}
+                <div className="flex gap-3 mt-2">
+                  {project.githubLink && <a href={project.githubLink} target="_blank" className="text-accent text-xs">🐙 GitHub</a>}
+                  {project.deployedLink && <a href={project.deployedLink} target="_blank" className="text-accent text-xs">🌐 Live Demo</a>}
+                  {project.documentation?.link && <a href={project.documentation.link} target="_blank" className="text-accent text-xs">📘 Docs</a>}
+                </div>
               </div>
             )}
           </div>

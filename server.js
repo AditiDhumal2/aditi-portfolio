@@ -20,11 +20,9 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
 // ============ AGGRESSIVE KEEP-ALIVE ============
-// This prevents cold starts completely
 if (process.env.NODE_ENV === 'production') {
   console.log('💓 Aggressive keep-alive enabled');
   
-  // Ping every 2 minutes (120,000 ms) - prevents sleep
   const keepAlive = () => {
     const url = `http://localhost:${PORT}/api/health`;
     fetch(url)
@@ -32,10 +30,7 @@ if (process.env.NODE_ENV === 'production') {
       .catch(() => {});
   };
   
-  // Ping every 2 minutes
   setInterval(keepAlive, 120000);
-  
-  // Initial ping after 5 seconds
   setTimeout(keepAlive, 5000);
 }
 
@@ -81,15 +76,21 @@ const profileSchema = new mongoose.Schema({
   highlights: [{ type: String }]
 }, { timestamps: true });
 
+// ============ UPDATED PROJECT SCHEMA (Simplified) ============
 const projectSchema = new mongoose.Schema({
+  // Core required fields
   title: { type: String, required: true },
-  problem: { type: String, default: '' },
-  dataset: { type: String, default: '' },
-  methodology: { type: String, default: '' },
+  
+  // NEW SIMPLIFIED FIELDS (Trailer Philosophy)
+  subtitle: { type: String, default: '' },
+  overview: { type: String, default: '' },
+  features: { type: String, default: '' }, // Comma-separated list
+  
+  // Tech Stack & Images
   tools: { type: String, default: '' },
-  results: { type: String, default: '' },
-  impact: { type: String, default: '' },
   images: [{ type: String }],
+  
+  // Action Buttons
   githubLink: { type: String, default: '' },
   deployedLink: { type: String, default: '' },
   documentation: {
@@ -97,6 +98,14 @@ const projectSchema = new mongoose.Schema({
     link: { type: String, default: '' },
     description: { type: String, default: '' }
   },
+  
+  // LEGACY FIELDS (Kept for backward compatibility, but hidden in modal)
+  // These will still exist in the database but won't be displayed in the modal
+  problem: { type: String, default: '' },
+  dataset: { type: String, default: '' },
+  methodology: { type: String, default: '' },
+  results: { type: String, default: '' },
+  impact: { type: String, default: '' },
   preprint: {
     title: { type: String, default: '' },
     doi: { type: String, default: '' },
@@ -110,6 +119,8 @@ const projectSchema = new mongoose.Schema({
   },
   challenges: { type: String, default: '' },
   futureWork: { type: String, default: '' },
+  
+  // Display settings
   featured: { type: Boolean, default: true },
   order: { type: Number, default: 0 }
 }, { timestamps: true });
@@ -247,6 +258,25 @@ async function seedInitialData() {
         ]
       });
       
+      // Seed sample project with simplified structure
+      await Project.create({
+        title: "Career Intelligence Platform",
+        subtitle: "AI-Powered Career Analytics Platform",
+        overview: "An end-to-end career analytics platform that helps professionals identify skill gaps and discover career paths using AI-driven insights.",
+        features: "AI Career Advisor, Skill Gap Analysis, Resume Analysis, Salary Prediction, Job Market Analytics",
+        tools: "Python, Streamlit, Scikit-learn, SQLite, Gemini API",
+        images: [],
+        githubLink: "https://github.com/yourusername/career-platform",
+        deployedLink: "https://career-platform.streamlit.app",
+        documentation: {
+          title: "Career Platform Documentation",
+          link: "https://github.com/yourusername/career-platform/blob/main/README.md",
+          description: "Comprehensive guide covering architecture, setup, and API usage."
+        },
+        featured: true,
+        order: 0
+      });
+      
       await Skills.create({
         programming: ['Python', 'SQL', 'JavaScript', 'R'],
         dataTools: ['Pandas', 'Tableau', 'Power BI'],
@@ -299,7 +329,7 @@ app.put('/api/profile', async (req, res) => {
   }
 });
 
-// Projects
+// Projects - UPDATED with simplified schema
 app.get('/api/projects', async (req, res) => {
   try {
     const projects = await Project.find().sort({ order: 1, createdAt: -1 });
@@ -590,6 +620,58 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// ============ MIGRATION HELPER: Convert existing projects ============
+// This endpoint helps migrate old project data to the new format
+app.post('/api/migrate-projects', async (req, res) => {
+  try {
+    const projects = await Project.find({});
+    let migrated = 0;
+    
+    for (const project of projects) {
+      let updated = false;
+      
+      // If overview is empty but problem exists, move problem to overview
+      if (!project.overview && project.problem) {
+        project.overview = project.problem;
+        updated = true;
+      }
+      
+      // If features is empty, generate from methodology or create defaults
+      if (!project.features) {
+        const features = [];
+        if (project.methodology) {
+          // Extract key phrases from methodology
+          const sentences = project.methodology.split('.');
+          for (const sentence of sentences) {
+            if (sentence.trim().length > 10) {
+              features.push(sentence.trim());
+            }
+            if (features.length >= 5) break;
+          }
+        }
+        if (features.length === 0) {
+          features.push("Data-driven analysis", "Machine learning integration", "Visualization dashboard", "Real-time processing", "Scalable architecture");
+        }
+        project.features = features.join(', ');
+        updated = true;
+      }
+      
+      if (updated) {
+        await project.save();
+        migrated++;
+      }
+    }
+    
+    res.json({ 
+      message: `Migration complete! ${migrated} projects updated.`,
+      total: projects.length,
+      migrated
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Serve Static Files
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'dist'), {
@@ -614,4 +696,17 @@ app.listen(PORT, async () => {
   console.log(`🚀 ========================================\n`);
   
   await seedInitialData();
+  
+  // Log the new schema fields
+  console.log('\n📋 Updated Project Schema (Trailer Philosophy):');
+  console.log('  ✅ subtitle - One-line subtitle');
+  console.log('  ✅ overview - 2-3 line project description');
+  console.log('  ✅ features - Comma-separated key features');
+  console.log('  ✅ tools - Tech stack (kept for badges)');
+  console.log('  ✅ images - Screenshots/visuals');
+  console.log('  ✅ githubLink, deployedLink - Action buttons');
+  console.log('  ✅ documentation - Link to full docs');
+  console.log('\n📌 Legacy fields (kept but not displayed in modal):');
+  console.log('  problem, dataset, methodology, results, impact');
+  console.log('  preprint, publication, challenges, futureWork\n');
 });
