@@ -23,7 +23,6 @@ const About = () => {
         axios.get('/api/certifications'),
         axios.get('/api/research')
       ]);
-      console.log('Profile data:', profileData.data);
       setProfile(profileData.data);
       setAchievements(achievementsData.data);
       setProjectsCount(projectsData.data.length);
@@ -59,20 +58,99 @@ const About = () => {
     "🔬 2 Research Papers Published"
   ];
 
-  // ============ SKILLS WITH PERCENTAGES (Like "Meet Mali") ============
+  // ============ YOUR ACTUAL SKILLS WITH PERCENTAGES ============
   const skillsData = [
-    { name: "HTML | CSS", percentage: 90 },
-    { name: "Python", percentage: 80 },
-    { name: "SQL | NoSQL", percentage: 75 },
-    { name: "Excel | Power BI | Tableau", percentage: 90 },
-    { name: "AWS Cloud", percentage: 85 },
-    { name: "Machine Learning", percentage: 75 },
-    { name: "Data Cleaning | Preparation", percentage: 90 },
-    { name: "Data Analysis | Modeling", percentage: 80 },
-    { name: "Data Visualization | Reporting", percentage: 75 },
-    { name: "Business Intelligence", percentage: 90 },
-    { name: "Communication | Storytelling", percentage: 85 },
-    { name: "Critical Thinking | Problem-Solving", percentage: 75 }
+    // 💻 Programming & Development
+    { name: "Python", percentage: 90 },
+    { name: "Java", percentage: 85 },
+    { name: "TypeScript", percentage: 80 },
+    { name: "JavaScript", percentage: 85 },
+    { name: "SQL", percentage: 85 },
+    
+    // 🤖 AI & Machine Learning
+    { name: "Machine Learning", percentage: 85 },
+    { name: "Deep Learning", percentage: 75 },
+    { name: "Computer Vision", percentage: 70 },
+    { name: "NLP", percentage: 75 },
+    { name: "Generative AI", percentage: 70 },
+    { name: "LLMs", percentage: 75 },
+    
+    // 📊 Data & Analytics
+    { name: "Pandas", percentage: 90 },
+    { name: "NumPy", percentage: 85 },
+    { name: "Scikit-learn", percentage: 85 },
+    { name: "Power BI", percentage: 80 },
+    { name: "Tableau", percentage: 75 },
+    { name: "Data Visualization", percentage: 85 },
+    
+    // 🧠 Information Systems
+    { name: "Decision Support Systems", percentage: 80 },
+    { name: "Business Intelligence", percentage: 85 },
+    { name: "Data-Driven Decision Making", percentage: 85 },
+    { name: "Information Systems", percentage: 80 },
+    
+    // 🌐 Full-Stack Development
+    { name: "Next.js", percentage: 80 },
+    { name: "React", percentage: 85 },
+    { name: "Node.js", percentage: 80 },
+    { name: "Express.js", percentage: 80 },
+    { name: "MongoDB", percentage: 80 },
+    { name: "REST APIs", percentage: 85 },
+    { name: "Flask", percentage: 75 },
+    
+    // 🔬 Research
+    { name: "Research Methodology", percentage: 85 },
+    { name: "Literature Review", percentage: 80 },
+    { name: "User Research", percentage: 75 },
+    { name: "Data Analysis", percentage: 90 },
+    { name: "Technical Writing", percentage: 80 },
+    
+    // ⚙️ Tools & Platforms
+    { name: "Git", percentage: 90 },
+    { name: "GitHub", percentage: 90 },
+    { name: "Docker", percentage: 70 },
+    { name: "Streamlit", percentage: 80 },
+    { name: "FastAPI", percentage: 75 },
+    { name: "AWS", percentage: 70 }
+  ];
+
+  // Group skills by category for display
+  const skillCategories = [
+    {
+      id: 'programming',
+      label: '💻 Programming & Development',
+      skills: skillsData.slice(0, 5)
+    },
+    {
+      id: 'ai-ml',
+      label: '🤖 AI & Machine Learning',
+      skills: skillsData.slice(5, 11)
+    },
+    {
+      id: 'data-analytics',
+      label: '📊 Data & Analytics',
+      skills: skillsData.slice(11, 17)
+    },
+    {
+      id: 'information-systems',
+      label: '🧠 Information Systems',
+      skills: skillsData.slice(17, 21)
+    },
+    {
+      id: 'fullstack',
+      label: '🌐 Full-Stack Development',
+      skills: skillsData.slice(21, 28)
+    },
+    {
+      id: 'research',
+      label: '🔬 Research',
+      skills: skillsData.slice(28, 33)
+    },
+    {
+      id: 'tools',
+      label: '⚙️ Tools & Platforms',
+      skills: skillsData.slice(33, 39)
+    }
   ];
 
   return (
@@ -208,36 +286,46 @@ const About = () => {
               </div>
             </div>
 
-            {/* ============ SKILLS SECTION - Like "Meet Mali" ============ */}
+            {/* ============ SKILLS SECTION - With YOUR Skills ============ */}
             <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 border border-gray-700">
               <div className="flex items-center gap-3 mb-6">
                 <div className="text-3xl">💪</div>
                 <h3 className="text-xl font-bold text-accent">Skills</h3>
               </div>
               
-              <div className="space-y-3">
-                {skillsData.map((skill, idx) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: idx * 0.05 }}
-                    className="space-y-1"
-                  >
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-300 font-medium">{skill.name}</span>
-                      <span className="text-accent font-bold">{skill.percentage}%</span>
+              <div className="space-y-4">
+                {skillCategories.map((category, catIdx) => (
+                  <div key={category.id}>
+                    <p className="text-xs font-semibold text-gray-400 mb-2">{category.label}</p>
+                    <div className="space-y-2">
+                      {category.skills.map((skill, idx) => (
+                        <motion.div
+                          key={idx}
+                          initial={{ opacity: 0, x: -20 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.3, delay: (catIdx * 0.1) + (idx * 0.02) }}
+                          className="space-y-0.5"
+                        >
+                          <div className="flex justify-between text-xs">
+                            <span className="text-gray-300 font-medium">{skill.name}</span>
+                            <span className="text-accent font-bold">{skill.percentage}%</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              whileInView={{ width: `${skill.percentage}%` }}
+                              transition={{ duration: 0.8, delay: (catIdx * 0.1) + (idx * 0.02) }}
+                              className="h-full bg-gradient-to-r from-accent to-accent/70 rounded-full"
+                              style={{ width: `${skill.percentage}%` }}
+                            />
+                          </div>
+                        </motion.div>
+                      ))}
                     </div>
-                    <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        whileInView={{ width: `${skill.percentage}%` }}
-                        transition={{ duration: 0.8, delay: idx * 0.05 }}
-                        className="h-full bg-gradient-to-r from-accent to-accent/70 rounded-full"
-                        style={{ width: `${skill.percentage}%` }}
-                      />
-                    </div>
-                  </motion.div>
+                    {catIdx < skillCategories.length - 1 && (
+                      <div className="border-t border-gray-700/50 my-3"></div>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>

@@ -227,9 +227,139 @@ const ProjectModal = ({ project, onClose }) => {
 };
 
 // ============================================
-// CURRENT PROJECTS SUBSECTION
+// CURRENT PROJECT DETAILS MODAL - For Current Projects
 // ============================================
-const CurrentProjectsSubsection = ({ projects }) => {
+const CurrentProjectModal = ({ project, onClose }) => {
+  if (!project) return null;
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 overflow-y-auto"
+      onClick={onClose}
+    >
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-gradient-to-br from-gray-900 to-dark border border-gray-700 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header with Icon */}
+        <div className="relative h-48 md:h-56 bg-gradient-to-r from-accent/20 to-purple-500/20 rounded-t-2xl flex items-center justify-center">
+          <div className="text-7xl md:text-8xl">🔨</div>
+          <button 
+            onClick={onClose} 
+            className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 rounded-full p-2 text-white transition z-10"
+          >
+            ✕
+          </button>
+        </div>
+        
+        {/* Title */}
+        <div className="p-5 border-b border-gray-700">
+          <h2 className="text-2xl md:text-3xl font-bold text-white">{project.title}</h2>
+          {project.timeline && (
+            <p className="text-gray-400 text-sm mt-1">📅 {project.timeline}</p>
+          )}
+        </div>
+        
+        {/* Description */}
+        <div className="p-5 border-b border-gray-700">
+          <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">📝 Description</h3>
+          <p className="text-gray-300 text-sm md:text-base leading-relaxed">
+            {project.description || "A project I'm currently building."}
+          </p>
+        </div>
+        
+        {/* Progress */}
+        {project.progress && (
+          <div className="p-5 border-b border-gray-700">
+            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">📊 Progress</h3>
+            <div className="flex justify-between text-sm text-gray-300 mb-1">
+              <span>Completion</span>
+              <span className="text-accent font-bold">{project.progress}</span>
+            </div>
+            <div className="w-full h-3 bg-gray-700 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-accent to-accent/70 rounded-full transition-all duration-1000"
+                style={{ width: project.progress }}
+              />
+            </div>
+          </div>
+        )}
+        
+        {/* Features */}
+        {project.features && project.features.length > 0 && (
+          <div className="p-5 border-b border-gray-700">
+            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">✨ Key Features</h3>
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {project.features.map((feature, idx) => (
+                <li key={idx} className="flex items-start gap-2 text-gray-300 text-sm">
+                  <span className="text-accent mt-0.5">▸</span>
+                  {feature}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        
+        {/* Technologies */}
+        {project.technologies && project.technologies.length > 0 && (
+          <div className="p-5 border-b border-gray-700">
+            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">🛠 Technologies</h3>
+            <div className="flex flex-wrap gap-2">
+              {project.technologies.map((tech, idx) => (
+                <span 
+                  key={idx} 
+                  className="bg-accent/20 text-accent px-3 py-1.5 rounded-full text-xs font-medium border border-accent/30"
+                >
+                  {tech}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Links */}
+        {(project.githubLink || project.demoLink) && (
+          <div className="p-5">
+            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">🔗 Links</h3>
+            <div className="flex flex-wrap gap-3">
+              {project.githubLink && (
+                <a 
+                  href={project.githubLink} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
+                >
+                  🐙 GitHub
+                </a>
+              )}
+              {project.demoLink && (
+                <a 
+                  href={project.demoLink} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="bg-accent hover:bg-accent/80 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
+                >
+                  🚀 Live Demo
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+};
+
+// ============================================
+// CURRENT PROJECTS SUBSECTION - With "Learn More" Hover
+// ============================================
+const CurrentProjectsSubsection = ({ projects, onProjectClick }) => {
   if (!projects || projects.length === 0) return null;
 
   return (
@@ -249,77 +379,65 @@ const CurrentProjectsSubsection = ({ projects }) => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.05 }}
-            className="bg-gray-800/50 rounded-xl border border-gray-700 p-6 hover:border-accent transition-all group"
+            className="group cursor-pointer"
+            onClick={() => onProjectClick(project)}
           >
-            <h4 className="text-lg font-bold text-white mb-2 group-hover:text-accent transition">
-              {project.title}
-            </h4>
-            <p className="text-gray-300 text-sm mb-4">{project.description}</p>
-            
-            {/* Progress Bar */}
-            {project.progress && (
-              <div className="mb-4">
-                <div className="flex justify-between text-xs text-gray-400 mb-1">
-                  <span>Progress</span>
-                  <span className="text-accent font-semibold">{project.progress}</span>
+            <div className="relative rounded-xl overflow-hidden bg-gray-800 border border-gray-700 hover:border-accent transition-all h-[220px]">
+              {/* Background gradient */}
+              <div className="w-full h-full bg-gradient-to-br from-accent/10 to-purple-500/10 flex items-center justify-center">
+                <div className="text-5xl opacity-50">🔨</div>
+              </div>
+              
+              {/* Overlay gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-gray-900/95 via-gray-900/60 to-transparent"></div>
+              
+              {/* Content */}
+              <div className="absolute bottom-0 left-0 right-0 p-5">
+                <h4 className="text-lg font-bold text-white group-hover:text-accent transition line-clamp-1">
+                  {project.title}
+                </h4>
+                <p className="text-gray-300 text-sm line-clamp-2 mt-1">
+                  {project.description}
+                </p>
+                
+                {/* Progress Bar - Compact */}
+                {project.progress && (
+                  <div className="mt-3">
+                    <div className="flex justify-between text-xs text-gray-400 mb-0.5">
+                      <span>Progress</span>
+                      <span className="text-accent font-semibold">{project.progress}</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                      <motion.div 
+                        className="h-full bg-gradient-to-r from-accent to-accent/70 rounded-full"
+                        initial={{ width: 0 }}
+                        whileInView={{ width: project.progress }}
+                        transition={{ duration: 0.8, delay: idx * 0.05 }}
+                      />
+                    </div>
+                  </div>
+                )}
+                
+                {/* Tech Stack Tags - Compact */}
+                {project.technologies && project.technologies.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {project.technologies.slice(0, 3).map((tech, tIdx) => (
+                      <span key={tIdx} className="bg-accent/10 text-accent px-2 py-0.5 rounded text-[10px]">
+                        {tech}
+                      </span>
+                    ))}
+                    {project.technologies.length > 3 && (
+                      <span className="text-gray-500 text-[10px]">+{project.technologies.length - 3}</span>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              {/* Hover Overlay - "Learn More →" */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="bg-accent/90 hover:bg-accent text-white px-6 py-3 rounded-lg font-semibold transform transition-transform group-hover:scale-105 shadow-lg">
+                  Learn More →
                 </div>
-                <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-                  <motion.div 
-                    className="h-full bg-gradient-to-r from-accent to-accent/70 rounded-full"
-                    initial={{ width: 0 }}
-                    whileInView={{ width: project.progress }}
-                    transition={{ duration: 0.8, delay: idx * 0.05 }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Features */}
-            {project.features && project.features.length > 0 && (
-              <div className="mb-4">
-                <p className="text-xs text-gray-400 mb-1">Features:</p>
-                <ul className="space-y-0.5">
-                  {project.features.slice(0, 3).map((feature, fIdx) => (
-                    <li key={fIdx} className="text-gray-300 text-xs flex items-start gap-1.5">
-                      <span className="text-accent">▸</span>
-                      {feature}
-                    </li>
-                  ))}
-                  {project.features.length > 3 && (
-                    <li className="text-gray-500 text-xs">+{project.features.length - 3} more</li>
-                  )}
-                </ul>
-              </div>
-            )}
-
-            {/* Technologies */}
-            {project.technologies && project.technologies.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mb-4">
-                {project.technologies.slice(0, 4).map((tech, tIdx) => (
-                  <span key={tIdx} className="bg-accent/10 text-accent px-2 py-0.5 rounded text-xs">
-                    {tech}
-                  </span>
-                ))}
-                {project.technologies.length > 4 && (
-                  <span className="text-gray-500 text-xs">+{project.technologies.length - 4}</span>
-                )}
-              </div>
-            )}
-
-            {/* Timeline & Links */}
-            <div className="flex items-center justify-between text-xs text-gray-400 border-t border-gray-700 pt-3">
-              {project.timeline && <span>📅 {project.timeline}</span>}
-              <div className="flex gap-3">
-                {project.githubLink && (
-                  <a href={project.githubLink} target="_blank" rel="noopener noreferrer" className="hover:text-accent transition">
-                    🐙 GitHub
-                  </a>
-                )}
-                {project.demoLink && (
-                  <a href={project.demoLink} target="_blank" rel="noopener noreferrer" className="hover:text-accent transition">
-                    🚀 Demo
-                  </a>
-                )}
               </div>
             </div>
           </motion.div>
@@ -336,6 +454,7 @@ const Projects = () => {
   const [projects, setProjects] = useState([]);
   const [currentProjects, setCurrentProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedCurrentProject, setSelectedCurrentProject] = useState(null);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
@@ -441,13 +560,26 @@ const Projects = () => {
           </div>
 
           {/* Current Projects Subsection */}
-          <CurrentProjectsSubsection projects={currentProjects} />
+          <CurrentProjectsSubsection 
+            projects={currentProjects} 
+            onProjectClick={setSelectedCurrentProject}
+          />
         </div>
       </section>
       
-      {/* Project Modal */}
+      {/* Featured Project Modal */}
       <AnimatePresence>
         {selectedProject && <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />}
+      </AnimatePresence>
+      
+      {/* Current Project Modal - Detailed View */}
+      <AnimatePresence>
+        {selectedCurrentProject && (
+          <CurrentProjectModal 
+            project={selectedCurrentProject} 
+            onClose={() => setSelectedCurrentProject(null)} 
+          />
+        )}
       </AnimatePresence>
     </>
   );
