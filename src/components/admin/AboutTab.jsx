@@ -10,6 +10,27 @@ const AboutTab = ({ profile, setProfile, showMessage, setUploading, uploading, f
   const [editingHighlightIndex, setEditingHighlightIndex] = useState(null);
   const [editingHighlightText, setEditingHighlightText] = useState('');
   
+  // Skills state
+  const [skillsData, setSkillsData] = useState([
+    { name: "HTML | CSS", percentage: 90 },
+    { name: "Python", percentage: 80 },
+    { name: "SQL | NoSQL", percentage: 75 },
+    { name: "Excel | Power BI | Tableau", percentage: 90 },
+    { name: "AWS Cloud", percentage: 85 },
+    { name: "Machine Learning", percentage: 75 },
+    { name: "Data Cleaning | Preparation", percentage: 90 },
+    { name: "Data Analysis | Modeling", percentage: 80 },
+    { name: "Data Visualization | Reporting", percentage: 75 },
+    { name: "Business Intelligence", percentage: 90 },
+    { name: "Communication | Storytelling", percentage: 85 },
+    { name: "Critical Thinking | Problem-Solving", percentage: 75 }
+  ]);
+  const [editingSkillIndex, setEditingSkillIndex] = useState(null);
+  const [editingSkillName, setEditingSkillName] = useState('');
+  const [editingSkillPercentage, setEditingSkillPercentage] = useState('');
+  const [newSkillName, setNewSkillName] = useState('');
+  const [newSkillPercentage, setNewSkillPercentage] = useState('');
+
   // Local state for edit form
   const [editForm, setEditForm] = useState({
     name: '',
@@ -151,6 +172,49 @@ const AboutTab = ({ profile, setProfile, showMessage, setUploading, uploading, f
     setEditForm({ ...editForm, highlights: updatedHighlights });
   };
 
+  // ============ SKILLS MANAGEMENT ============
+  const addSkill = () => {
+    if (!newSkillName.trim()) return;
+    const percentage = parseInt(newSkillPercentage) || 0;
+    setSkillsData([...skillsData, { name: newSkillName, percentage: Math.min(100, Math.max(0, percentage)) }]);
+    setNewSkillName('');
+    setNewSkillPercentage('');
+    showMessage('✅ Skill added!');
+  };
+
+  const updateSkill = (index, name, percentage) => {
+    const updatedSkills = [...skillsData];
+    updatedSkills[index] = { 
+      name: name || updatedSkills[index].name, 
+      percentage: Math.min(100, Math.max(0, parseInt(percentage) || 0))
+    };
+    setSkillsData(updatedSkills);
+    setEditingSkillIndex(null);
+    setEditingSkillName('');
+    setEditingSkillPercentage('');
+    showMessage('✅ Skill updated!');
+  };
+
+  const deleteSkill = (index) => {
+    if (window.confirm('Delete this skill?')) {
+      const updatedSkills = skillsData.filter((_, i) => i !== index);
+      setSkillsData(updatedSkills);
+      showMessage('✅ Skill deleted!');
+    }
+  };
+
+  const startEditSkill = (index) => {
+    setEditingSkillIndex(index);
+    setEditingSkillName(skillsData[index].name);
+    setEditingSkillPercentage(skillsData[index].percentage.toString());
+  };
+
+  const cancelEditSkill = () => {
+    setEditingSkillIndex(null);
+    setEditingSkillName('');
+    setEditingSkillPercentage('');
+  };
+
   return (
     <div className="bg-gray-800 rounded-xl p-6">
       <div className="flex justify-between items-center mb-4">
@@ -209,7 +273,6 @@ const AboutTab = ({ profile, setProfile, showMessage, setUploading, uploading, f
                 className="w-full p-3 rounded bg-gray-700" 
                 placeholder="9.46"
               />
-              <p className="text-xs text-gray-500 mt-1">e.g., 9.46 (Top 5% of Class)</p>
             </div>
             <div>
               <label className="block mb-2 text-sm font-semibold text-accent">📚 Overall CGPA</label>
@@ -287,7 +350,7 @@ const AboutTab = ({ profile, setProfile, showMessage, setUploading, uploading, f
             </div>
           </div>
 
-          {/* Key Highlights Section - NEW */}
+          {/* Key Highlights Section */}
           <div className="mt-8 pt-6 border-t border-gray-700">
             <h3 className="text-xl font-bold mb-2">⭐ Key Highlights</h3>
             <p className="text-sm text-gray-400 mb-4">Short, impactful statements that appear on your About page (keep them brief!)</p>
@@ -396,6 +459,102 @@ const AboutTab = ({ profile, setProfile, showMessage, setUploading, uploading, f
           </div>
         </div>
       )}
+
+      {/* ============ SKILLS MANAGEMENT - ALWAYS VISIBLE ============ */}
+      <div className="mt-8 pt-6 border-t border-gray-700">
+        <h3 className="text-xl font-bold mb-4">💪 Skills (with Percentages)</h3>
+        <p className="text-sm text-gray-400 mb-4">Manage your skills with percentage bars (like "Meet Mali" style)</p>
+        
+        {/* Skills List */}
+        <div className="space-y-2 mb-4">
+          {skillsData.map((skill, idx) => (
+            <div key={idx} className="flex items-center gap-3 bg-gray-700/50 p-3 rounded-lg">
+              {editingSkillIndex === idx ? (
+                <>
+                  <input 
+                    type="text" 
+                    value={editingSkillName} 
+                    onChange={(e) => setEditingSkillName(e.target.value)} 
+                    className="flex-1 p-2 rounded bg-gray-600 text-sm"
+                    placeholder="Skill name"
+                  />
+                  <input 
+                    type="number" 
+                    value={editingSkillPercentage} 
+                    onChange={(e) => setEditingSkillPercentage(e.target.value)} 
+                    className="w-20 p-2 rounded bg-gray-600 text-sm text-center"
+                    placeholder="0-100"
+                    min="0"
+                    max="100"
+                  />
+                  <button 
+                    onClick={() => updateSkill(idx, editingSkillName, parseInt(editingSkillPercentage))} 
+                    className="bg-green-500 px-3 py-1 rounded text-sm"
+                  >
+                    Save
+                  </button>
+                  <button 
+                    onClick={cancelEditSkill} 
+                    className="bg-gray-500 px-3 py-1 rounded text-sm"
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="flex-1">
+                    <div className="flex justify-between text-sm mb-0.5">
+                      <span className="text-gray-300">{skill.name}</span>
+                      <span className="text-accent font-bold">{skill.percentage}%</span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-600 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-accent to-accent/70 rounded-full transition-all duration-500"
+                        style={{ width: `${skill.percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                  <button onClick={() => startEditSkill(idx)} className="bg-blue-500 px-3 py-1 rounded text-sm ml-2">
+                    Edit
+                  </button>
+                  <button onClick={() => deleteSkill(idx)} className="bg-red-500 px-3 py-1 rounded text-sm">
+                    Delete
+                  </button>
+                </>
+              )}
+            </div>
+          ))}
+          {skillsData.length === 0 && (
+            <p className="text-gray-500 text-sm italic">No skills added yet. Add your skills below.</p>
+          )}
+        </div>
+        
+        {/* Add New Skill */}
+        <div className="flex gap-2">
+          <input 
+            type="text" 
+            value={newSkillName} 
+            onChange={(e) => setNewSkillName(e.target.value)} 
+            placeholder="Skill name (e.g., Python, HTML | CSS)" 
+            className="flex-1 p-2 rounded bg-gray-700 text-sm"
+          />
+          <input 
+            type="number" 
+            value={newSkillPercentage} 
+            onChange={(e) => setNewSkillPercentage(e.target.value)} 
+            placeholder="%" 
+            className="w-20 p-2 rounded bg-gray-700 text-sm text-center"
+            min="0"
+            max="100"
+          />
+          <button onClick={addSkill} className="bg-green-500 px-4 py-2 rounded hover:bg-green-600 text-sm">
+            + Add Skill
+          </button>
+        </div>
+        <p className="text-xs text-gray-500 mt-2">
+          Add your skills with percentage values (e.g., "Python" → 80%). These will appear as progress bars.
+        </p>
+      </div>
     </div>
   );
 };

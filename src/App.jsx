@@ -4,14 +4,14 @@ import Navbar from './components/Navbar';
 
 // Lazy load components for faster initial load
 const Hero = lazy(() => import('./components/Hero'));
-const About = lazy(() => import('./components/About'));
+const About = lazy(() => import('./components/About')); // Now includes Skills
 const Experience = lazy(() => import('./components/Experience'));
-const Projects = lazy(() => import('./components/Projects'));
-const CurrentProjects = lazy(() => import('./components/CurrentProjects'));
+const Projects = lazy(() => import('./components/Projects')); // Now includes Current Projects as subsection
 const Research = lazy(() => import('./components/Research'));
 const Certifications = lazy(() => import('./components/Certifications'));
 const Achievements = lazy(() => import('./components/Achievements'));
-const Skills = lazy(() => import('./components/Skills'));
+// REMOVED: Skills import - now integrated into About
+// REMOVED: CurrentProjects import - now integrated into Projects
 const Contact = lazy(() => import('./components/Contact'));
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
 
@@ -62,14 +62,14 @@ function App() {
               <>
                 <Navbar />
                 <Hero />
-                <About />
+                <About /> {/* Skills are now inside About */}
                 <Experience />
-                <Projects />
-                <CurrentProjects />
+                <Projects /> {/* Current Projects are now inside Projects as subsection */}
                 <Research />
                 <Certifications />
                 <Achievements />
-                <Skills />
+                {/* REMOVED: <Skills /> - now integrated into About */}
+                {/* REMOVED: <CurrentProjects /> - now integrated into Projects */}
                 <Contact />
                 <footer className="py-6 text-center text-gray-500 text-sm border-t border-gray-800">
                   <p>© 2024 Aditi Dhumal | Built with React & Tailwind CSS</p>

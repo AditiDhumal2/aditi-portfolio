@@ -100,7 +100,6 @@ const projectSchema = new mongoose.Schema({
   },
   
   // LEGACY FIELDS (Kept for backward compatibility, but hidden in modal)
-  // These will still exist in the database but won't be displayed in the modal
   problem: { type: String, default: '' },
   dataset: { type: String, default: '' },
   methodology: { type: String, default: '' },
@@ -200,7 +199,14 @@ const achievementSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
+// ============ UPDATED SKILLS SCHEMA - Now supports percentages ============
 const skillsSchema = new mongoose.Schema({
+  // New structure: array of skill objects with name and percentage
+  skills: [{
+    name: { type: String, required: true },
+    percentage: { type: Number, default: 0, min: 0, max: 100 }
+  }],
+  // Legacy fields - kept for backward compatibility
   programming: [{ type: String }],
   dataTools: [{ type: String }],
   mlTools: [{ type: String }],
@@ -277,7 +283,23 @@ async function seedInitialData() {
         order: 0
       });
       
+      // Seed skills with percentages (like "Meet Mali" style)
       await Skills.create({
+        skills: [
+          { name: "HTML | CSS", percentage: 90 },
+          { name: "Python", percentage: 80 },
+          { name: "SQL | NoSQL", percentage: 75 },
+          { name: "Excel | Power BI | Tableau", percentage: 90 },
+          { name: "AWS Cloud", percentage: 85 },
+          { name: "Machine Learning", percentage: 75 },
+          { name: "Data Cleaning | Preparation", percentage: 90 },
+          { name: "Data Analysis | Modeling", percentage: 80 },
+          { name: "Data Visualization | Reporting", percentage: 75 },
+          { name: "Business Intelligence", percentage: 90 },
+          { name: "Communication | Storytelling", percentage: 85 },
+          { name: "Critical Thinking | Problem-Solving", percentage: 75 }
+        ],
+        // Legacy fields for backward compatibility
         programming: ['Python', 'SQL', 'JavaScript', 'R'],
         dataTools: ['Pandas', 'Tableau', 'Power BI'],
         mlTools: ['Scikit-learn', 'TensorFlow'],
@@ -329,7 +351,7 @@ app.put('/api/profile', async (req, res) => {
   }
 });
 
-// Projects - UPDATED with simplified schema
+// Projects
 app.get('/api/projects', async (req, res) => {
   try {
     const projects = await Project.find().sort({ order: 1, createdAt: -1 });
@@ -551,12 +573,27 @@ app.delete('/api/achievements/:id', async (req, res) => {
   }
 });
 
-// Skills
+// ============ UPDATED SKILLS ROUTES ============
 app.get('/api/skills', async (req, res) => {
   try {
     let skills = await Skills.findOne();
     if (!skills) {
+      // Create default skills if none exist
       skills = await Skills.create({
+        skills: [
+          { name: "HTML | CSS", percentage: 90 },
+          { name: "Python", percentage: 80 },
+          { name: "SQL | NoSQL", percentage: 75 },
+          { name: "Excel | Power BI | Tableau", percentage: 90 },
+          { name: "AWS Cloud", percentage: 85 },
+          { name: "Machine Learning", percentage: 75 },
+          { name: "Data Cleaning | Preparation", percentage: 90 },
+          { name: "Data Analysis | Modeling", percentage: 80 },
+          { name: "Data Visualization | Reporting", percentage: 75 },
+          { name: "Business Intelligence", percentage: 90 },
+          { name: "Communication | Storytelling", percentage: 85 },
+          { name: "Critical Thinking | Problem-Solving", percentage: 75 }
+        ],
         programming: ['Python', 'SQL', 'JavaScript', 'R'],
         dataTools: ['Pandas', 'Tableau', 'Power BI'],
         mlTools: ['Scikit-learn', 'TensorFlow'],
@@ -621,7 +658,6 @@ app.get('/api/health', (req, res) => {
 });
 
 // ============ MIGRATION HELPER: Convert existing projects ============
-// This endpoint helps migrate old project data to the new format
 app.post('/api/migrate-projects', async (req, res) => {
   try {
     const projects = await Project.find({});
@@ -630,17 +666,14 @@ app.post('/api/migrate-projects', async (req, res) => {
     for (const project of projects) {
       let updated = false;
       
-      // If overview is empty but problem exists, move problem to overview
       if (!project.overview && project.problem) {
         project.overview = project.problem;
         updated = true;
       }
       
-      // If features is empty, generate from methodology or create defaults
       if (!project.features) {
         const features = [];
         if (project.methodology) {
-          // Extract key phrases from methodology
           const sentences = project.methodology.split('.');
           for (const sentence of sentences) {
             if (sentence.trim().length > 10) {
@@ -672,6 +705,53 @@ app.post('/api/migrate-projects', async (req, res) => {
   }
 });
 
+// ============ MIGRATION HELPER: Convert old skills to new format ============
+app.post('/api/migrate-skills', async (req, res) => {
+  try {
+    const skillsDoc = await Skills.findOne();
+    if (!skillsDoc) {
+      return res.json({ message: 'No skills document found to migrate' });
+    }
+    
+    // If skills array doesn't exist or is empty, create from legacy fields
+    if (!skillsDoc.skills || skillsDoc.skills.length === 0) {
+      const legacySkills = [];
+      
+      // Collect all skills from legacy fields
+      const allLegacySkills = [
+        ...(skillsDoc.programming || []),
+        ...(skillsDoc.dataTools || []),
+        ...(skillsDoc.mlTools || []),
+        ...(skillsDoc.databases || []),
+        ...(skillsDoc.web || [])
+      ];
+      
+      // Create skill objects with default percentages
+      allLegacySkills.forEach((skill, index) => {
+        legacySkills.push({
+          name: skill,
+          percentage: Math.min(100, Math.max(50, 85 - (index * 2)))
+        });
+      });
+      
+      skillsDoc.skills = legacySkills;
+      await skillsDoc.save();
+      
+      return res.json({
+        message: `Skills migration complete! ${legacySkills.length} skills added.`,
+        skills: legacySkills
+      });
+    }
+    
+    res.json({ 
+      message: 'Skills already migrated!',
+      count: skillsDoc.skills.length
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Serve Static Files
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'dist'), {
@@ -697,16 +777,16 @@ app.listen(PORT, async () => {
   
   await seedInitialData();
   
-  // Log the new schema fields
-  console.log('\n📋 Updated Project Schema (Trailer Philosophy):');
-  console.log('  ✅ subtitle - One-line subtitle');
-  console.log('  ✅ overview - 2-3 line project description');
-  console.log('  ✅ features - Comma-separated key features');
-  console.log('  ✅ tools - Tech stack (kept for badges)');
-  console.log('  ✅ images - Screenshots/visuals');
-  console.log('  ✅ githubLink, deployedLink - Action buttons');
-  console.log('  ✅ documentation - Link to full docs');
-  console.log('\n📌 Legacy fields (kept but not displayed in modal):');
-  console.log('  problem, dataset, methodology, results, impact');
-  console.log('  preprint, publication, challenges, futureWork\n');
+  console.log('\n📋 Updated Schemas:');
+  console.log('  ✅ Profile - With SGPA, CGPA, Journey, Highlights');
+  console.log('  ✅ Projects - Simplified modal structure (subtitle, overview, features)');
+  console.log('  ✅ Skills - New format with name + percentage arrays');
+  console.log('  ✅ Legacy fields preserved for backward compatibility');
+  
+  console.log('\n💡 Skills Migration:');
+  console.log('  POST /api/migrate-skills - Convert old skills to new format');
+  console.log('  GET /api/skills - Get skills with percentages');
+  console.log('  PUT /api/skills - Update skills');
+  
+  console.log('\n🚀 Server ready!\n');
 });
