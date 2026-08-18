@@ -55,6 +55,8 @@ mongoose.connect(MONGODB_URI, connectionOptions)
   });
 
 // ============ SCHEMAS ============
+
+// 1. PROFILE SCHEMA - Updated with SGPA, CGPA, Journey, Highlights
 const profileSchema = new mongoose.Schema({
   name: { type: String, default: 'Aditi Dhumal' },
   photo: { type: String, default: '' },
@@ -64,27 +66,27 @@ const profileSchema = new mongoose.Schema({
   education: { type: String, default: 'BE in Information Technology' },
   interests: { type: String, default: 'Data Analytics + AI Systems' },
   description: { type: String, default: '' },
-  sgpa: { type: String, default: '' },
-  cgpa: { type: String, default: '' },
+  sgpa: { type: String, default: '' },        // NEW: SGPA field
+  cgpa: { type: String, default: '' },        // NEW: CGPA field
   stats: {
     achievements: { type: Number, default: 0 },
     projects: { type: Number, default: 0 },
     certifications: { type: Number, default: 0 },
     researchPapers: { type: Number, default: 0 }
   },
-  journey: [{ type: String }],
-  highlights: [{ type: String }]
+  journey: [{ type: String }],                 // NEW: Journey points
+  highlights: [{ type: String }]               // NEW: Key highlights
 }, { timestamps: true });
 
-// ============ UPDATED PROJECT SCHEMA (Simplified) ============
+// 2. PROJECT SCHEMA - Simplified for Trailer Philosophy
 const projectSchema = new mongoose.Schema({
   // Core required fields
   title: { type: String, required: true },
   
   // NEW SIMPLIFIED FIELDS (Trailer Philosophy)
-  subtitle: { type: String, default: '' },
-  overview: { type: String, default: '' },
-  features: { type: String, default: '' }, // Comma-separated list
+  subtitle: { type: String, default: '' },     // NEW: One-line subtitle
+  overview: { type: String, default: '' },     // NEW: 2-3 line overview
+  features: { type: String, default: '' },     // NEW: Comma-separated features list
   
   // Tech Stack & Images
   tools: { type: String, default: '' },
@@ -99,7 +101,7 @@ const projectSchema = new mongoose.Schema({
     description: { type: String, default: '' }
   },
   
-  // LEGACY FIELDS (Kept for backward compatibility, but hidden in modal)
+  // LEGACY FIELDS (Kept for backward compatibility, hidden in modal)
   problem: { type: String, default: '' },
   dataset: { type: String, default: '' },
   methodology: { type: String, default: '' },
@@ -124,20 +126,7 @@ const projectSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
-const experienceSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  company: { type: String, required: true },
-  location: { type: String, default: '' },
-  period: { type: String, default: '' },
-  type: { type: String, default: 'Internship' },
-  roleDescription: { type: String, default: '' },
-  achievements: [{ type: String }],
-  technologies: [{ type: String }],
-  image: { type: String, default: '' },
-  certificateLink: { type: String, default: '' },
-  order: { type: Number, default: 0 }
-}, { timestamps: true });
-
+// 3. CURRENT PROJECT SCHEMA - Kept for subsection in Projects
 const currentProjectSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, default: '' },
@@ -150,6 +139,7 @@ const currentProjectSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
+// 4. RESEARCH SCHEMA
 const researchSchema = new mongoose.Schema({
   title: { type: String, required: true },
   type: { type: String, default: 'Conference Paper' },
@@ -173,6 +163,7 @@ const researchSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
+// 5. CERTIFICATION SCHEMA
 const certificationSchema = new mongoose.Schema({
   name: { type: String, default: 'New Certification' },
   issuer: { type: String, default: 'Unknown Issuer' },
@@ -188,6 +179,7 @@ const certificationSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
+// 6. ACHIEVEMENT SCHEMA
 const achievementSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, default: '' },
@@ -199,14 +191,14 @@ const achievementSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// ============ UPDATED SKILLS SCHEMA - Now supports percentages ============
+// 7. SKILLS SCHEMA - Updated with percentage-based skills
 const skillsSchema = new mongoose.Schema({
-  // New structure: array of skill objects with name and percentage
+  // NEW: Array of skill objects with name and percentage
   skills: [{
     name: { type: String, required: true },
     percentage: { type: Number, default: 0, min: 0, max: 100 }
   }],
-  // Legacy fields - kept for backward compatibility
+  // LEGACY FIELDS - Kept for backward compatibility
   programming: [{ type: String }],
   dataTools: [{ type: String }],
   mlTools: [{ type: String }],
@@ -214,6 +206,7 @@ const skillsSchema = new mongoose.Schema({
   web: [{ type: String }]
 }, { timestamps: true });
 
+// 8. CONTACT SCHEMA
 const contactSchema = new mongoose.Schema({
   linkedin: { type: String, default: '' },
   github: { type: String, default: '' },
@@ -225,7 +218,7 @@ const contactSchema = new mongoose.Schema({
 // ============ MODELS ============
 const Profile = mongoose.model('Profile', profileSchema);
 const Project = mongoose.model('Project', projectSchema);
-const Experience = mongoose.model('Experience', experienceSchema);
+// REMOVED: Experience model (section removed)
 const CurrentProject = mongoose.model('CurrentProject', currentProjectSchema);
 const Research = mongoose.model('Research', researchSchema);
 const Certification = mongoose.model('Certification', certificationSchema);
@@ -240,6 +233,7 @@ async function seedInitialData() {
     if (profileCount === 0) {
       console.log('🌱 Seeding initial data...');
       
+      // Seed Profile with new fields
       await Profile.create({
         name: 'Aditi Dhumal',
         title: 'Information Technology Student specializing in Data Analytics & Intelligent Systems',
@@ -247,16 +241,16 @@ async function seedInitialData() {
         education: 'BE in Information Technology',
         interests: 'Data Analytics + AI Systems',
         description: "I'm a passionate IT student with a strong research mindset, aiming to solve real-world problems through data.",
-        sgpa: '9.46',
-        cgpa: '8.02',
+        sgpa: '9.46',                    // NEW
+        cgpa: '8.02',                    // NEW
         stats: { achievements: 6, projects: 3, certifications: 4, researchPapers: 2 },
-        journey: [
+        journey: [                       // NEW
           "Passionate about turning data into actionable insights",
           "Experienced in Python, SQL, and Machine Learning",
           "Research-oriented with 2 published papers",
           "Aiming for MSIM to create intelligent systems"
         ],
-        highlights: [
+        highlights: [                    // NEW
           "🏆 Final Year SGPA: 9.46 (Top 5% of Class)",
           "📚 Overall CGPA: 8.02",
           "🏅 Academic Excellence Award",
@@ -267,9 +261,9 @@ async function seedInitialData() {
       // Seed sample project with simplified structure
       await Project.create({
         title: "Career Intelligence Platform",
-        subtitle: "AI-Powered Career Analytics Platform",
-        overview: "An end-to-end career analytics platform that helps professionals identify skill gaps and discover career paths using AI-driven insights.",
-        features: "AI Career Advisor, Skill Gap Analysis, Resume Analysis, Salary Prediction, Job Market Analytics",
+        subtitle: "AI-Powered Career Analytics Platform",          // NEW
+        overview: "An end-to-end career analytics platform that helps professionals identify skill gaps and discover career paths using AI-driven insights.",  // NEW
+        features: "AI Career Advisor, Skill Gap Analysis, Resume Analysis, Salary Prediction, Job Market Analytics",  // NEW
         tools: "Python, Streamlit, Scikit-learn, SQLite, Gemini API",
         images: [],
         githubLink: "https://github.com/yourusername/career-platform",
@@ -283,9 +277,9 @@ async function seedInitialData() {
         order: 0
       });
       
-      // Seed skills with percentages (like "Meet Mali" style)
+      // Seed skills with percentages (NEW format)
       await Skills.create({
-        skills: [
+        skills: [                      // NEW: Array of skill objects
           { name: "HTML | CSS", percentage: 90 },
           { name: "Python", percentage: 80 },
           { name: "SQL | NoSQL", percentage: 75 },
@@ -299,7 +293,7 @@ async function seedInitialData() {
           { name: "Communication | Storytelling", percentage: 85 },
           { name: "Critical Thinking | Problem-Solving", percentage: 75 }
         ],
-        // Legacy fields for backward compatibility
+        // Legacy fields kept
         programming: ['Python', 'SQL', 'JavaScript', 'R'],
         dataTools: ['Pandas', 'Tableau', 'Power BI'],
         mlTools: ['Scikit-learn', 'TensorFlow'],
@@ -321,11 +315,13 @@ async function seedInitialData() {
 }
 
 // ============ ROUTES ============
+
+// Test route
 app.get('/test', (req, res) => {
   res.json({ message: 'Server is working!', timestamp: new Date().toISOString() });
 });
 
-// Profile
+// ===== PROFILE ROUTES =====
 app.get('/api/profile', async (req, res) => {
   try {
     let profile = await Profile.findOne();
@@ -351,7 +347,7 @@ app.put('/api/profile', async (req, res) => {
   }
 });
 
-// Projects
+// ===== PROJECTS ROUTES =====
 app.get('/api/projects', async (req, res) => {
   try {
     const projects = await Project.find().sort({ order: 1, createdAt: -1 });
@@ -388,44 +384,7 @@ app.delete('/api/projects/:id', async (req, res) => {
   }
 });
 
-// Experience
-app.get('/api/experience', async (req, res) => {
-  try {
-    const experiences = await Experience.find().sort({ order: 1, createdAt: -1 });
-    res.json(experiences);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.post('/api/experience', async (req, res) => {
-  try {
-    const exp = await Experience.create(req.body);
-    res.json(exp);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.put('/api/experience/:id', async (req, res) => {
-  try {
-    const exp = await Experience.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(exp);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.delete('/api/experience/:id', async (req, res) => {
-  try {
-    await Experience.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Deleted' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Current Projects
+// ===== CURRENT PROJECTS ROUTES =====
 app.get('/api/current-projects', async (req, res) => {
   try {
     const projects = await CurrentProject.find().sort({ order: 1, createdAt: -1 });
@@ -462,7 +421,7 @@ app.delete('/api/current-projects/:id', async (req, res) => {
   }
 });
 
-// Research
+// ===== RESEARCH ROUTES =====
 app.get('/api/research', async (req, res) => {
   try {
     const research = await Research.find().sort({ order: 1, year: -1 });
@@ -499,7 +458,7 @@ app.delete('/api/research/:id', async (req, res) => {
   }
 });
 
-// Certifications
+// ===== CERTIFICATIONS ROUTES =====
 app.get('/api/certifications', async (req, res) => {
   try {
     const certs = await Certification.find().sort({ order: 1, date: -1 });
@@ -536,7 +495,7 @@ app.delete('/api/certifications/:id', async (req, res) => {
   }
 });
 
-// Achievements
+// ===== ACHIEVEMENTS ROUTES =====
 app.get('/api/achievements', async (req, res) => {
   try {
     const achievements = await Achievement.find().sort({ order: 1, createdAt: -1 });
@@ -573,12 +532,12 @@ app.delete('/api/achievements/:id', async (req, res) => {
   }
 });
 
-// ============ UPDATED SKILLS ROUTES ============
+// ===== SKILLS ROUTES =====
 app.get('/api/skills', async (req, res) => {
   try {
     let skills = await Skills.findOne();
     if (!skills) {
-      // Create default skills if none exist
+      // Create default skills with percentages if none exist
       skills = await Skills.create({
         skills: [
           { name: "HTML | CSS", percentage: 90 },
@@ -622,7 +581,7 @@ app.put('/api/skills', async (req, res) => {
   }
 });
 
-// Contact
+// ===== CONTACT ROUTES =====
 app.get('/api/contact', async (req, res) => {
   try {
     let contact = await Contact.findOne();
@@ -648,7 +607,7 @@ app.put('/api/contact', async (req, res) => {
   }
 });
 
-// Health Check
+// ===== HEALTH CHECK =====
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok', 
@@ -657,7 +616,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// ============ MIGRATION HELPER: Convert existing projects ============
+// ===== MIGRATION: Convert existing projects to new format =====
 app.post('/api/migrate-projects', async (req, res) => {
   try {
     const projects = await Project.find({});
@@ -666,11 +625,13 @@ app.post('/api/migrate-projects', async (req, res) => {
     for (const project of projects) {
       let updated = false;
       
+      // Move problem to overview if overview is empty
       if (!project.overview && project.problem) {
         project.overview = project.problem;
         updated = true;
       }
       
+      // Generate features from methodology if features is empty
       if (!project.features) {
         const features = [];
         if (project.methodology) {
@@ -705,7 +666,7 @@ app.post('/api/migrate-projects', async (req, res) => {
   }
 });
 
-// ============ MIGRATION HELPER: Convert old skills to new format ============
+// ===== MIGRATION: Convert old skills to new percentage format =====
 app.post('/api/migrate-skills', async (req, res) => {
   try {
     const skillsDoc = await Skills.findOne();
@@ -752,7 +713,7 @@ app.post('/api/migrate-skills', async (req, res) => {
   }
 });
 
-// Serve Static Files
+// ===== SERVE STATIC FILES =====
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'dist'), {
     maxAge: '1d',
@@ -778,15 +739,35 @@ app.listen(PORT, async () => {
   await seedInitialData();
   
   console.log('\n📋 Updated Schemas:');
-  console.log('  ✅ Profile - With SGPA, CGPA, Journey, Highlights');
+  console.log('  ✅ Profile - Added SGPA, CGPA, Journey, Highlights');
   console.log('  ✅ Projects - Simplified modal structure (subtitle, overview, features)');
-  console.log('  ✅ Skills - New format with name + percentage arrays');
+  console.log('  ✅ Skills - New format with name + percentage arrays (like "Meet Mali")');
+  console.log('  ❌ Experience - REMOVED (section removed from portfolio)');
   console.log('  ✅ Legacy fields preserved for backward compatibility');
   
-  console.log('\n💡 Skills Migration:');
-  console.log('  POST /api/migrate-skills - Convert old skills to new format');
-  console.log('  GET /api/skills - Get skills with percentages');
-  console.log('  PUT /api/skills - Update skills');
+  console.log('\n📌 Active Endpoints:');
+  console.log('  GET  /api/profile');
+  console.log('  PUT  /api/profile');
+  console.log('  GET  /api/projects');
+  console.log('  POST /api/projects');
+  console.log('  PUT  /api/projects/:id');
+  console.log('  DELETE /api/projects/:id');
+  console.log('  GET  /api/current-projects');
+  console.log('  POST /api/current-projects');
+  console.log('  PUT  /api/current-projects/:id');
+  console.log('  DELETE /api/current-projects/:id');
+  console.log('  GET  /api/research');
+  console.log('  GET  /api/certifications');
+  console.log('  GET  /api/achievements');
+  console.log('  GET  /api/skills');
+  console.log('  PUT  /api/skills');
+  console.log('  GET  /api/contact');
+  console.log('  PUT  /api/contact');
+  console.log('  GET  /api/health');
+  
+  console.log('\n💡 Migration Endpoints:');
+  console.log('  POST /api/migrate-projects - Convert old projects to new format');
+  console.log('  POST /api/migrate-skills - Convert old skills to percentage format');
   
   console.log('\n🚀 Server ready!\n');
 });

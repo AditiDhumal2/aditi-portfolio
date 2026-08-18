@@ -13,7 +13,6 @@ const ProjectModal = ({ project, onClose }) => {
   const images = project.images && project.images.length > 0 ? project.images : [];
   const hasMultipleImages = images.length > 1;
   
-  // Auto-slide effect
   useEffect(() => {
     if (!hasMultipleImages) return;
     const interval = setInterval(() => {
@@ -22,7 +21,6 @@ const ProjectModal = ({ project, onClose }) => {
     return () => clearInterval(interval);
   }, [images.length, hasMultipleImages]);
   
-  // Navigation functions
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
   };
@@ -35,10 +33,7 @@ const ProjectModal = ({ project, onClose }) => {
     setCurrentImageIndex(index);
   };
   
-  // Parse tech stack into array
   const techStack = project.tools?.split(',').map(t => t.trim()).filter(Boolean) || [];
-  
-  // Parse features (if stored as comma-separated string)
   const features = project.features?.split(',').map(f => f.trim()).filter(Boolean) || [];
   
   return (
@@ -56,7 +51,7 @@ const ProjectModal = ({ project, onClose }) => {
         className="bg-gradient-to-br from-gray-900 to-dark border border-gray-700 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
-        {/* ===== IMAGE SLIDER ===== */}
+        {/* Image Slider */}
         <div className="relative h-64 md:h-80 bg-gradient-to-r from-accent/20 to-purple-500/20 rounded-t-2xl overflow-hidden">
           {images.length > 0 ? (
             <>
@@ -121,7 +116,7 @@ const ProjectModal = ({ project, onClose }) => {
           </button>
         </div>
         
-        {/* ===== PROJECT TITLE & SUBTITLE ===== */}
+        {/* Title & Subtitle */}
         <div className="p-5 border-b border-gray-700">
           <h2 className="text-2xl md:text-3xl font-bold text-white">{project.title}</h2>
           {project.subtitle && (
@@ -129,7 +124,7 @@ const ProjectModal = ({ project, onClose }) => {
           )}
         </div>
         
-        {/* ===== ACTION BUTTONS ===== */}
+        {/* Action Buttons */}
         <div className="flex flex-wrap gap-2 p-4 border-b border-gray-700">
           {project.deployedLink && (
             <a 
@@ -166,7 +161,7 @@ const ProjectModal = ({ project, onClose }) => {
           )}
         </div>
         
-        {/* ===== OVERVIEW (2-3 lines) ===== */}
+        {/* Overview */}
         <div className="p-5 border-b border-gray-700">
           <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">📝 Overview</h3>
           <p className="text-gray-300 text-sm md:text-base leading-relaxed">
@@ -174,7 +169,7 @@ const ProjectModal = ({ project, onClose }) => {
           </p>
         </div>
         
-        {/* ===== KEY FEATURES (5-6 bullets) ===== */}
+        {/* Key Features */}
         <div className="p-5 border-b border-gray-700">
           <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">✨ Key Features</h3>
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -186,7 +181,6 @@ const ProjectModal = ({ project, onClose }) => {
                 </li>
               ))
             ) : (
-              // Fallback: generate from project data
               <>
                 <li className="flex items-start gap-2 text-gray-300 text-sm">
                   <span className="text-accent mt-0.5">▸</span>
@@ -209,7 +203,7 @@ const ProjectModal = ({ project, onClose }) => {
           </ul>
         </div>
         
-        {/* ===== TECH STACK BADGES ===== */}
+        {/* Tech Stack */}
         <div className="p-5">
           <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">🛠 Tech Stack</h3>
           <div className="flex flex-wrap gap-2">
@@ -233,21 +227,129 @@ const ProjectModal = ({ project, onClose }) => {
 };
 
 // ============================================
+// CURRENT PROJECTS SUBSECTION
+// ============================================
+const CurrentProjectsSubsection = ({ projects }) => {
+  if (!projects || projects.length === 0) return null;
+
+  return (
+    <div className="mt-16">
+      <div className="text-center mb-8">
+        <h3 className="text-2xl md:text-3xl font-bold text-white">
+          🔨 <span className="text-accent">Currently Building</span>
+        </h3>
+        <div className="w-16 h-0.5 bg-accent/50 mx-auto rounded-full mt-2"></div>
+        <p className="text-gray-400 text-sm mt-2">Active projects I'm working on right now</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {projects.map((project, idx) => (
+          <motion.div
+            key={project._id}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.05 }}
+            className="bg-gray-800/50 rounded-xl border border-gray-700 p-6 hover:border-accent transition-all group"
+          >
+            <h4 className="text-lg font-bold text-white mb-2 group-hover:text-accent transition">
+              {project.title}
+            </h4>
+            <p className="text-gray-300 text-sm mb-4">{project.description}</p>
+            
+            {/* Progress Bar */}
+            {project.progress && (
+              <div className="mb-4">
+                <div className="flex justify-between text-xs text-gray-400 mb-1">
+                  <span>Progress</span>
+                  <span className="text-accent font-semibold">{project.progress}</span>
+                </div>
+                <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                  <motion.div 
+                    className="h-full bg-gradient-to-r from-accent to-accent/70 rounded-full"
+                    initial={{ width: 0 }}
+                    whileInView={{ width: project.progress }}
+                    transition={{ duration: 0.8, delay: idx * 0.05 }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Features */}
+            {project.features && project.features.length > 0 && (
+              <div className="mb-4">
+                <p className="text-xs text-gray-400 mb-1">Features:</p>
+                <ul className="space-y-0.5">
+                  {project.features.slice(0, 3).map((feature, fIdx) => (
+                    <li key={fIdx} className="text-gray-300 text-xs flex items-start gap-1.5">
+                      <span className="text-accent">▸</span>
+                      {feature}
+                    </li>
+                  ))}
+                  {project.features.length > 3 && (
+                    <li className="text-gray-500 text-xs">+{project.features.length - 3} more</li>
+                  )}
+                </ul>
+              </div>
+            )}
+
+            {/* Technologies */}
+            {project.technologies && project.technologies.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {project.technologies.slice(0, 4).map((tech, tIdx) => (
+                  <span key={tIdx} className="bg-accent/10 text-accent px-2 py-0.5 rounded text-xs">
+                    {tech}
+                  </span>
+                ))}
+                {project.technologies.length > 4 && (
+                  <span className="text-gray-500 text-xs">+{project.technologies.length - 4}</span>
+                )}
+              </div>
+            )}
+
+            {/* Timeline & Links */}
+            <div className="flex items-center justify-between text-xs text-gray-400 border-t border-gray-700 pt-3">
+              {project.timeline && <span>📅 {project.timeline}</span>}
+              <div className="flex gap-3">
+                {project.githubLink && (
+                  <a href={project.githubLink} target="_blank" rel="noopener noreferrer" className="hover:text-accent transition">
+                    🐙 GitHub
+                  </a>
+                )}
+                {project.demoLink && (
+                  <a href={project.demoLink} target="_blank" rel="noopener noreferrer" className="hover:text-accent transition">
+                    🚀 Demo
+                  </a>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ============================================
 // MAIN PROJECTS COMPONENT
 // ============================================
 const Projects = () => {
   const [projects, setProjects] = useState([]);
+  const [currentProjects, setCurrentProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    loadProjects();
+    loadData();
   }, []);
   
-  const loadProjects = async () => {
+  const loadData = async () => {
     try {
-      const response = await axios.get('/api/projects');
-      setProjects(response.data);
+      const [projectsRes, currentRes] = await Promise.all([
+        axios.get('/api/projects'),
+        axios.get('/api/current-projects')
+      ]);
+      setProjects(projectsRes.data);
+      setCurrentProjects(currentRes.data);
       setLoading(false);
     } catch (error) {
       console.error('Error loading projects:', error);
@@ -263,6 +365,7 @@ const Projects = () => {
     <>
       <section id="projects" className="py-16 bg-gradient-to-b from-dark to-gray-900">
         <div className="container mx-auto px-6">
+          {/* Section Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -290,6 +393,7 @@ const Projects = () => {
             </motion.div>
           </motion.div>
           
+          {/* Featured Projects Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredProjects.map((project, idx) => (
               <motion.div
@@ -335,9 +439,13 @@ const Projects = () => {
               </motion.div>
             ))}
           </div>
+
+          {/* Current Projects Subsection */}
+          <CurrentProjectsSubsection projects={currentProjects} />
         </div>
       </section>
       
+      {/* Project Modal */}
       <AnimatePresence>
         {selectedProject && <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />}
       </AnimatePresence>

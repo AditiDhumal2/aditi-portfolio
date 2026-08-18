@@ -12,17 +12,14 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
-  // Dynamic menu items - Updated with all sections
+  // Updated menu items - Removed Experience
   const navItems = [
     { name: 'Home', id: 'home' },
-    { name: 'About', id: 'about' },
-    { name: 'Experience', id: 'experience' },
-    { name: 'Projects', id: 'projects' },
-    { name: 'Building', id: 'building' },
+    { name: 'About', id: 'about' },      // Skills are inside About
+    { name: 'Projects', id: 'projects' }, // Current Projects are inside Projects
     { name: 'Research', id: 'research' },
     { name: 'Certifications', id: 'certifications' },
     { name: 'Achievements', id: 'achievements' },
-    { name: 'Skills', id: 'skills' },
     { name: 'Contact', id: 'contact' }
   ];
   
