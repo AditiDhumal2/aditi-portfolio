@@ -58,100 +58,55 @@ const About = () => {
     "🔬 2 Research Papers Published"
   ];
 
-  // ============ YOUR ACTUAL SKILLS WITH PERCENTAGES ============
+  // ============ SKILLS DATA - 14 Skills with Levels ============
   const skillsData = [
-    // 💻 Programming & Development
-    { name: "Python", percentage: 90 },
-    { name: "Java", percentage: 85 },
-    { name: "TypeScript", percentage: 80 },
-    { name: "JavaScript", percentage: 85 },
-    { name: "SQL", percentage: 85 },
+    // Advanced - Your strongest skills
+    { name: "Python", level: "Advanced" },
+    { name: "SQL", level: "Advanced" },
+    { name: "Pandas", level: "Advanced" },
+    { name: "Scikit-learn", level: "Advanced" },
+    { name: "Excel", level: "Advanced" },
+    { name: "Data Analysis", level: "Advanced" },
     
-    // 🤖 AI & Machine Learning
-    { name: "Machine Learning", percentage: 85 },
-    { name: "Deep Learning", percentage: 75 },
-    { name: "Computer Vision", percentage: 70 },
-    { name: "NLP", percentage: 75 },
-    { name: "Generative AI", percentage: 70 },
-    { name: "LLMs", percentage: 75 },
+    // Proficient - You can work independently
+    { name: "JavaScript", level: "Proficient" },
+    { name: "React", level: "Proficient" },
+    { name: "Power BI", level: "Proficient" },
+    { name: "Tableau", level: "Proficient" },
+    { name: "Machine Learning", level: "Proficient" },
+    { name: "Research Methodology", level: "Proficient" },
     
-    // 📊 Data & Analytics
-    { name: "Pandas", percentage: 90 },
-    { name: "NumPy", percentage: 85 },
-    { name: "Scikit-learn", percentage: 85 },
-    { name: "Power BI", percentage: 80 },
-    { name: "Tableau", percentage: 75 },
-    { name: "Data Visualization", percentage: 85 },
-    
-    // 🧠 Information Systems
-    { name: "Decision Support Systems", percentage: 80 },
-    { name: "Business Intelligence", percentage: 85 },
-    { name: "Data-Driven Decision Making", percentage: 85 },
-    { name: "Information Systems", percentage: 80 },
-    
-    // 🌐 Full-Stack Development
-    { name: "Next.js", percentage: 80 },
-    { name: "React", percentage: 85 },
-    { name: "Node.js", percentage: 80 },
-    { name: "Express.js", percentage: 80 },
-    { name: "MongoDB", percentage: 80 },
-    { name: "REST APIs", percentage: 85 },
-    { name: "Flask", percentage: 75 },
-    
-    // 🔬 Research
-    { name: "Research Methodology", percentage: 85 },
-    { name: "Literature Review", percentage: 80 },
-    { name: "User Research", percentage: 75 },
-    { name: "Data Analysis", percentage: 90 },
-    { name: "Technical Writing", percentage: 80 },
-    
-    // ⚙️ Tools & Platforms
-    { name: "Git", percentage: 90 },
-    { name: "GitHub", percentage: 90 },
-    { name: "Docker", percentage: 70 },
-    { name: "Streamlit", percentage: 80 },
-    { name: "FastAPI", percentage: 75 },
-    { name: "AWS", percentage: 70 }
+    // Familiar - You understand and can use
+    { name: "NLP", level: "Familiar" },
+    { name: "AWS", level: "Familiar" }
   ];
 
-  // Group skills by category for display
-  const skillCategories = [
-    {
-      id: 'programming',
-      label: '💻 Programming & Development',
-      skills: skillsData.slice(0, 5)
-    },
-    {
-      id: 'ai-ml',
-      label: '🤖 AI & Machine Learning',
-      skills: skillsData.slice(5, 11)
-    },
-    {
-      id: 'data-analytics',
-      label: '📊 Data & Analytics',
-      skills: skillsData.slice(11, 17)
-    },
-    {
-      id: 'information-systems',
-      label: '🧠 Information Systems',
-      skills: skillsData.slice(17, 21)
-    },
-    {
-      id: 'fullstack',
-      label: '🌐 Full-Stack Development',
-      skills: skillsData.slice(21, 28)
-    },
-    {
-      id: 'research',
-      label: '🔬 Research',
-      skills: skillsData.slice(28, 33)
-    },
-    {
-      id: 'tools',
-      label: '⚙️ Tools & Platforms',
-      skills: skillsData.slice(33, 39)
+  // Get color based on level
+  const getLevelColor = (level) => {
+    switch(level) {
+      case 'Advanced':
+        return 'bg-green-500/20 text-green-400 border-green-500/30 hover:bg-green-500/30';
+      case 'Proficient':
+        return 'bg-blue-500/20 text-blue-400 border-blue-500/30 hover:bg-blue-500/30';
+      case 'Familiar':
+        return 'bg-gray-500/20 text-gray-400 border-gray-500/30 hover:bg-gray-500/30';
+      default:
+        return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     }
-  ];
+  };
+
+  const getLevelSymbol = (level) => {
+    switch(level) {
+      case 'Advanced':
+        return '★';
+      case 'Proficient':
+        return '●';
+      case 'Familiar':
+        return '○';
+      default:
+        return '○';
+    }
+  };
 
   return (
     <section id="about" className="py-20 bg-gradient-to-b from-dark to-gray-900">
@@ -197,7 +152,7 @@ const About = () => {
               </p>
             </div>
             
-            {/* Education Card with SGPA and CGPA */}
+            {/* Education Card */}
             <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 border border-gray-700">
               <div className="flex items-center gap-3 mb-4">
                 <div className="text-3xl">🎓</div>
@@ -286,47 +241,44 @@ const About = () => {
               </div>
             </div>
 
-            {/* ============ SKILLS SECTION - With YOUR Skills ============ */}
+            {/* ============ SKILLS - 14 Skills with Levels ============ */}
             <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 border border-gray-700">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="text-3xl">💪</div>
-                <h3 className="text-xl font-bold text-accent">Skills</h3>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="text-3xl">💪</div>
+                  <h3 className="text-xl font-bold text-accent">Skills</h3>
+                </div>
+                <span className="text-xs text-gray-500">{skillsData.length} skills</span>
               </div>
               
-              <div className="space-y-4">
-                {skillCategories.map((category, catIdx) => (
-                  <div key={category.id}>
-                    <p className="text-xs font-semibold text-gray-400 mb-2">{category.label}</p>
-                    <div className="space-y-2">
-                      {category.skills.map((skill, idx) => (
-                        <motion.div
-                          key={idx}
-                          initial={{ opacity: 0, x: -20 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.3, delay: (catIdx * 0.1) + (idx * 0.02) }}
-                          className="space-y-0.5"
-                        >
-                          <div className="flex justify-between text-xs">
-                            <span className="text-gray-300 font-medium">{skill.name}</span>
-                            <span className="text-accent font-bold">{skill.percentage}%</span>
-                          </div>
-                          <div className="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              whileInView={{ width: `${skill.percentage}%` }}
-                              transition={{ duration: 0.8, delay: (catIdx * 0.1) + (idx * 0.02) }}
-                              className="h-full bg-gradient-to-r from-accent to-accent/70 rounded-full"
-                              style={{ width: `${skill.percentage}%` }}
-                            />
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                    {catIdx < skillCategories.length - 1 && (
-                      <div className="border-t border-gray-700/50 my-3"></div>
-                    )}
-                  </div>
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {skillsData.map((skill) => (
+                  <motion.span 
+                    key={skill.name}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.2 }}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium border transition hover:scale-105 cursor-default ${getLevelColor(skill.level)}`}
+                  >
+                    {skill.name}
+                    <span className="ml-1 text-[10px] opacity-70">
+                      {getLevelSymbol(skill.level)}
+                    </span>
+                  </motion.span>
                 ))}
+              </div>
+              
+              {/* Legend */}
+              <div className="flex flex-wrap gap-3 pt-2 border-t border-gray-700/50 text-[10px] text-gray-500">
+                <span className="flex items-center gap-1">
+                  <span className="text-green-400">★</span> Advanced
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="text-blue-400">●</span> Proficient
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="text-gray-400">○</span> Familiar
+                </span>
               </div>
             </div>
           </motion.div>
