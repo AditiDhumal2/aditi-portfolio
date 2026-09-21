@@ -2,19 +2,25 @@ import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 
-// Lazy load components for faster initial load
+// ============ MAIN COMPONENTS ============
 const Hero = lazy(() => import('./components/Hero'));
-const About = lazy(() => import('./components/About')); // Now includes Skills
-const Projects = lazy(() => import('./components/Projects')); // Now includes Current Projects
+const About = lazy(() => import('./components/About'));
+const Projects = lazy(() => import('./components/Projects'));
 const Research = lazy(() => import('./components/Research'));
 const Certifications = lazy(() => import('./components/Certifications'));
 const Achievements = lazy(() => import('./components/Achievements'));
 const Contact = lazy(() => import('./components/Contact'));
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
 
-// REMOVED: Experience import
+// ============ PUBLIC DETAIL PAGES ============
+const ProjectsPage = lazy(() => import('./pages/ProjectsPage'));
+const ProjectDetail = lazy(() => import('./pages/ProjectDetail'));
+const ResearchPage = lazy(() => import('./pages/ResearchPage'));
+const ResearchDetail = lazy(() => import('./pages/ResearchDetail'));
+const AchievementsPage = lazy(() => import('./pages/AchievementsPage'));
+const AchievementDetail = lazy(() => import('./pages/AchievementDetail'));
 
-// Professional Loading Component with Rolling Box
+// ============ PROFESSIONAL LOADING COMPONENT ============
 const LoadingSpinner = () => {
   const [showTimeout, setShowTimeout] = useState(false);
 
@@ -55,14 +61,58 @@ function App() {
       <div className="bg-dark min-h-screen">
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
+            {/* ============ ADMIN ROUTE ============ */}
             <Route path="/admin" element={<AdminDashboard />} />
+
+            {/* ============ PUBLIC PROJECTS ============ */}
+            <Route path="/projects" element={
+              <>
+                <Navbar />
+                <ProjectsPage />
+              </>
+            } />
+            <Route path="/projects/:slug" element={
+              <>
+                <Navbar />
+                <ProjectDetail />
+              </>
+            } />
+
+            {/* ============ PUBLIC RESEARCH ============ */}
+            <Route path="/research" element={
+              <>
+                <Navbar />
+                <ResearchPage />
+              </>
+            } />
+            <Route path="/research/:slug" element={
+              <>
+                <Navbar />
+                <ResearchDetail />
+              </>
+            } />
+
+            {/* ============ PUBLIC ACHIEVEMENTS ============ */}
+            <Route path="/achievements" element={
+              <>
+                <Navbar />
+                <AchievementsPage />
+              </>
+            } />
+            <Route path="/achievements/:slug" element={
+              <>
+                <Navbar />
+                <AchievementDetail />
+              </>
+            } />
+
+            {/* ============ MAIN PORTFOLIO ============ */}
             <Route path="/" element={
               <>
                 <Navbar />
                 <Hero />
-                <About /> {/* Skills are now inside About */}
-                {/* REMOVED: <Experience /> */}
-                <Projects /> {/* Current Projects are now inside Projects */}
+                <About />
+                <Projects />
                 <Research />
                 <Certifications />
                 <Achievements />

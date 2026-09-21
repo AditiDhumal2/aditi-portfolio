@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
 // ============================================
-// RESEARCH MODAL - Similar to Project Modal
+// RESEARCH MODAL
 // ============================================
 const ResearchModal = ({ item, onClose }) => {
   if (!item) return null;
@@ -23,7 +24,6 @@ const ResearchModal = ({ item, onClose }) => {
         className="bg-gradient-to-br from-gray-900 to-dark border border-gray-700 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
-        {/* Header with Image or Gradient */}
         <div className="relative h-48 md:h-56 bg-gradient-to-r from-accent/20 to-purple-500/20 rounded-t-2xl flex items-center justify-center">
           {item.image ? (
             <img src={item.image} alt={item.title} className="w-full h-full object-cover rounded-t-2xl" />
@@ -38,7 +38,6 @@ const ResearchModal = ({ item, onClose }) => {
           </button>
         </div>
         
-        {/* Title & Metadata */}
         <div className="p-5 border-b border-gray-700">
           <h2 className="text-2xl md:text-3xl font-bold text-accent">{item.title}</h2>
           <div className="flex flex-wrap gap-2 mt-2">
@@ -66,9 +65,7 @@ const ResearchModal = ({ item, onClose }) => {
           )}
         </div>
         
-        {/* Content */}
         <div className="p-5 space-y-4">
-          {/* Theme / Research Focus */}
           {item.theme && (
             <div>
               <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">📌 Research Focus</h3>
@@ -76,7 +73,6 @@ const ResearchModal = ({ item, onClose }) => {
             </div>
           )}
           
-          {/* Abstract / Overview */}
           {item.abstract && (
             <div>
               <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">📝 Overview</h3>
@@ -84,7 +80,6 @@ const ResearchModal = ({ item, onClose }) => {
             </div>
           )}
           
-          {/* Description / Key Contributions */}
           {item.description && (
             <div>
               <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">💡 Key Contributions</h3>
@@ -101,7 +96,6 @@ const ResearchModal = ({ item, onClose }) => {
             </div>
           )}
           
-          {/* Impact */}
           {item.impact && (
             <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl p-4 border border-blue-500/20">
               <h3 className="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-2">🔥 Impact</h3>
@@ -109,7 +103,6 @@ const ResearchModal = ({ item, onClose }) => {
             </div>
           )}
           
-          {/* Skills */}
           {item.skills && item.skills.length > 0 && (
             <div>
               <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">🛠️ Skills</h3>
@@ -123,7 +116,6 @@ const ResearchModal = ({ item, onClose }) => {
             </div>
           )}
           
-          {/* DOI */}
           {item.doi && (
             <div>
               <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">🔗 DOI</h3>
@@ -138,7 +130,6 @@ const ResearchModal = ({ item, onClose }) => {
             </div>
           )}
           
-          {/* Citations */}
           {item.citations && (
             <div>
               <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">📊 Citations</h3>
@@ -168,6 +159,15 @@ const ResearchModal = ({ item, onClose }) => {
                 💻 View Project
               </a>
             )}
+            
+            {/* NEW: View Full Page Button */}
+            <Link 
+              to={`/research/${item.slug || item._id}`}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
+              onClick={onClose}
+            >
+              📄 View Full Page →
+            </Link>
           </div>
         </div>
       </motion.div>
@@ -176,7 +176,7 @@ const ResearchModal = ({ item, onClose }) => {
 };
 
 // ============================================
-// RESEARCH COMPONENT - Similar hover effect as Projects
+// RESEARCH COMPONENT
 // ============================================
 const Research = () => {
   const [research, setResearch] = useState([]);
@@ -201,14 +201,9 @@ const Research = () => {
   if (loading) return null;
   if (research.length === 0) return null;
   
-  // Sort by order
   const sortedResearch = [...research].sort((a, b) => (a.order || 0) - (b.order || 0));
-  
-  // Featured Research
   const featuredPaper = sortedResearch.find(r => r.featured === true);
   const previousResearch = sortedResearch.filter(r => r.featured !== true);
-  
-  // Research Snapshot Stats
   const totalPublications = research.length;
   
   return (
@@ -235,7 +230,7 @@ const Research = () => {
           </p>
         </motion.div>
         
-        {/* Featured Research - Similar to Projects Learn More */}
+        {/* Featured Research */}
         {featuredPaper && (
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -252,15 +247,12 @@ const Research = () => {
               onClick={() => setSelectedItem(featuredPaper)}
             >
               <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border-2 border-yellow-500/30 hover:border-yellow-400 transition-all h-[320px]">
-                {/* Background */}
                 <div className="w-full h-full bg-gradient-to-br from-yellow-500/5 to-orange-500/5 flex items-center justify-center">
                   <div className="text-6xl opacity-20">⭐</div>
                 </div>
                 
-                {/* Overlay gradient */}
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-900/95 via-gray-900/60 to-transparent"></div>
                 
-                {/* Content */}
                 <div className="absolute bottom-0 left-0 right-0 p-6">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-xs font-medium">
@@ -295,7 +287,6 @@ const Research = () => {
                     </p>
                   )}
                   
-                  {/* Skills Tags */}
                   {featuredPaper.skills && featuredPaper.skills.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2">
                       {featuredPaper.skills.slice(0, 3).map(skill => (
@@ -310,7 +301,6 @@ const Research = () => {
                   )}
                 </div>
                 
-                {/* Hover Overlay - "Learn More →" */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="bg-yellow-500/90 hover:bg-yellow-500 text-gray-900 px-6 py-3 rounded-lg font-semibold transform transition-transform group-hover:scale-105 shadow-lg">
                     Learn More →
@@ -321,7 +311,7 @@ const Research = () => {
           </motion.div>
         )}
         
-        {/* Previous Research Grid - Same style as Projects */}
+        {/* Previous Research Grid */}
         {previousResearch.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -342,15 +332,12 @@ const Research = () => {
                   onClick={() => setSelectedItem(item)}
                 >
                   <div className="relative rounded-xl overflow-hidden bg-gray-800 border border-gray-700 hover:border-accent transition-all h-[220px]">
-                    {/* Background gradient */}
                     <div className="w-full h-full bg-gradient-to-br from-accent/10 to-purple-500/10 flex items-center justify-center">
                       <div className="text-5xl opacity-30">📄</div>
                     </div>
                     
-                    {/* Overlay gradient */}
                     <div className="absolute inset-0 bg-gradient-to-t from-gray-900/95 via-gray-900/60 to-transparent"></div>
                     
-                    {/* Content */}
                     <div className="absolute bottom-0 left-0 right-0 p-4">
                       <h4 className="text-lg font-bold text-white group-hover:text-accent transition line-clamp-1">
                         {item.title}
@@ -368,7 +355,6 @@ const Research = () => {
                         </p>
                       )}
                       
-                      {/* Skills Tags */}
                       {item.skills && item.skills.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
                           {item.skills.slice(0, 3).map(skill => (
@@ -382,7 +368,6 @@ const Research = () => {
                         </div>
                       )}
                       
-                      {/* Type Badge */}
                       {item.type && (
                         <span className="inline-block bg-accent/20 text-accent px-2 py-0.5 rounded text-[10px] mt-1">
                           {item.type}
@@ -390,7 +375,6 @@ const Research = () => {
                       )}
                     </div>
                     
-                    {/* Hover Overlay - "Learn More →" */}
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <div className="bg-accent/90 hover:bg-accent text-white px-6 py-3 rounded-lg font-semibold transform transition-transform group-hover:scale-105 shadow-lg">
                         Learn More →
@@ -408,7 +392,7 @@ const Research = () => {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-gray-800/30 rounded-2xl p-6 border border-gray-700"
+          className="bg-gray-800/30 rounded-2xl p-6 border border-gray-700 mb-8"
         >
           <h3 className="text-xl font-bold text-accent mb-4">📊 Research Snapshot</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -432,6 +416,16 @@ const Research = () => {
             </div>
           </div>
         </motion.div>
+
+        {/* View All Research Button */}
+        <div className="text-center">
+          <Link 
+            to="/research" 
+            className="bg-accent hover:bg-accent/80 text-white px-6 py-3 rounded-lg transition font-medium inline-block"
+          >
+            View All Research →
+          </Link>
+        </div>
       </div>
       
       {/* Research Modal */}

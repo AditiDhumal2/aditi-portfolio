@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
@@ -159,6 +160,15 @@ const ProjectModal = ({ project, onClose }) => {
               📘 Documentation
             </a>
           )}
+          
+          {/* NEW: View Full Page Button */}
+          <Link 
+            to={`/projects/${project.slug || project._id}`}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
+            onClick={onClose}
+          >
+            📄 View Full Page →
+          </Link>
         </div>
         
         {/* Overview */}
@@ -227,7 +237,7 @@ const ProjectModal = ({ project, onClose }) => {
 };
 
 // ============================================
-// CURRENT PROJECT DETAILS MODAL - For Current Projects
+// CURRENT PROJECT DETAILS MODAL
 // ============================================
 const CurrentProjectModal = ({ project, onClose }) => {
   if (!project) return null;
@@ -247,7 +257,6 @@ const CurrentProjectModal = ({ project, onClose }) => {
         className="bg-gradient-to-br from-gray-900 to-dark border border-gray-700 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
-        {/* Header with Icon */}
         <div className="relative h-48 md:h-56 bg-gradient-to-r from-accent/20 to-purple-500/20 rounded-t-2xl flex items-center justify-center">
           <div className="text-7xl md:text-8xl">🔨</div>
           <button 
@@ -258,7 +267,6 @@ const CurrentProjectModal = ({ project, onClose }) => {
           </button>
         </div>
         
-        {/* Title */}
         <div className="p-5 border-b border-gray-700">
           <h2 className="text-2xl md:text-3xl font-bold text-white">{project.title}</h2>
           {project.timeline && (
@@ -266,7 +274,6 @@ const CurrentProjectModal = ({ project, onClose }) => {
           )}
         </div>
         
-        {/* Description */}
         <div className="p-5 border-b border-gray-700">
           <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">📝 Description</h3>
           <p className="text-gray-300 text-sm md:text-base leading-relaxed">
@@ -274,7 +281,6 @@ const CurrentProjectModal = ({ project, onClose }) => {
           </p>
         </div>
         
-        {/* Progress */}
         {project.progress && (
           <div className="p-5 border-b border-gray-700">
             <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">📊 Progress</h3>
@@ -291,7 +297,6 @@ const CurrentProjectModal = ({ project, onClose }) => {
           </div>
         )}
         
-        {/* Features */}
         {project.features && project.features.length > 0 && (
           <div className="p-5 border-b border-gray-700">
             <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">✨ Key Features</h3>
@@ -306,7 +311,6 @@ const CurrentProjectModal = ({ project, onClose }) => {
           </div>
         )}
         
-        {/* Technologies */}
         {project.technologies && project.technologies.length > 0 && (
           <div className="p-5 border-b border-gray-700">
             <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">🛠 Technologies</h3>
@@ -323,7 +327,6 @@ const CurrentProjectModal = ({ project, onClose }) => {
           </div>
         )}
         
-        {/* Links */}
         {(project.githubLink || project.demoLink) && (
           <div className="p-5">
             <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">🔗 Links</h3>
@@ -357,7 +360,7 @@ const CurrentProjectModal = ({ project, onClose }) => {
 };
 
 // ============================================
-// CURRENT PROJECTS SUBSECTION - With "Learn More" Hover
+// CURRENT PROJECTS SUBSECTION
 // ============================================
 const CurrentProjectsSubsection = ({ projects, onProjectClick }) => {
   if (!projects || projects.length === 0) return null;
@@ -383,15 +386,12 @@ const CurrentProjectsSubsection = ({ projects, onProjectClick }) => {
             onClick={() => onProjectClick(project)}
           >
             <div className="relative rounded-xl overflow-hidden bg-gray-800 border border-gray-700 hover:border-accent transition-all h-[220px]">
-              {/* Background gradient */}
               <div className="w-full h-full bg-gradient-to-br from-accent/10 to-purple-500/10 flex items-center justify-center">
                 <div className="text-5xl opacity-50">🔨</div>
               </div>
               
-              {/* Overlay gradient */}
               <div className="absolute inset-0 bg-gradient-to-t from-gray-900/95 via-gray-900/60 to-transparent"></div>
               
-              {/* Content */}
               <div className="absolute bottom-0 left-0 right-0 p-5">
                 <h4 className="text-lg font-bold text-white group-hover:text-accent transition line-clamp-1">
                   {project.title}
@@ -400,7 +400,6 @@ const CurrentProjectsSubsection = ({ projects, onProjectClick }) => {
                   {project.description}
                 </p>
                 
-                {/* Progress Bar - Compact */}
                 {project.progress && (
                   <div className="mt-3">
                     <div className="flex justify-between text-xs text-gray-400 mb-0.5">
@@ -418,7 +417,6 @@ const CurrentProjectsSubsection = ({ projects, onProjectClick }) => {
                   </div>
                 )}
                 
-                {/* Tech Stack Tags - Compact */}
                 {project.technologies && project.technologies.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
                     {project.technologies.slice(0, 3).map((tech, tIdx) => (
@@ -433,7 +431,6 @@ const CurrentProjectsSubsection = ({ projects, onProjectClick }) => {
                 )}
               </div>
               
-              {/* Hover Overlay - "Learn More →" */}
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <div className="bg-accent/90 hover:bg-accent text-white px-6 py-3 rounded-lg font-semibold transform transition-transform group-hover:scale-105 shadow-lg">
                   Learn More →
@@ -564,6 +561,16 @@ const Projects = () => {
             projects={currentProjects} 
             onProjectClick={setSelectedCurrentProject}
           />
+
+          {/* View All Projects Button */}
+          <div className="text-center mt-10">
+            <Link 
+              to="/projects" 
+              className="bg-accent hover:bg-accent/80 text-white px-6 py-3 rounded-lg transition font-medium inline-block"
+            >
+              View All Projects →
+            </Link>
+          </div>
         </div>
       </section>
       
@@ -572,7 +579,7 @@ const Projects = () => {
         {selectedProject && <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />}
       </AnimatePresence>
       
-      {/* Current Project Modal - Detailed View */}
+      {/* Current Project Modal */}
       <AnimatePresence>
         {selectedCurrentProject && (
           <CurrentProjectModal 

@@ -1,40 +1,26 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
+// ============================================
+// ACHIEVEMENT MODAL (with View Full Page)
+// ============================================
 const AchievementModal = ({ ach, onClose }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
   if (!ach) return null;
   
-  // Get images array - if ach.images is array, use it, otherwise fallback to single image
   const images = ach.images && ach.images.length > 0 ? ach.images : (ach.image ? [ach.image] : []);
   const hasMultipleImages = images.length > 1;
   
-  // Auto-slide effect
   useEffect(() => {
     if (!hasMultipleImages) return;
-    
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % images.length);
-    }, 3000); // Change image every 3 seconds
-    
+    }, 3000);
     return () => clearInterval(interval);
   }, [images.length, hasMultipleImages]);
-  
-  // Go to next/previous image
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % images.length);
-  };
-  
-  const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
-  
-  // Go to specific image
-  const goToImage = (index) => {
-    setCurrentImageIndex(index);
-  };
   
   return (
     <motion.div 
@@ -54,7 +40,6 @@ const AchievementModal = ({ ach, onClose }) => {
         <div className="p-6">
           <button onClick={onClose} className="float-right text-gray-400 hover:text-white text-2xl">✕</button>
           
-          {/* Title with Icon */}
           <div className="mb-4">
             <div className="flex items-center gap-3 mb-2">
               <span className="text-4xl">
@@ -70,10 +55,8 @@ const AchievementModal = ({ ach, onClose }) => {
             {ach.date && <span className="text-gray-400 text-sm ml-3">{ach.date}</span>}
           </div>
           
-          {/* Image Slider */}
           {images.length > 0 && (
             <div className="mb-5 rounded-xl overflow-hidden border border-gray-700 relative">
-              {/* Image Container */}
               <div className="relative w-full" style={{ minHeight: '300px', maxHeight: '500px' }}>
                 <AnimatePresence mode="wait">
                   <motion.img 
@@ -88,48 +71,42 @@ const AchievementModal = ({ ach, onClose }) => {
                   />
                 </AnimatePresence>
                 
-                {/* Navigation Arrows - Only show if multiple images */}
                 {hasMultipleImages && (
                   <>
                     <button
-                      onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                      onClick={(e) => { e.stopPropagation(); setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length); }}
                       className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition z-10"
                     >
                       ◀
                     </button>
                     <button
-                      onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                      onClick={(e) => { e.stopPropagation(); setCurrentImageIndex((prev) => (prev + 1) % images.length); }}
                       className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition z-10"
                     >
                       ▶
                     </button>
                     
-                    {/* Dot indicators */}
                     <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
                       {images.map((_, idx) => (
                         <button
                           key={idx}
-                          onClick={(e) => { e.stopPropagation(); goToImage(idx); }}
+                          onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(idx); }}
                           className={`w-2.5 h-2.5 rounded-full transition ${
                             currentImageIndex === idx ? 'bg-accent w-6' : 'bg-gray-500/50 hover:bg-gray-400'
                           }`}
                         />
                       ))}
                     </div>
+                    
+                    <div className="absolute top-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full z-10">
+                      {currentImageIndex + 1} / {images.length}
+                    </div>
                   </>
-                )}
-                
-                {/* Image counter */}
-                {hasMultipleImages && (
-                  <div className="absolute top-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full z-10">
-                    {currentImageIndex + 1} / {images.length}
-                  </div>
                 )}
               </div>
             </div>
           )}
           
-          {/* Achievement Details */}
           <div className="space-y-4">
             {ach.description && (
               <div>
@@ -140,7 +117,6 @@ const AchievementModal = ({ ach, onClose }) => {
               </div>
             )}
             
-            {/* Links Section */}
             <div className="flex flex-wrap gap-3 pt-3 border-t border-gray-700">
               {ach.certificateLink && (
                 <a 
@@ -162,6 +138,15 @@ const AchievementModal = ({ ach, onClose }) => {
                   <span>🔗</span> Learn More
                 </a>
               )}
+              
+              {/* NEW: View Full Page Button */}
+              <Link 
+                to={`/achievements/${ach.slug || ach._id}`}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-lg transition flex items-center gap-2"
+                onClick={onClose}
+              >
+                📄 View Full Page →
+              </Link>
             </div>
           </div>
         </div>
@@ -170,6 +155,9 @@ const AchievementModal = ({ ach, onClose }) => {
   );
 };
 
+// ============================================
+// MAIN ACHIEVEMENTS COMPONENT
+// ============================================
 const Achievements = () => {
   const [achievements, setAchievements] = useState([]);
   const [selectedAch, setSelectedAch] = useState(null);
@@ -199,7 +187,6 @@ const Achievements = () => {
     </section>
   );
   
-  // Filter achievements by category
   const leadershipItems = achievements.filter(a => 
     a.category === '💼 Leadership & Community' || 
     a.category === 'Leadership' || 
@@ -289,7 +276,6 @@ const Achievements = () => {
                   onClick={() => setSelectedAch(ach)}
                 >
                   <div className="relative rounded-xl overflow-hidden bg-gray-800 border border-gray-700 hover:border-accent transition-all h-[240px]">
-                    {/* Show first image as preview */}
                     {ach.images && ach.images.length > 0 ? (
                       <img 
                         src={ach.images[0]} 
@@ -332,6 +318,16 @@ const Achievements = () => {
               ))}
             </div>
           )}
+          
+          {/* View All Achievements Button */}
+          <div className="text-center mt-10">
+            <Link 
+              to="/achievements" 
+              className="bg-accent hover:bg-accent/80 text-white px-6 py-3 rounded-lg transition font-medium inline-block"
+            >
+              View All Achievements →
+            </Link>
+          </div>
         </div>
       </section>
       

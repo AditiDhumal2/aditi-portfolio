@@ -54,9 +54,19 @@ mongoose.connect(MONGODB_URI, connectionOptions)
     console.error('❌ MongoDB connection error:', err.message);
   });
 
+// ============ HELPER: GENERATE SLUG ============
+function generateSlug(title) {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')      // Remove special characters
+    .replace(/[\s_-]+/g, '-')       // Replace spaces/underscores with hyphens
+    .replace(/^-+|-+$/g, '');       // Remove leading/trailing hyphens
+}
+
 // ============ SCHEMAS ============
 
-// 1. PROFILE SCHEMA - Updated with SGPA, CGPA, Journey, Highlights
+// 1. PROFILE SCHEMA
 const profileSchema = new mongoose.Schema({
   name: { type: String, default: 'Aditi Dhumal' },
   photo: { type: String, default: '' },
@@ -66,33 +76,27 @@ const profileSchema = new mongoose.Schema({
   education: { type: String, default: 'BE in Information Technology' },
   interests: { type: String, default: 'Data Analytics + AI Systems' },
   description: { type: String, default: '' },
-  sgpa: { type: String, default: '' },        // NEW: SGPA field
-  cgpa: { type: String, default: '' },        // NEW: CGPA field
+  sgpa: { type: String, default: '' },
+  cgpa: { type: String, default: '' },
   stats: {
     achievements: { type: Number, default: 0 },
     projects: { type: Number, default: 0 },
     certifications: { type: Number, default: 0 },
     researchPapers: { type: Number, default: 0 }
   },
-  journey: [{ type: String }],                 // NEW: Journey points
-  highlights: [{ type: String }]               // NEW: Key highlights
+  journey: [{ type: String }],
+  highlights: [{ type: String }]
 }, { timestamps: true });
 
-// 2. PROJECT SCHEMA - Simplified for Trailer Philosophy
+// 2. PROJECT SCHEMA - With slug for public pages
 const projectSchema = new mongoose.Schema({
-  // Core required fields
   title: { type: String, required: true },
-  
-  // NEW SIMPLIFIED FIELDS (Trailer Philosophy)
-  subtitle: { type: String, default: '' },     // NEW: One-line subtitle
-  overview: { type: String, default: '' },     // NEW: 2-3 line overview
-  features: { type: String, default: '' },     // NEW: Comma-separated features list
-  
-  // Tech Stack & Images
+  slug: { type: String, unique: true, index: true, sparse: true },  // NEW
+  subtitle: { type: String, default: '' },
+  overview: { type: String, default: '' },
+  features: { type: String, default: '' },
   tools: { type: String, default: '' },
   images: [{ type: String }],
-  
-  // Action Buttons
   githubLink: { type: String, default: '' },
   deployedLink: { type: String, default: '' },
   documentation: {
@@ -100,8 +104,7 @@ const projectSchema = new mongoose.Schema({
     link: { type: String, default: '' },
     description: { type: String, default: '' }
   },
-  
-  // LEGACY FIELDS (Kept for backward compatibility, hidden in modal)
+  // Legacy fields
   problem: { type: String, default: '' },
   dataset: { type: String, default: '' },
   methodology: { type: String, default: '' },
@@ -120,13 +123,11 @@ const projectSchema = new mongoose.Schema({
   },
   challenges: { type: String, default: '' },
   futureWork: { type: String, default: '' },
-  
-  // Display settings
   featured: { type: Boolean, default: true },
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// 3. CURRENT PROJECT SCHEMA - Kept for subsection in Projects
+// 3. CURRENT PROJECT SCHEMA
 const currentProjectSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, default: '' },
@@ -139,9 +140,10 @@ const currentProjectSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// 4. RESEARCH SCHEMA
+// 4. RESEARCH SCHEMA - With slug for public pages
 const researchSchema = new mongoose.Schema({
   title: { type: String, required: true },
+  slug: { type: String, unique: true, index: true, sparse: true },  // NEW
   type: { type: String, default: 'Conference Paper' },
   status: { type: String, default: 'Submitted' },
   description: { type: String, default: '' },
@@ -179,9 +181,10 @@ const certificationSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// 6. ACHIEVEMENT SCHEMA
+// 6. ACHIEVEMENT SCHEMA - With slug for public pages
 const achievementSchema = new mongoose.Schema({
   title: { type: String, required: true },
+  slug: { type: String, unique: true, index: true, sparse: true },  // NEW
   description: { type: String, default: '' },
   category: { type: String, default: '💼 Leadership & Community' },
   date: { type: String, default: '' },
@@ -191,14 +194,13 @@ const achievementSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// 7. SKILLS SCHEMA - Updated with percentage-based skills
+// 7. SKILLS SCHEMA
 const skillsSchema = new mongoose.Schema({
-  // NEW: Array of skill objects with name and percentage
   skills: [{
     name: { type: String, required: true },
-    percentage: { type: Number, default: 0, min: 0, max: 100 }
+    level: { type: String, default: 'Proficient' }  // Advanced, Proficient, Familiar
   }],
-  // LEGACY FIELDS - Kept for backward compatibility
+  // Legacy fields
   programming: [{ type: String }],
   dataTools: [{ type: String }],
   mlTools: [{ type: String }],
@@ -218,7 +220,6 @@ const contactSchema = new mongoose.Schema({
 // ============ MODELS ============
 const Profile = mongoose.model('Profile', profileSchema);
 const Project = mongoose.model('Project', projectSchema);
-// REMOVED: Experience model (section removed)
 const CurrentProject = mongoose.model('CurrentProject', currentProjectSchema);
 const Research = mongoose.model('Research', researchSchema);
 const Certification = mongoose.model('Certification', certificationSchema);
@@ -233,7 +234,6 @@ async function seedInitialData() {
     if (profileCount === 0) {
       console.log('🌱 Seeding initial data...');
       
-      // Seed Profile with new fields
       await Profile.create({
         name: 'Aditi Dhumal',
         title: 'Information Technology Student specializing in Data Analytics & Intelligent Systems',
@@ -241,16 +241,16 @@ async function seedInitialData() {
         education: 'BE in Information Technology',
         interests: 'Data Analytics + AI Systems',
         description: "I'm a passionate IT student with a strong research mindset, aiming to solve real-world problems through data.",
-        sgpa: '9.46',                    // NEW
-        cgpa: '8.02',                    // NEW
+        sgpa: '9.46',
+        cgpa: '8.02',
         stats: { achievements: 6, projects: 3, certifications: 4, researchPapers: 2 },
-        journey: [                       // NEW
+        journey: [
           "Passionate about turning data into actionable insights",
           "Experienced in Python, SQL, and Machine Learning",
           "Research-oriented with 2 published papers",
           "Aiming for MSIM to create intelligent systems"
         ],
-        highlights: [                    // NEW
+        highlights: [
           "🏆 Final Year SGPA: 9.46 (Top 5% of Class)",
           "📚 Overall CGPA: 8.02",
           "🏅 Academic Excellence Award",
@@ -258,12 +258,12 @@ async function seedInitialData() {
         ]
       });
       
-      // Seed sample project with simplified structure
       await Project.create({
         title: "Career Intelligence Platform",
-        subtitle: "AI-Powered Career Analytics Platform",          // NEW
-        overview: "An end-to-end career analytics platform that helps professionals identify skill gaps and discover career paths using AI-driven insights.",  // NEW
-        features: "AI Career Advisor, Skill Gap Analysis, Resume Analysis, Salary Prediction, Job Market Analytics",  // NEW
+        slug: "career-intelligence-platform",
+        subtitle: "AI-Powered Career Analytics Platform",
+        overview: "An end-to-end career analytics platform that helps professionals identify skill gaps and discover career paths using AI-driven insights.",
+        features: "AI Career Advisor, Skill Gap Analysis, Resume Analysis, Salary Prediction, Job Market Analytics",
         tools: "Python, Streamlit, Scikit-learn, SQLite, Gemini API",
         images: [],
         githubLink: "https://github.com/yourusername/career-platform",
@@ -277,23 +277,23 @@ async function seedInitialData() {
         order: 0
       });
       
-      // Seed skills with percentages (NEW format)
       await Skills.create({
-        skills: [                      // NEW: Array of skill objects
-          { name: "HTML | CSS", percentage: 90 },
-          { name: "Python", percentage: 80 },
-          { name: "SQL | NoSQL", percentage: 75 },
-          { name: "Excel | Power BI | Tableau", percentage: 90 },
-          { name: "AWS Cloud", percentage: 85 },
-          { name: "Machine Learning", percentage: 75 },
-          { name: "Data Cleaning | Preparation", percentage: 90 },
-          { name: "Data Analysis | Modeling", percentage: 80 },
-          { name: "Data Visualization | Reporting", percentage: 75 },
-          { name: "Business Intelligence", percentage: 90 },
-          { name: "Communication | Storytelling", percentage: 85 },
-          { name: "Critical Thinking | Problem-Solving", percentage: 75 }
+        skills: [
+          { name: "Python", level: "Advanced" },
+          { name: "SQL", level: "Advanced" },
+          { name: "Pandas", level: "Advanced" },
+          { name: "Scikit-learn", level: "Advanced" },
+          { name: "Excel", level: "Advanced" },
+          { name: "Data Analysis", level: "Advanced" },
+          { name: "JavaScript", level: "Proficient" },
+          { name: "React", level: "Proficient" },
+          { name: "Power BI", level: "Proficient" },
+          { name: "Tableau", level: "Proficient" },
+          { name: "Machine Learning", level: "Proficient" },
+          { name: "Research Methodology", level: "Proficient" },
+          { name: "NLP", level: "Familiar" },
+          { name: "AWS", level: "Familiar" }
         ],
-        // Legacy fields kept
         programming: ['Python', 'SQL', 'JavaScript', 'R'],
         dataTools: ['Pandas', 'Tableau', 'Power BI'],
         mlTools: ['Scikit-learn', 'TensorFlow'],
@@ -347,7 +347,7 @@ app.put('/api/profile', async (req, res) => {
   }
 });
 
-// ===== PROJECTS ROUTES =====
+// ===== PROJECTS ROUTES (With Slug Support) =====
 app.get('/api/projects', async (req, res) => {
   try {
     const projects = await Project.find().sort({ order: 1, createdAt: -1 });
@@ -357,9 +357,39 @@ app.get('/api/projects', async (req, res) => {
   }
 });
 
+// Get single project by slug
+app.get('/api/projects/slug/:slug', async (req, res) => {
+  try {
+    const project = await Project.findOne({ slug: req.params.slug });
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+    res.json(project);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get single project by ID
+app.get('/api/projects/:id', async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+    res.json(project);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.post('/api/projects', async (req, res) => {
   try {
-    const project = await Project.create(req.body);
+    const projectData = { ...req.body };
+    if (!projectData.slug && projectData.title) {
+      projectData.slug = generateSlug(projectData.title);
+    }
+    const project = await Project.create(projectData);
     res.json(project);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -368,7 +398,11 @@ app.post('/api/projects', async (req, res) => {
 
 app.put('/api/projects/:id', async (req, res) => {
   try {
-    const project = await Project.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updateData = { ...req.body };
+    if (updateData.title && !updateData.slug) {
+      updateData.slug = generateSlug(updateData.title);
+    }
+    const project = await Project.findByIdAndUpdate(req.params.id, updateData, { new: true });
     res.json(project);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -421,7 +455,7 @@ app.delete('/api/current-projects/:id', async (req, res) => {
   }
 });
 
-// ===== RESEARCH ROUTES =====
+// ===== RESEARCH ROUTES (With Slug Support) =====
 app.get('/api/research', async (req, res) => {
   try {
     const research = await Research.find().sort({ order: 1, year: -1 });
@@ -431,9 +465,39 @@ app.get('/api/research', async (req, res) => {
   }
 });
 
+// Get single research by slug
+app.get('/api/research/slug/:slug', async (req, res) => {
+  try {
+    const research = await Research.findOne({ slug: req.params.slug });
+    if (!research) {
+      return res.status(404).json({ error: 'Research not found' });
+    }
+    res.json(research);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get single research by ID
+app.get('/api/research/:id', async (req, res) => {
+  try {
+    const research = await Research.findById(req.params.id);
+    if (!research) {
+      return res.status(404).json({ error: 'Research not found' });
+    }
+    res.json(research);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.post('/api/research', async (req, res) => {
   try {
-    const research = await Research.create(req.body);
+    const researchData = { ...req.body };
+    if (!researchData.slug && researchData.title) {
+      researchData.slug = generateSlug(researchData.title);
+    }
+    const research = await Research.create(researchData);
     res.json(research);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -442,7 +506,11 @@ app.post('/api/research', async (req, res) => {
 
 app.put('/api/research/:id', async (req, res) => {
   try {
-    const research = await Research.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updateData = { ...req.body };
+    if (updateData.title && !updateData.slug) {
+      updateData.slug = generateSlug(updateData.title);
+    }
+    const research = await Research.findByIdAndUpdate(req.params.id, updateData, { new: true });
     res.json(research);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -495,7 +563,7 @@ app.delete('/api/certifications/:id', async (req, res) => {
   }
 });
 
-// ===== ACHIEVEMENTS ROUTES =====
+// ===== ACHIEVEMENTS ROUTES (With Slug Support) =====
 app.get('/api/achievements', async (req, res) => {
   try {
     const achievements = await Achievement.find().sort({ order: 1, createdAt: -1 });
@@ -505,9 +573,39 @@ app.get('/api/achievements', async (req, res) => {
   }
 });
 
+// Get single achievement by slug
+app.get('/api/achievements/slug/:slug', async (req, res) => {
+  try {
+    const achievement = await Achievement.findOne({ slug: req.params.slug });
+    if (!achievement) {
+      return res.status(404).json({ error: 'Achievement not found' });
+    }
+    res.json(achievement);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get single achievement by ID
+app.get('/api/achievements/:id', async (req, res) => {
+  try {
+    const achievement = await Achievement.findById(req.params.id);
+    if (!achievement) {
+      return res.status(404).json({ error: 'Achievement not found' });
+    }
+    res.json(achievement);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.post('/api/achievements', async (req, res) => {
   try {
-    const achievement = await Achievement.create(req.body);
+    const achievementData = { ...req.body };
+    if (!achievementData.slug && achievementData.title) {
+      achievementData.slug = generateSlug(achievementData.title);
+    }
+    const achievement = await Achievement.create(achievementData);
     res.json(achievement);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -516,7 +614,11 @@ app.post('/api/achievements', async (req, res) => {
 
 app.put('/api/achievements/:id', async (req, res) => {
   try {
-    const achievement = await Achievement.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updateData = { ...req.body };
+    if (updateData.title && !updateData.slug) {
+      updateData.slug = generateSlug(updateData.title);
+    }
+    const achievement = await Achievement.findByIdAndUpdate(req.params.id, updateData, { new: true });
     res.json(achievement);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -537,27 +639,23 @@ app.get('/api/skills', async (req, res) => {
   try {
     let skills = await Skills.findOne();
     if (!skills) {
-      // Create default skills with percentages if none exist
       skills = await Skills.create({
         skills: [
-          { name: "HTML | CSS", percentage: 90 },
-          { name: "Python", percentage: 80 },
-          { name: "SQL | NoSQL", percentage: 75 },
-          { name: "Excel | Power BI | Tableau", percentage: 90 },
-          { name: "AWS Cloud", percentage: 85 },
-          { name: "Machine Learning", percentage: 75 },
-          { name: "Data Cleaning | Preparation", percentage: 90 },
-          { name: "Data Analysis | Modeling", percentage: 80 },
-          { name: "Data Visualization | Reporting", percentage: 75 },
-          { name: "Business Intelligence", percentage: 90 },
-          { name: "Communication | Storytelling", percentage: 85 },
-          { name: "Critical Thinking | Problem-Solving", percentage: 75 }
-        ],
-        programming: ['Python', 'SQL', 'JavaScript', 'R'],
-        dataTools: ['Pandas', 'Tableau', 'Power BI'],
-        mlTools: ['Scikit-learn', 'TensorFlow'],
-        databases: ['PostgreSQL', 'MySQL', 'MongoDB'],
-        web: ['React', 'Flask', 'Streamlit']
+          { name: "Python", level: "Advanced" },
+          { name: "SQL", level: "Advanced" },
+          { name: "Pandas", level: "Advanced" },
+          { name: "Scikit-learn", level: "Advanced" },
+          { name: "Excel", level: "Advanced" },
+          { name: "Data Analysis", level: "Advanced" },
+          { name: "JavaScript", level: "Proficient" },
+          { name: "React", level: "Proficient" },
+          { name: "Power BI", level: "Proficient" },
+          { name: "Tableau", level: "Proficient" },
+          { name: "Machine Learning", level: "Proficient" },
+          { name: "Research Methodology", level: "Proficient" },
+          { name: "NLP", level: "Familiar" },
+          { name: "AWS", level: "Familiar" }
+        ]
       });
     }
     res.json(skills);
@@ -616,6 +714,78 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// ===== MIGRATION: Generate slugs for existing data =====
+app.post('/api/migrate-slugs', async (req, res) => {
+  try {
+    let projectsUpdated = 0;
+    let researchUpdated = 0;
+    let achievementsUpdated = 0;
+
+    // Migrate projects
+    const projects = await Project.find({ $or: [{ slug: { $exists: false } }, { slug: '' }, { slug: null }] });
+    for (const project of projects) {
+      if (project.title) {
+        let slug = generateSlug(project.title);
+        let existing = await Project.findOne({ slug, _id: { $ne: project._id } });
+        let counter = 1;
+        while (existing) {
+          slug = `${generateSlug(project.title)}-${counter}`;
+          existing = await Project.findOne({ slug, _id: { $ne: project._id } });
+          counter++;
+        }
+        project.slug = slug;
+        await project.save();
+        projectsUpdated++;
+      }
+    }
+
+    // Migrate research
+    const research = await Research.find({ $or: [{ slug: { $exists: false } }, { slug: '' }, { slug: null }] });
+    for (const item of research) {
+      if (item.title) {
+        let slug = generateSlug(item.title);
+        let existing = await Research.findOne({ slug, _id: { $ne: item._id } });
+        let counter = 1;
+        while (existing) {
+          slug = `${generateSlug(item.title)}-${counter}`;
+          existing = await Research.findOne({ slug, _id: { $ne: item._id } });
+          counter++;
+        }
+        item.slug = slug;
+        await item.save();
+        researchUpdated++;
+      }
+    }
+
+    // Migrate achievements
+    const achievements = await Achievement.find({ $or: [{ slug: { $exists: false } }, { slug: '' }, { slug: null }] });
+    for (const achievement of achievements) {
+      if (achievement.title) {
+        let slug = generateSlug(achievement.title);
+        let existing = await Achievement.findOne({ slug, _id: { $ne: achievement._id } });
+        let counter = 1;
+        while (existing) {
+          slug = `${generateSlug(achievement.title)}-${counter}`;
+          existing = await Achievement.findOne({ slug, _id: { $ne: achievement._id } });
+          counter++;
+        }
+        achievement.slug = slug;
+        await achievement.save();
+        achievementsUpdated++;
+      }
+    }
+
+    res.json({
+      message: 'Slug migration complete!',
+      projectsUpdated,
+      researchUpdated,
+      achievementsUpdated
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ===== MIGRATION: Convert existing projects to new format =====
 app.post('/api/migrate-projects', async (req, res) => {
   try {
@@ -625,13 +795,11 @@ app.post('/api/migrate-projects', async (req, res) => {
     for (const project of projects) {
       let updated = false;
       
-      // Move problem to overview if overview is empty
       if (!project.overview && project.problem) {
         project.overview = project.problem;
         updated = true;
       }
       
-      // Generate features from methodology if features is empty
       if (!project.features) {
         const features = [];
         if (project.methodology) {
@@ -666,7 +834,7 @@ app.post('/api/migrate-projects', async (req, res) => {
   }
 });
 
-// ===== MIGRATION: Convert old skills to new percentage format =====
+// ===== MIGRATION: Convert old skills to new level format =====
 app.post('/api/migrate-skills', async (req, res) => {
   try {
     const skillsDoc = await Skills.findOne();
@@ -674,11 +842,9 @@ app.post('/api/migrate-skills', async (req, res) => {
       return res.json({ message: 'No skills document found to migrate' });
     }
     
-    // If skills array doesn't exist or is empty, create from legacy fields
     if (!skillsDoc.skills || skillsDoc.skills.length === 0) {
       const legacySkills = [];
       
-      // Collect all skills from legacy fields
       const allLegacySkills = [
         ...(skillsDoc.programming || []),
         ...(skillsDoc.dataTools || []),
@@ -687,11 +853,10 @@ app.post('/api/migrate-skills', async (req, res) => {
         ...(skillsDoc.web || [])
       ];
       
-      // Create skill objects with default percentages
       allLegacySkills.forEach((skill, index) => {
         legacySkills.push({
           name: skill,
-          percentage: Math.min(100, Math.max(50, 85 - (index * 2)))
+          level: 'Proficient'
         });
       });
       
@@ -739,35 +904,29 @@ app.listen(PORT, async () => {
   await seedInitialData();
   
   console.log('\n📋 Updated Schemas:');
-  console.log('  ✅ Profile - Added SGPA, CGPA, Journey, Highlights');
-  console.log('  ✅ Projects - Simplified modal structure (subtitle, overview, features)');
-  console.log('  ✅ Skills - New format with name + percentage arrays (like "Meet Mali")');
-  console.log('  ❌ Experience - REMOVED (section removed from portfolio)');
-  console.log('  ✅ Legacy fields preserved for backward compatibility');
+  console.log('  ✅ Profile - SGPA, CGPA, Journey, Highlights');
+  console.log('  ✅ Projects - Slug support for public pages');
+  console.log('  ✅ Research - Slug support for public pages');
+  console.log('  ✅ Achievements - Slug support for public pages');
+  console.log('  ✅ Skills - Level-based (Advanced, Proficient, Familiar)');
   
-  console.log('\n📌 Active Endpoints:');
-  console.log('  GET  /api/profile');
-  console.log('  PUT  /api/profile');
-  console.log('  GET  /api/projects');
-  console.log('  POST /api/projects');
-  console.log('  PUT  /api/projects/:id');
-  console.log('  DELETE /api/projects/:id');
-  console.log('  GET  /api/current-projects');
-  console.log('  POST /api/current-projects');
-  console.log('  PUT  /api/current-projects/:id');
-  console.log('  DELETE /api/current-projects/:id');
-  console.log('  GET  /api/research');
-  console.log('  GET  /api/certifications');
-  console.log('  GET  /api/achievements');
-  console.log('  GET  /api/skills');
-  console.log('  PUT  /api/skills');
-  console.log('  GET  /api/contact');
-  console.log('  PUT  /api/contact');
-  console.log('  GET  /api/health');
+  console.log('\n📌 Public Pages (Resume-friendly URLs):');
+  console.log('  GET  /projects                    - All projects');
+  console.log('  GET  /projects/:slug              - Single project');
+  console.log('  GET  /research                    - All research');
+  console.log('  GET  /research/:slug              - Single research');
+  console.log('  GET  /achievements                - All achievements');
+  console.log('  GET  /achievements/:slug          - Single achievement');
+  
+  console.log('\n📌 API Endpoints:');
+  console.log('  GET  /api/projects/slug/:slug     - Get project by slug');
+  console.log('  GET  /api/research/slug/:slug     - Get research by slug');
+  console.log('  GET  /api/achievements/slug/:slug - Get achievement by slug');
   
   console.log('\n💡 Migration Endpoints:');
-  console.log('  POST /api/migrate-projects - Convert old projects to new format');
-  console.log('  POST /api/migrate-skills - Convert old skills to percentage format');
+  console.log('  POST /api/migrate-slugs           - Generate slugs for all content');
+  console.log('  POST /api/migrate-projects        - Convert old projects');
+  console.log('  POST /api/migrate-skills          - Convert old skills');
   
   console.log('\n🚀 Server ready!\n');
 });
