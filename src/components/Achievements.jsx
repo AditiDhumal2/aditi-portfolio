@@ -3,9 +3,6 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
-// ============================================
-// ACHIEVEMENT MODAL (with View Full Page)
-// ============================================
 const AchievementModal = ({ ach, onClose }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
@@ -119,27 +116,15 @@ const AchievementModal = ({ ach, onClose }) => {
             
             <div className="flex flex-wrap gap-3 pt-3 border-t border-gray-700">
               {ach.certificateLink && (
-                <a 
-                  href={ach.certificateLink} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg transition flex items-center gap-2"
-                >
+                <a href={ach.certificateLink} target="_blank" rel="noopener noreferrer" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg transition flex items-center gap-2">
                   <span>📄</span> View Certificate
                 </a>
               )}
               {ach.link && (
-                <a 
-                  href={ach.link} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="bg-accent hover:bg-blue-600 text-white px-4 py-2.5 rounded-lg transition flex items-center gap-2"
-                >
+                <a href={ach.link} target="_blank" rel="noopener noreferrer" className="bg-accent hover:bg-blue-600 text-white px-4 py-2.5 rounded-lg transition flex items-center gap-2">
                   <span>🔗</span> Learn More
                 </a>
               )}
-              
-              {/* NEW: View Full Page Button */}
               <Link 
                 to={`/achievements/${ach.slug || ach._id}`}
                 className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-lg transition flex items-center gap-2"
@@ -155,10 +140,7 @@ const AchievementModal = ({ ach, onClose }) => {
   );
 };
 
-// ============================================
-// MAIN ACHIEVEMENTS COMPONENT
-// ============================================
-const Achievements = () => {
+const Achievements = ({ standalone = false }) => {
   const [achievements, setAchievements] = useState([]);
   const [selectedAch, setSelectedAch] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
@@ -180,7 +162,7 @@ const Achievements = () => {
   };
   
   if (loading) return (
-    <section id="achievements" className="py-16 bg-gradient-to-b from-gray-900 to-dark">
+    <section className={standalone ? "py-16 bg-dark" : "py-16 bg-gradient-to-b from-gray-900 to-dark"}>
       <div className="container mx-auto px-6 text-center">
         <div className="animate-pulse text-gray-400">Loading achievements...</div>
       </div>
@@ -223,7 +205,10 @@ const Achievements = () => {
   
   return (
     <>
-      <section id="achievements" className="py-16 bg-gradient-to-b from-gray-900 to-dark">
+      <section 
+        id={standalone ? undefined : "achievements"} 
+        className={standalone ? "py-16 bg-dark" : "py-16 bg-gradient-to-b from-gray-900 to-dark"}
+      >
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -235,16 +220,13 @@ const Achievements = () => {
             <div className="w-16 h-0.5 bg-accent mx-auto rounded-full mt-2"></div>
           </motion.div>
           
-          {/* Tabs */}
           <div className="flex flex-wrap justify-center gap-2 mb-10">
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-5 py-2.5 rounded-lg transition flex items-center gap-2 ${
-                  activeTab === tab.id 
-                    ? 'bg-accent text-white' 
-                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                  activeTab === tab.id ? 'bg-accent text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
                 }`}
               >
                 <span>{tab.icon}</span>
@@ -258,11 +240,8 @@ const Achievements = () => {
             ))}
           </div>
           
-          {/* Achievements Grid */}
           {filteredAchievements.length === 0 ? (
-            <div className="text-center text-gray-400 py-10">
-              No achievements in this category yet.
-            </div>
+            <div className="text-center text-gray-400 py-10">No achievements in this category yet.</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredAchievements.map((ach, idx) => (
@@ -277,17 +256,9 @@ const Achievements = () => {
                 >
                   <div className="relative rounded-xl overflow-hidden bg-gray-800 border border-gray-700 hover:border-accent transition-all h-[240px]">
                     {ach.images && ach.images.length > 0 ? (
-                      <img 
-                        src={ach.images[0]} 
-                        alt={ach.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
+                      <img src={ach.images[0]} alt={ach.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : ach.image ? (
-                      <img 
-                        src={ach.image} 
-                        alt={ach.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
+                      <img src={ach.image} alt={ach.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-accent/10 to-purple-500/10 flex items-center justify-center">
                         <div className="text-6xl">
@@ -303,9 +274,7 @@ const Achievements = () => {
                       <h3 className="text-base font-bold text-white group-hover:text-accent transition line-clamp-2">
                         {ach.title}
                       </h3>
-                      {ach.date && (
-                        <p className="text-gray-500 text-xs">{ach.date}</p>
-                      )}
+                      {ach.date && <p className="text-gray-500 text-xs">{ach.date}</p>}
                     </div>
                     
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -319,15 +288,21 @@ const Achievements = () => {
             </div>
           )}
           
-          {/* View All Achievements Button */}
-          <div className="text-center mt-10">
-            <Link 
-              to="/achievements" 
-              className="bg-accent hover:bg-accent/80 text-white px-6 py-3 rounded-lg transition font-medium inline-block"
-            >
-              View All Achievements →
-            </Link>
-          </div>
+          {!standalone && (
+            <div className="text-center mt-10">
+              <Link to="/achievements" className="bg-accent hover:bg-accent/80 text-white px-6 py-3 rounded-lg transition font-medium inline-block">
+                View All Achievements →
+              </Link>
+            </div>
+          )}
+
+          {standalone && (
+            <div className="text-center mt-10">
+              <Link to="/" className="text-accent hover:underline">
+                ← Back to Home
+              </Link>
+            </div>
+          )}
         </div>
       </section>
       

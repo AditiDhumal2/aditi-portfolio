@@ -2,7 +2,7 @@ import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 
-// ============ MAIN COMPONENTS ============
+// Main components (used on homepage)
 const Hero = lazy(() => import('./components/Hero'));
 const About = lazy(() => import('./components/About'));
 const Projects = lazy(() => import('./components/Projects'));
@@ -12,23 +12,22 @@ const Achievements = lazy(() => import('./components/Achievements'));
 const Contact = lazy(() => import('./components/Contact'));
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
 
-// ============ PUBLIC DETAIL PAGES ============
+// Standalone pages
+const AboutPage = lazy(() => import('./pages/AboutPage'));
 const ProjectsPage = lazy(() => import('./pages/ProjectsPage'));
 const ProjectDetail = lazy(() => import('./pages/ProjectDetail'));
 const ResearchPage = lazy(() => import('./pages/ResearchPage'));
 const ResearchDetail = lazy(() => import('./pages/ResearchDetail'));
+const CertificationsPage = lazy(() => import('./pages/CertificationsPage'));
 const AchievementsPage = lazy(() => import('./pages/AchievementsPage'));
 const AchievementDetail = lazy(() => import('./pages/AchievementDetail'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
 
-// ============ PROFESSIONAL LOADING COMPONENT ============
 const LoadingSpinner = () => {
   const [showTimeout, setShowTimeout] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowTimeout(true);
-    }, 8000);
-
+    const timer = setTimeout(() => setShowTimeout(true), 8000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -61,52 +60,26 @@ function App() {
       <div className="bg-dark min-h-screen">
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
-            {/* ============ ADMIN ROUTE ============ */}
+            {/* ============ ADMIN ============ */}
             <Route path="/admin" element={<AdminDashboard />} />
 
-            {/* ============ PUBLIC PROJECTS ============ */}
-            <Route path="/projects" element={
-              <>
-                <Navbar />
-                <ProjectsPage />
-              </>
-            } />
-            <Route path="/projects/:slug" element={
-              <>
-                <Navbar />
-                <ProjectDetail />
-              </>
-            } />
+            {/* ============ STANDALONE PAGES ============ */}
+            <Route path="/about" element={<><Navbar /><AboutPage /></>} />
+            
+            <Route path="/projects" element={<><Navbar /><ProjectsPage /></>} />
+            <Route path="/projects/:slug" element={<><Navbar /><ProjectDetail /></>} />
+            
+            <Route path="/research" element={<><Navbar /><ResearchPage /></>} />
+            <Route path="/research/:slug" element={<><Navbar /><ResearchDetail /></>} />
+            
+            <Route path="/certifications" element={<><Navbar /><CertificationsPage /></>} />
+            
+            <Route path="/achievements" element={<><Navbar /><AchievementsPage /></>} />
+            <Route path="/achievements/:slug" element={<><Navbar /><AchievementDetail /></>} />
+            
+            <Route path="/contact" element={<><Navbar /><ContactPage /></>} />
 
-            {/* ============ PUBLIC RESEARCH ============ */}
-            <Route path="/research" element={
-              <>
-                <Navbar />
-                <ResearchPage />
-              </>
-            } />
-            <Route path="/research/:slug" element={
-              <>
-                <Navbar />
-                <ResearchDetail />
-              </>
-            } />
-
-            {/* ============ PUBLIC ACHIEVEMENTS ============ */}
-            <Route path="/achievements" element={
-              <>
-                <Navbar />
-                <AchievementsPage />
-              </>
-            } />
-            <Route path="/achievements/:slug" element={
-              <>
-                <Navbar />
-                <AchievementDetail />
-              </>
-            } />
-
-            {/* ============ MAIN PORTFOLIO ============ */}
+            {/* ============ HOMEPAGE (Rich Preview) ============ */}
             <Route path="/" element={
               <>
                 <Navbar />

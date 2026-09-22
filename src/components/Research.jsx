@@ -3,9 +3,6 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
-// ============================================
-// RESEARCH MODAL
-// ============================================
 const ResearchModal = ({ item, onClose }) => {
   if (!item) return null;
   
@@ -30,10 +27,7 @@ const ResearchModal = ({ item, onClose }) => {
           ) : (
             <div className="text-7xl md:text-8xl">📚</div>
           )}
-          <button 
-            onClick={onClose} 
-            className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 rounded-full p-2 text-white transition z-10"
-          >
+          <button onClick={onClose} className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 rounded-full p-2 text-white transition z-10">
             ✕
           </button>
         </div>
@@ -119,12 +113,7 @@ const ResearchModal = ({ item, onClose }) => {
           {item.doi && (
             <div>
               <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">🔗 DOI</h3>
-              <a 
-                href={`https://doi.org/${item.doi}`} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-accent hover:underline text-sm break-all"
-              >
+              <a href={`https://doi.org/${item.doi}`} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline text-sm break-all">
                 {item.doi}
               </a>
             </div>
@@ -137,7 +126,6 @@ const ResearchModal = ({ item, onClose }) => {
             </div>
           )}
           
-          {/* Action Buttons */}
           <div className="flex flex-wrap gap-3 pt-2 border-t border-gray-700">
             {item.paperLink && (
               <a href={item.paperLink} target="_blank" rel="noopener noreferrer" className="bg-accent hover:bg-accent/80 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
@@ -159,8 +147,6 @@ const ResearchModal = ({ item, onClose }) => {
                 💻 View Project
               </a>
             )}
-            
-            {/* NEW: View Full Page Button */}
             <Link 
               to={`/research/${item.slug || item._id}`}
               className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
@@ -175,10 +161,7 @@ const ResearchModal = ({ item, onClose }) => {
   );
 };
 
-// ============================================
-// RESEARCH COMPONENT
-// ============================================
-const Research = () => {
+const Research = ({ standalone = false }) => {
   const [research, setResearch] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -207,9 +190,11 @@ const Research = () => {
   const totalPublications = research.length;
   
   return (
-    <section id="research" className="py-20 bg-gradient-to-b from-dark to-gray-900">
+    <section 
+      id={standalone ? undefined : "research"} 
+      className={standalone ? "py-20 bg-dark" : "py-20 bg-gradient-to-b from-dark to-gray-900"}
+    >
       <div className="container mx-auto px-6">
-        {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -230,7 +215,6 @@ const Research = () => {
           </p>
         </motion.div>
         
-        {/* Featured Research */}
         {featuredPaper && (
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -255,13 +239,9 @@ const Research = () => {
                 
                 <div className="absolute bottom-0 left-0 right-0 p-6">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-xs font-medium">
-                      Featured
-                    </span>
+                    <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-xs font-medium">Featured</span>
                     {featuredPaper.status && (
-                      <span className="bg-green-500/20 text-green-400 px-2 py-0.5 rounded text-xs font-medium">
-                        {featuredPaper.status}
-                      </span>
+                      <span className="bg-green-500/20 text-green-400 px-2 py-0.5 rounded text-xs font-medium">{featuredPaper.status}</span>
                     )}
                   </div>
                   
@@ -282,17 +262,13 @@ const Research = () => {
                   )}
                   
                   {featuredPaper.abstract && (
-                    <p className="text-gray-300 text-sm mt-2 line-clamp-2">
-                      {featuredPaper.abstract}
-                    </p>
+                    <p className="text-gray-300 text-sm mt-2 line-clamp-2">{featuredPaper.abstract}</p>
                   )}
                   
                   {featuredPaper.skills && featuredPaper.skills.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2">
                       {featuredPaper.skills.slice(0, 3).map(skill => (
-                        <span key={skill} className="bg-accent/10 text-accent px-2 py-0.5 rounded text-[10px]">
-                          {skill}
-                        </span>
+                        <span key={skill} className="bg-accent/10 text-accent px-2 py-0.5 rounded text-[10px]">{skill}</span>
                       ))}
                       {featuredPaper.skills.length > 3 && (
                         <span className="text-gray-500 text-[10px]">+{featuredPaper.skills.length - 3}</span>
@@ -311,7 +287,6 @@ const Research = () => {
           </motion.div>
         )}
         
-        {/* Previous Research Grid */}
         {previousResearch.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -350,17 +325,13 @@ const Research = () => {
                       )}
                       
                       {item.abstract && (
-                        <p className="text-gray-300 text-xs mt-1 line-clamp-2">
-                          {item.abstract}
-                        </p>
+                        <p className="text-gray-300 text-xs mt-1 line-clamp-2">{item.abstract}</p>
                       )}
                       
                       {item.skills && item.skills.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
                           {item.skills.slice(0, 3).map(skill => (
-                            <span key={skill} className="bg-accent/10 text-accent px-2 py-0.5 rounded text-[10px]">
-                              {skill}
-                            </span>
+                            <span key={skill} className="bg-accent/10 text-accent px-2 py-0.5 rounded text-[10px]">{skill}</span>
                           ))}
                           {item.skills.length > 3 && (
                             <span className="text-gray-500 text-[10px]">+{item.skills.length - 3}</span>
@@ -369,9 +340,7 @@ const Research = () => {
                       )}
                       
                       {item.type && (
-                        <span className="inline-block bg-accent/20 text-accent px-2 py-0.5 rounded text-[10px] mt-1">
-                          {item.type}
-                        </span>
+                        <span className="inline-block bg-accent/20 text-accent px-2 py-0.5 rounded text-[10px] mt-1">{item.type}</span>
                       )}
                     </div>
                     
@@ -387,7 +356,6 @@ const Research = () => {
           </motion.div>
         )}
         
-        {/* Research Snapshot */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -417,18 +385,26 @@ const Research = () => {
           </div>
         </motion.div>
 
-        {/* View All Research Button */}
-        <div className="text-center">
-          <Link 
-            to="/research" 
-            className="bg-accent hover:bg-accent/80 text-white px-6 py-3 rounded-lg transition font-medium inline-block"
-          >
-            View All Research →
-          </Link>
-        </div>
+        {!standalone && (
+          <div className="text-center">
+            <Link 
+              to="/research" 
+              className="bg-accent hover:bg-accent/80 text-white px-6 py-3 rounded-lg transition font-medium inline-block"
+            >
+              View All Research →
+            </Link>
+          </div>
+        )}
+
+        {standalone && (
+          <div className="text-center mt-10">
+            <Link to="/" className="text-accent hover:underline">
+              ← Back to Home
+            </Link>
+          </div>
+        )}
       </div>
       
-      {/* Research Modal */}
       <AnimatePresence>
         {selectedItem && <ResearchModal item={selectedItem} onClose={() => setSelectedItem(null)} />}
       </AnimatePresence>

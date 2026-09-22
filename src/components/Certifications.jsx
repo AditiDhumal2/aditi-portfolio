@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
-const Certifications = () => {
+const Certifications = ({ standalone = false }) => {
   const [certifications, setCertifications] = useState([]);
   const [selectedCert, setSelectedCert] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -27,7 +28,10 @@ const Certifications = () => {
   
   return (
     <>
-      <section id="certifications" className="py-16 bg-gradient-to-b from-dark to-gray-900">
+      <section 
+        id={standalone ? undefined : "certifications"} 
+        className={standalone ? "py-16 bg-dark" : "py-16 bg-gradient-to-b from-dark to-gray-900"}
+      >
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -50,14 +54,9 @@ const Certifications = () => {
                 onClick={() => setSelectedCert(cert)}
               >
                 <div className="relative rounded-xl overflow-hidden bg-gray-800 border border-gray-700 hover:border-accent transition-all h-[220px]">
-                  {/* Certificate Image */}
                   <div className="w-full h-full">
                     {cert.image && cert.image !== "" ? (
-                      <img 
-                        src={cert.image} 
-                        alt={cert.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
+                      <img src={cert.image} alt={cert.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-accent/20 to-purple-500/20 flex items-center justify-center">
                         <div className="text-6xl">📜</div>
@@ -65,10 +64,8 @@ const Certifications = () => {
                     )}
                   </div>
                   
-                  {/* Dark overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent transition-opacity group-hover:opacity-100"></div>
                   
-                  {/* Content overlay - bottom aligned */}
                   <div className="absolute bottom-0 left-0 right-0 p-4">
                     <h3 className="text-base font-bold text-white group-hover:text-accent transition line-clamp-2">
                       {cert.name}
@@ -76,7 +73,6 @@ const Certifications = () => {
                     <p className="text-gray-400 text-sm">{cert.issuer}</p>
                   </div>
                   
-                  {/* Learn More - appears on hover */}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="bg-accent/90 hover:bg-accent text-white px-6 py-3 rounded-lg font-semibold transform transition-transform group-hover:scale-105 shadow-lg">
                       Learn More →
@@ -86,10 +82,17 @@ const Certifications = () => {
               </motion.div>
             ))}
           </div>
+
+          {standalone && (
+            <div className="text-center mt-10">
+              <Link to="/" className="text-accent hover:underline">
+                ← Back to Home
+              </Link>
+            </div>
+          )}
         </div>
       </section>
       
-      {/* Certificate Modal */}
       <AnimatePresence>
         {selectedCert && (
           <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4" onClick={() => setSelectedCert(null)}>

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 
-const Contact = () => {
+const Contact = ({ standalone = false }) => {
   const [contact, setContact] = useState(null);
   const [loading, setLoading] = useState(true);
   
@@ -69,7 +70,10 @@ const Contact = () => {
   const activeLinks = socialLinks.filter(link => link.url && link.url !== '#');
   
   return (
-    <section id="contact" className="py-16 bg-gradient-to-b from-gray-900 to-dark">
+    <section 
+      id={standalone ? undefined : "contact"} 
+      className={standalone ? "py-16 bg-dark" : "py-16 bg-gradient-to-b from-gray-900 to-dark"}
+    >
       <div className="container mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -107,6 +111,14 @@ const Contact = () => {
               </motion.a>
             ))}
           </div>
+
+          {standalone && (
+            <div className="mt-12">
+              <Link to="/" className="text-accent hover:underline">
+                ← Back to Home
+              </Link>
+            </div>
+          )}
         </motion.div>
       </div>
     </section>

@@ -1,0 +1,1 @@
+import{j as t}from"./index-C0sASBvO.js";import r from"./About-CmGd2Izg.js";import"./index-BOeqtr82.js";import"./motion-8OuRr5J-.js";const m=()=>t.jsx("div",{className:"min-h-screen bg-dark pt-20",children:t.jsx(r,{standalone:!0})});export{m as default};

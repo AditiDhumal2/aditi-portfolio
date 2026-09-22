@@ -3,9 +3,6 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
-// ============================================
-// SIMPLIFIED PROJECT MODAL - Trailer Philosophy
-// ============================================
 const ProjectModal = ({ project, onClose }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
@@ -52,7 +49,6 @@ const ProjectModal = ({ project, onClose }) => {
         className="bg-gradient-to-br from-gray-900 to-dark border border-gray-700 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
-        {/* Image Slider */}
         <div className="relative h-64 md:h-80 bg-gradient-to-r from-accent/20 to-purple-500/20 rounded-t-2xl overflow-hidden">
           {images.length > 0 ? (
             <>
@@ -117,7 +113,6 @@ const ProjectModal = ({ project, onClose }) => {
           </button>
         </div>
         
-        {/* Title & Subtitle */}
         <div className="p-5 border-b border-gray-700">
           <h2 className="text-2xl md:text-3xl font-bold text-white">{project.title}</h2>
           {project.subtitle && (
@@ -125,43 +120,22 @@ const ProjectModal = ({ project, onClose }) => {
           )}
         </div>
         
-        {/* Action Buttons */}
         <div className="flex flex-wrap gap-2 p-4 border-b border-gray-700">
           {project.deployedLink && (
-            <a 
-              href={project.deployedLink} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="bg-accent hover:bg-accent/80 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
-            >
+            <a href={project.deployedLink} target="_blank" rel="noopener noreferrer" className="bg-accent hover:bg-accent/80 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
               🌐 Live Demo
             </a>
           )}
           {project.githubLink && (
-            <a 
-              href={project.githubLink} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.387.6.113.82-.26.82-.58 0-.287-.01-1.05-.015-2.06-3.338.726-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.082-.73.082-.73 1.205.085 1.838 1.237 1.838 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.775.418-1.305.762-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.4 3-.405 1.02.005 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/>
-              </svg>
-              GitHub
+            <a href={project.githubLink} target="_blank" rel="noopener noreferrer" className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
+              🐙 GitHub
             </a>
           )}
           {project.documentation?.link && (
-            <a 
-              href={project.documentation.link} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
-            >
+            <a href={project.documentation.link} target="_blank" rel="noopener noreferrer" className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
               📘 Documentation
             </a>
           )}
-          
-          {/* NEW: View Full Page Button */}
           <Link 
             to={`/projects/${project.slug || project._id}`}
             className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
@@ -171,7 +145,6 @@ const ProjectModal = ({ project, onClose }) => {
           </Link>
         </div>
         
-        {/* Overview */}
         <div className="p-5 border-b border-gray-700">
           <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">📝 Overview</h3>
           <p className="text-gray-300 text-sm md:text-base leading-relaxed">
@@ -179,7 +152,6 @@ const ProjectModal = ({ project, onClose }) => {
           </p>
         </div>
         
-        {/* Key Features */}
         <div className="p-5 border-b border-gray-700">
           <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">✨ Key Features</h3>
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -200,29 +172,17 @@ const ProjectModal = ({ project, onClose }) => {
                   <span className="text-accent mt-0.5">▸</span>
                   Machine learning models
                 </li>
-                <li className="flex items-start gap-2 text-gray-300 text-sm">
-                  <span className="text-accent mt-0.5">▸</span>
-                  Interactive visualizations
-                </li>
-                <li className="flex items-start gap-2 text-gray-300 text-sm">
-                  <span className="text-accent mt-0.5">▸</span>
-                  Real-time analytics
-                </li>
               </>
             )}
           </ul>
         </div>
         
-        {/* Tech Stack */}
         <div className="p-5">
           <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">🛠 Tech Stack</h3>
           <div className="flex flex-wrap gap-2">
             {techStack.length > 0 ? (
               techStack.map((tech, idx) => (
-                <span 
-                  key={idx} 
-                  className="bg-accent/20 text-accent px-3 py-1.5 rounded-full text-xs font-medium border border-accent/30"
-                >
+                <span key={idx} className="bg-accent/20 text-accent px-3 py-1.5 rounded-full text-xs font-medium border border-accent/30">
                   {tech}
                 </span>
               ))
@@ -236,9 +196,6 @@ const ProjectModal = ({ project, onClose }) => {
   );
 };
 
-// ============================================
-// CURRENT PROJECT DETAILS MODAL
-// ============================================
 const CurrentProjectModal = ({ project, onClose }) => {
   if (!project) return null;
 
@@ -259,10 +216,7 @@ const CurrentProjectModal = ({ project, onClose }) => {
       >
         <div className="relative h-48 md:h-56 bg-gradient-to-r from-accent/20 to-purple-500/20 rounded-t-2xl flex items-center justify-center">
           <div className="text-7xl md:text-8xl">🔨</div>
-          <button 
-            onClick={onClose} 
-            className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 rounded-full p-2 text-white transition z-10"
-          >
+          <button onClick={onClose} className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 rounded-full p-2 text-white transition z-10">
             ✕
           </button>
         </div>
@@ -316,10 +270,7 @@ const CurrentProjectModal = ({ project, onClose }) => {
             <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">🛠 Technologies</h3>
             <div className="flex flex-wrap gap-2">
               {project.technologies.map((tech, idx) => (
-                <span 
-                  key={idx} 
-                  className="bg-accent/20 text-accent px-3 py-1.5 rounded-full text-xs font-medium border border-accent/30"
-                >
+                <span key={idx} className="bg-accent/20 text-accent px-3 py-1.5 rounded-full text-xs font-medium border border-accent/30">
                   {tech}
                 </span>
               ))}
@@ -332,22 +283,12 @@ const CurrentProjectModal = ({ project, onClose }) => {
             <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">🔗 Links</h3>
             <div className="flex flex-wrap gap-3">
               {project.githubLink && (
-                <a 
-                  href={project.githubLink} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
-                >
+                <a href={project.githubLink} target="_blank" rel="noopener noreferrer" className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
                   🐙 GitHub
                 </a>
               )}
               {project.demoLink && (
-                <a 
-                  href={project.demoLink} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="bg-accent hover:bg-accent/80 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
-                >
+                <a href={project.demoLink} target="_blank" rel="noopener noreferrer" className="bg-accent hover:bg-accent/80 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
                   🚀 Live Demo
                 </a>
               )}
@@ -359,9 +300,6 @@ const CurrentProjectModal = ({ project, onClose }) => {
   );
 };
 
-// ============================================
-// CURRENT PROJECTS SUBSECTION
-// ============================================
 const CurrentProjectsSubsection = ({ projects, onProjectClick }) => {
   if (!projects || projects.length === 0) return null;
 
@@ -444,10 +382,7 @@ const CurrentProjectsSubsection = ({ projects, onProjectClick }) => {
   );
 };
 
-// ============================================
-// MAIN PROJECTS COMPONENT
-// ============================================
-const Projects = () => {
+const Projects = ({ standalone = false }) => {
   const [projects, setProjects] = useState([]);
   const [currentProjects, setCurrentProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -479,9 +414,11 @@ const Projects = () => {
   
   return (
     <>
-      <section id="projects" className="py-16 bg-gradient-to-b from-dark to-gray-900">
+      <section 
+        id={standalone ? undefined : "projects"} 
+        className={standalone ? "py-16 bg-dark" : "py-16 bg-gradient-to-b from-dark to-gray-900"}
+      >
         <div className="container mx-auto px-6">
-          {/* Section Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -509,7 +446,6 @@ const Projects = () => {
             </motion.div>
           </motion.div>
           
-          {/* Featured Projects Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredProjects.map((project, idx) => (
               <motion.div
@@ -556,30 +492,36 @@ const Projects = () => {
             ))}
           </div>
 
-          {/* Current Projects Subsection */}
           <CurrentProjectsSubsection 
             projects={currentProjects} 
             onProjectClick={setSelectedCurrentProject}
           />
 
-          {/* View All Projects Button */}
-          <div className="text-center mt-10">
-            <Link 
-              to="/projects" 
-              className="bg-accent hover:bg-accent/80 text-white px-6 py-3 rounded-lg transition font-medium inline-block"
-            >
-              View All Projects →
-            </Link>
-          </div>
+          {!standalone && (
+            <div className="text-center mt-10">
+              <Link 
+                to="/projects" 
+                className="bg-accent hover:bg-accent/80 text-white px-6 py-3 rounded-lg transition font-medium inline-block"
+              >
+                View All Projects →
+              </Link>
+            </div>
+          )}
+
+          {standalone && (
+            <div className="text-center mt-10">
+              <Link to="/" className="text-accent hover:underline">
+                ← Back to Home
+              </Link>
+            </div>
+          )}
         </div>
       </section>
       
-      {/* Featured Project Modal */}
       <AnimatePresence>
         {selectedProject && <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />}
       </AnimatePresence>
       
-      {/* Current Project Modal */}
       <AnimatePresence>
         {selectedCurrentProject && (
           <CurrentProjectModal 
